@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Videns · In-game overlay</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/videns-mark.svg" type="image/svg+xml">
+<link rel="preload" href="/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/rows.css">
+<style>
+  /* Panel de partida con el diseño del de selección (/draft): una ventana con el rótulo VIDENS. y secciones,
+     borde con el degradado de Videns; dentro, lo del overlay de partida (objetivos y oro de objetos, filas con
+     la franja de /faces). Detrás, una pantalla de juego simulada con el minimapa real de ese momento. */
+  @font-face { font-family: "Inter"; font-style: normal; font-weight: 400 900; font-display: block; src: url("/inter-var-latin.woff2") format("woff2"); }
+  :root { color-scheme: dark; --order: #4f8bff; --chaos: #ff5c5c; --card: #0b0e13; --edge: #1f2738; --dim: #7a8494;
+          --text: #e8e6e3; --gold: #f0c75e; --mark: #c77dff;
+          --fill: linear-gradient(135deg, #dcaaff 0%, #b556ff 48%, #6a1ccf 100%); }
+  * { box-sizing: border-box; margin: 0; }
+  [hidden] { display: none !important; }
+  body { font: 14px/1.4 "Segoe UI", system-ui, sans-serif; background: #07090c; color: var(--text); overflow: hidden; }
+  .order { color: var(--order); } .chaos { color: var(--chaos); } .dim { color: var(--dim); }
+  .view { position: relative; overflow: hidden; height: 100vh; }
+  .stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0;
+           background: radial-gradient(ellipse 80% 70% at 50% 45%, #171b22, #0c0e12); }
+  .msg { position: absolute; inset: 0; display: grid; place-items: center; color: var(--dim); font-size: 20px; }
+
+  /* pantalla de juego simulada (solo contexto, sin arte de Riot salvo iconos y el minimapa de la partida) */
+  .game { position: absolute; left: 360px; top: 180px; width: 1280px; height: 720px; border-radius: 4px; overflow: hidden;
+          background: #0a0f0c; box-shadow: 0 0 0 1px #222a35, 0 30px 80px rgba(0,0,0,.6); }
+  .game .terrain { position: absolute; inset: -60px; width: calc(100% + 120px); height: calc(100% + 120px); object-fit: cover;
+                   filter: blur(26px) brightness(.5) saturate(1.25); }
+  .game .vig { position: absolute; inset: 0; background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 40%, rgba(4,6,8,.75) 100%); }
+  .score { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 14px;
+           height: 34px; padding: 0 14px; border-radius: 4px; background: rgba(6,9,12,.82); box-shadow: inset 0 0 0 1px #2a3240;
+           font: 600 15px/1 "Segoe UI", sans-serif; font-variant-numeric: tabular-nums; color: #d6dbe2; }
+  .score .clk { min-width: 54px; text-align: center; color: #e8e6e3; }
+  .score .s { display: inline-flex; align-items: center; gap: 5px; }
+  .score svg { width: 14px; height: 14px; }
+  .mini { position: absolute; right: 14px; bottom: 14px; width: 262px; height: 262px; border-radius: 3px; overflow: hidden;
+          box-shadow: 0 0 0 2px #2a3240, 0 8px 24px rgba(0,0,0,.6); }
+  .mini img { width: 100%; height: 100%; display: block; }
+  .hud { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px;
+         padding: 10px 16px; border-radius: 6px; background: rgba(6,9,12,.86); box-shadow: inset 0 0 0 1px #2a3240; }
+  .hud .por { position: relative; width: 68px; height: 68px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 2px #c8aa6e; }
+  .hud .por img { width: 100%; height: 100%; transform: scale(1.1); }
+  .hud .lv { position: absolute; left: 50%; bottom: -2px; transform: translateX(-50%); min-width: 22px; padding: 0 5px; border-radius: 99px;
+             background: #0b0e13; box-shadow: 0 0 0 1px #c8aa6e; font: 700 11px/18px "Segoe UI", sans-serif; text-align: center; }
+  .hud .ab { display: flex; gap: 6px; }
+  .hud .ab span { width: 46px; height: 46px; border-radius: 4px; display: grid; place-items: end start; padding: 3px 5px;
+                  background: linear-gradient(160deg, #1c2633, #0e141b); box-shadow: inset 0 0 0 1px #33404f; font: 700 11px/1 "Segoe UI", sans-serif; color: #9aa4b2; }
+  .hud .its { display: grid; grid-template-columns: repeat(3, 32px); gap: 4px; }
+  .hud .its span { width: 32px; height: 32px; border-radius: 3px; overflow: hidden; background: #0b0f14; box-shadow: inset 0 0 0 1px #262e3a; }
+  .hud .its img { width: 100%; height: 100%; }
+  .hud .gd { display: flex; align-items: center; gap: 5px; font: 700 15px/1 "Segoe UI", sans-serif; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .hud .gd i { width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe49a, #c9962d); }
+  /* el resto de la pantalla, borroso: la vista va a las ventanas */
+  .game .score, .game .hud, .game .mini { filter: blur(4px) brightness(.85); }
+
+  /* tres ventanas (objetivos, oro de objetos, CS/min); cada ventana es su tarjeta, con el rótulo VIDENS. */
+  .card { border: 5px solid transparent; border-radius: 11px;
+          background: linear-gradient(var(--card), var(--card)) padding-box, var(--fill) border-box;
+          box-shadow: 0 0 0 3px rgba(181,86,255,.16), 0 12px 32px rgba(0,0,0,.55); }
+  .stack { position: absolute; left: 52px; top: 196px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+  .card.obj { width: 306px; } .card.gold { width: 396px; }
+  .card.cs { position: absolute; left: 1350px; top: 438px; width: 276px; }
+  .chd { display: flex; align-items: center; height: 36px; padding: 0 12px; border-bottom: 2px solid var(--edge); }
+  .chd .lbl { margin-left: auto; font-size: 11px; font-weight: 800; letter-spacing: .08em; color: var(--dim); }
+  .logo { display: inline-block; white-space: nowrap; font: 900 15px/1 "Inter", "Segoe UI", sans-serif; letter-spacing: -.04em;
+          font-variant-numeric: normal; color: #f6f4fb; transform: skewX(20.97deg) scaleX(1.18); transform-origin: 0 55%; }
+  .logo i { display: inline-block; font-style: normal; color: #b556ff; transform: scaleX(.8475) skewX(-20.97deg); }
+  .cb { padding: 9px 10px 10px; }
+  /* CS/min: el tuyo contra el esperado para tu campeón en tu línea a este minuto (barra hasta 115 % del objetivo) */
+  .csw { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
+  .csw .dim { font-size: 11px; font-weight: 800; letter-spacing: .08em; }
+  .csn { display: flex; align-items: baseline; gap: 6px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .csn .big { font-size: 34px; font-weight: 900; letter-spacing: -.02em; line-height: 1; }
+  .csn .u { font-size: 12px; color: var(--dim); }
+  .csn .tg { margin-left: auto; font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--dim); }
+  .csn .tg b { margin-left: 4px; font-size: 19px; font-weight: 800; letter-spacing: 0; color: var(--text); }
+  .csb { position: relative; height: 10px; margin-top: 10px; border-radius: 99px; background: #151b27; }
+  .csb i { position: absolute; inset: 0 auto 0 0; border-radius: 99px; background: var(--fill); }
+  .csb em { position: absolute; top: -5px; bottom: -5px; width: 3px; margin-left: -1.5px; border-radius: 1px; background: var(--text); }
+  .csd { margin-top: 9px; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .csd.neg { color: var(--gold); } .csd.pos { color: #7ed491; }
+  .csd span { color: var(--dim); font-weight: 400; }
+  .wh { display: flex; align-items: center; min-height: 20px; margin-bottom: 6px; font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--dim); }
+  .t { font-variant-numeric: tabular-nums; font-weight: 800; font-size: 18px; }
+  .t.soon { color: var(--gold); }
+  .oi { width: 24px; height: 24px; flex: none; }
+  .ci { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; flex: none; background: #1f2738; box-shadow: 0 0 0 2px var(--order); }
+  .ci img { width: 100%; height: 100%; transform: scale(1.12); }
+  .objrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .cell { display: inline-flex; align-items: center; gap: 7px; }
+  .cnt { font-weight: 800; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .buff { display: flex; align-items: center; gap: 7px; margin-top: 8px; padding-top: 8px; border-top: 2px dashed rgba(255,255,255,.12); }
+  .buff .who { display: inline-flex; gap: 3px; margin-left: auto; }
+  .buff .lbl { font-size: 11px; font-weight: 800; letter-spacing: .06em; }
+  /* oro de objetos: BLUE | diferencia por línea | RED; la fila (.prow) vive en /rows.css */
+  .gt { display: grid; grid-template-columns: 150px 56px 150px; gap: 0 6px; justify-content: space-between; }
+  .col .side { display: flex; justify-content: space-between; font-weight: 800; font-size: 13px; letter-spacing: .06em;
+               padding-bottom: 3px; border-bottom: 2px solid rgba(255,255,255,.14); margin-bottom: 3px; }
+  .col .side .tt { font-variant-numeric: tabular-nums; }
+  .mid .side { justify-content: center; }
+  .diff { display: flex; align-items: center; justify-content: center; gap: 3px; height: 34px; margin: 2px 0;
+          border: 2px solid #2a3040; border-radius: 3px; background: #0f1420;
+          font: 800 12.5px/1 "Segoe UI", system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--text); }
+  .diff.blue { color: var(--order); border-color: #2a4a8a; }
+  .diff.red { color: var(--chaos); border-color: #7a2a2a; }
+  .diff .arrow { font-size: 10px; }
+  .diff.total { height: auto; padding: 3px 0; margin: 0 0 3px; border-color: transparent; background: transparent; font-size: 13.5px; }
+  .prow.me { box-shadow: inset 3px 0 0 var(--mark); }
+  .card .prow .num { font-size: 14px; font-weight: 800; }
+</style>
+</head>
+<body>
+<div class="view" id="view">
+  <div class="stage" id="stage">
+    <div class="msg" id="msg">Loading the game…</div>
+    <div class="game" id="game" hidden></div>
+    <div id="cards" hidden></div>
+  </div>
+</div>
+<script src="/rows.js"></script>
+<script>
+// Vista previa: un momento real de una partida challenger (web/preview/game-fixture.json, sacado de la
+// review-data publicada por videns-site) con la forma del payload del overlay de partida.
+const $ = (s) => document.querySelector(s);
+const DD = "https://ddragon.leagueoflegends.com/cdn/16.18.1/img/";
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const kg = (n) => Number(n || 0).toLocaleString("en-US");
+const mmss = (s) => { s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+const ci = (p) => `<span class="ci" title="${esc(p.champion)}"><img src="${DD}champion/${p.icon}.png" alt=""></span>`;
+const oi = (name, title) => `<img class="oi" src="/img/objective/${name}.png" alt="${title}" title="${title}">`;
+const TOWER = `<svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M5 1h6l-1 3h1v2l-1 1v6h2v2H4v-2h2V7L5 6V4h1z"/></svg>`;
+let faces = {};
+
+function timer(at, now) {
+  const left = at - now;
+  return left <= 0 ? `<span class="t" style="color:#7ed491">UP</span>` : `<span class="t${left <= 60 ? " soon" : ""}">${mmss(left)}</span>`;
+}
+function objectives(g) {
+  const o = g.objectives, now = g.game_time_s, c = o.dragon.counts;
+  const buffs = o.buffs.filter((b) => b.ends_at > now).map((b) => `<div class="buff">${oi("baron", "Baron buff")}
+      <span class="lbl ${b.team_id === 100 ? "order" : "chaos"}">${b.team_id === 100 ? "BLUE" : "RED"}</span>${timer(b.ends_at, now)}
+      <span class="who">${b.holders.map(ci).join("")}</span></div>`).join("");
+  return `<div class="card obj">${head("OBJECTIVES")}<div class="cb">
+    <div class="objrow">
+      <span class="cell">${oi("baron", "Baron")}${timer(o.baron.spawns_at, now)}</span>
+      <span class="cell">${oi("dragon", "Dragon")}<span class="cnt"><span class="order">${c["100"]}</span><span class="dim">–</span><span class="chaos">${c["200"]}</span></span>${timer(o.dragon.spawns_at, now)}</span>
+    </div>${buffs}</div></div>`;
+}
+const head = (label) => `<div class="chd"><span class="logo" aria-label="Videns">VIDENS<i>.</i></span><span class="lbl">${label}</span></div>`;
+// tu CS/min contra el esperado para tu campeón y línea a este minuto (tablas del drafting tool)
+function csCard(g) {
+  const c = g.cs, min = g.game_time_s / 60, now = c.now / min, exp = c.expected / min, d = Math.round(c.now - c.expected);
+  const scale = exp * 1.15;
+  return `<div class="card cs">${head("CS / MIN")}<div class="cb">
+    <div class="csw"><span class="ci"><img src="${DD}champion/${c.icon}.png" alt=""></span>${esc(c.champion)}<span class="dim">${c.role}</span></div>
+    <div class="csn"><span class="big">${now.toFixed(1)}</span><span class="u">/ min</span><span class="tg">TARGET<b>${exp.toFixed(1)}</b></span></div>
+    <div class="csb"><i style="width:${Math.min(100, now / scale * 100).toFixed(1)}%"></i><em style="left:${(exp / scale * 100).toFixed(1)}%"></em></div>
+    <div class="csd ${d < 0 ? "neg" : "pos"}">${d < 0 ? "−" : "+"}${Math.abs(d)} CS <span>${d < 0 ? "behind" : "ahead"} at ${mmss(g.game_time_s)}</span></div>
+  </div></div>`;
+}
+// fila de jugador: el rectángulo del splash marcado en /faces; RED en espejo
+function row(p, teamId) {
+  const cls = `prow splash ${teamId === 200 ? "mirror" : ""} ${p.is_me ? "me" : ""} ${p.dead ? "dead" : ""}`;
+  return `<div class="${cls}" title="${esc(p.champion)}"><img class="art" src="${Rows.artUrl(p.icon, 0)}" alt="" style="${Rows.artStyle(faces[p.icon])}"
+    onerror="this.remove()"><span class="num">${kg(p.item_gold)}</span></div>`;
+}
+function diffBox(b, r, extra = "") {
+  const d = b - r;
+  if (d === 0) return `<div class="diff ${extra}">0</div>`;
+  const label = kg(Math.abs(d));
+  return d > 0 ? `<div class="diff blue ${extra}"><span class="arrow">◀</span>${label}</div>`
+               : `<div class="diff red ${extra}">${label}<span class="arrow">▶</span></div>`;
+}
+function gold(g) {
+  const [blue, red] = g.gold.teams;
+  const col = (t) => `<div class="col"><div class="side ${t.team_id === 100 ? "order" : "chaos"}"><span>${t.team_id === 100 ? "BLUE" : "RED"}</span><span class="tt">${kg(t.item_gold)}</span></div>
+    ${t.players.map((p) => row(p, t.team_id)).join("")}</div>`;
+  const mid = `<div class="col mid">${diffBox(blue.item_gold, red.item_gold, "total")}
+    ${blue.players.map((p, i) => diffBox(p.item_gold, red.players[i].item_gold)).join("")}</div>`;
+  return `<div class="card gold">${head("ITEM GOLD")}<div class="cb"><div class="gt">${col(blue)}${mid}${col(red)}</div></div></div>`;
+}
+function game(g) {
+  const o = g.objectives, me = g.gold.teams.flatMap((t) => t.players).find((p) => p.is_me);
+  const slots = [...(me.items || []), ...Array(6).fill(0)].slice(0, 6);
+  return `<img class="terrain" src="/preview/minimap.webp" alt=""><div class="vig"></div>
+    <div class="score"><span class="s order"><b>${o.towers_destroyed["100"]}</b>${TOWER}</span><span class="s order"><b>${o.dragon.counts["100"]}</b>${oi("dragon", "")}</span>
+      <span class="clk">${mmss(g.game_time_s)}</span>
+      <span class="s chaos">${oi("dragon", "")}<b>${o.dragon.counts["200"]}</b></span><span class="s chaos">${TOWER}<b>${o.towers_destroyed["200"]}</b></span></div>
+    <div class="hud"><span class="por"><img src="${DD}champion/${me.icon}.png" alt=""><span class="lv">${me.level}</span></span>
+      <span class="ab"><span>Q</span><span>W</span><span>E</span><span>R</span></span>
+      <span class="its">${slots.map((id) => `<span>${id ? `<img src="${DD}item/${id}.png" alt="">` : ""}</span>`).join("")}</span>
+      <span class="gd"><i></i>${kg(g.hud_gold)}</span></div>
+    <div class="mini"><img src="/preview/minimap.webp" alt="Minimap at ${mmss(g.game_time_s)}"></div>`;
+}
+function fit() {
+  const v = $("#view"), k = Math.min(v.clientWidth / 1920, v.clientHeight / 1080), st = $("#stage");
+  st.style.transform = `scale(${k})`;
+  st.style.left = `${(v.clientWidth - 1920 * k) / 2}px`;
+}
+addEventListener("resize", fit);
+fit();
+(async () => {
+  let g;
+  try {
+    g = await (await fetch(`/preview/${encodeURIComponent(new URLSearchParams(location.search).get("fixture") || "game-fixture")}.json`)).json();
+    const r = await fetch("/api/faces"); if (r.ok) faces = await r.json();
+  } catch (e) { $("#msg").textContent = "Could not load the preview data."; return; }
+  $("#game").innerHTML = game(g);
+  $("#cards").innerHTML = `<div class="stack">${objectives(g)}${gold(g)}</div>${csCard(g)}`;
+  $("#msg").hidden = true;
+  $("#game").hidden = false;
+  $("#cards").hidden = false;
+})();
+</script>
+</body>
+</html>

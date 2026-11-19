@@ -1,0 +1,15 @@
+# Each project also has its own .gitignore; these apply everywhere.
+.env
+.dev.vars*
+!.env.example
+.venv*/
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+dist/
+build/
+.worktrees/
+*.db
+*.db-wal
+*.db-shm

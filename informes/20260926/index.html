@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informe 2026-09-26 — videns.gg</title>
+<style>
+  :root { color-scheme: light;
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e;
+    --muted:#898781; --grid:#e1e0d9; --base:#c3c2b7; --border:rgba(11,11,11,.10);
+    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --good:#006300; }
+  @media (prefers-color-scheme: dark) { :root { color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink2:#c3c2b7;
+    --muted:#898781; --grid:#2c2c2a; --base:#383835; --border:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --good:#0ca30c; } }
+  *{box-sizing:border-box;margin:0}
+  body{background:var(--page);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;padding:32px 16px 64px}
+  main{max-width:880px;margin:0 auto;display:grid;gap:26px}
+  h1{font-size:25px} header p{color:var(--ink2);margin-top:4px}
+  section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 24px}
+  h2{font-size:17px;margin-bottom:4px} .sub{color:var(--ink2);font-size:13.5px;margin-bottom:14px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
+  .tile{border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:grid;gap:2px}
+  .tile .k{font-size:12.5px;color:var(--ink2)} .tile .v{font-size:26px;font-weight:650}
+  .tile .d{font-size:12.5px;color:var(--muted)} .v.good{color:var(--good)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:right;padding:7px 9px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left} th{color:var(--ink2);font-weight:600;font-size:12.5px}
+  tr:last-child td{border-bottom:none}
+  ul{padding-left:20px;display:grid;gap:7px} li::marker{color:var(--muted)}
+  .foot{color:var(--muted);font-size:12px}
+  code{font-size:12.5px;background:color-mix(in oklab,var(--ink) 6%,transparent);padding:1px 5px;border-radius:4px}
+  .wrap{overflow-x:auto}
+  .pend{color:var(--s2);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Informe — 25/27 de septiembre de 2026</h1>
+    <p>build_tracker · fase 2 sobre la generación v4: economía + compañero ward-free reentrenados con las 6.354 partidas · <b>la mezcla M2 supera a la referencia congelada en +0,79 puntos</b> · nada promocionado · test sellado</p>
+  </header>
+
+  <section>
+    <h2>Resumen ejecutivo</h2>
+    <p class="sub">Pregunta: con el Bf nuevo congelado como referencia (50,74 %), ¿las dos piezas que sostenían la mezcla antigua —features económicas y compañero ward-free— siguen aportando si se reaprenden con las 6.354 partidas? Métrica: exacto ward-free de la primera acción, decoder agrupado, misma cohorte de 146.597 decisiones / 1.209 partidas posteriores a todo el entrenamiento, emparejado por partida.</p>
+    <div class="tiles">
+      <div class="tile"><span class="k">M2 = ½ econ_ft_new + ½ wardfree_new vs Bf nuevo (referencia)</span><span class="v good">+0,79</span><span class="d">CI 95 % [+0,69, +0,89] · 51,53 % vs 50,74 % · <b>+1.164 decisiones netas</b> · top-3 66,09 % (+0,49)</span></div>
+      <div class="tile"><span class="k">M2 vs nuestra mejor configuración anterior (mezcla v3)</span><span class="v good">+2,33</span><span class="d">CI [+2,18, +2,48] · 49,20 % → 51,53 % · <b>+3.421 netas</b> en la misma cohorte</span></div>
+      <div class="tile"><span class="k">Features económicas (fine-tune gemelo)</span><span class="v good">+0,27</span><span class="d">vs control gemelo, CI [+0,20, +0,34] · vs Bf nuevo +0,25 [+0,16, +0,32] · el ajuste sin economía no aporta (−0,03)</span></div>
+      <div class="tile"><span class="k">Compañero ward-free a solas</span><span class="v">−0,09</span><span class="d">CI [−0,22, +0,05] · nulo; su valor está en la mezcla (+0,88 de M2 sobre él)</span></div>
+      <div class="tile"><span class="k">M2 rompe aciertos de ambos padres</span><span class="v good">0</span><span class="d">y acierta 97 que ambos fallaban · recomendación nueva en 618 decisiones (0,4 %)</span></div>
+      <div class="tile"><span class="k">Coste solo-ward</span><span class="v">−0,77</span><span class="d">CI [−1,21, −0,34] · todas las piezas nuevas prefieren una compra principal donde la verdad era solo un ward</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Resultado, todos los brazos en la misma cohorte</h2>
+    <div class="wrap"><table>
+      <tr><th>modelo</th><th>exacto 1ª</th><th>top-3</th><th>Δ vs Bf nuevo</th><th>CI 95 %</th><th>netas</th><th>supera R1</th></tr>
+      <tr><td><b>M2</b> (½ econ_ft_new agrupado + ½ wardfree_new; pesos declarados)</td><td><b>51,53 %</b></td><td><b>66,09 %</b></td><td><b>+0,794</b></td><td>[+0,691, +0,889]</td><td><b>+1.164</b></td><td><b>sí</b></td></tr>
+      <tr><td>econ_ft_new (ep8, features reales)</td><td>50,98 %</td><td>65,68 %</td><td>+0,246</td><td>[+0,160, +0,324]</td><td>+361</td><td>sí</td></tr>
+      <tr><td>control_ft_new (ep8, features a cero)</td><td>50,71 %</td><td>65,56 %</td><td>−0,025</td><td>[−0,078, +0,032]</td><td>−37</td><td>no</td></tr>
+      <tr><td>wardfree_new (ep16)</td><td>50,65 %</td><td>65,59 %</td><td>−0,086</td><td>[−0,216, +0,050]</td><td>−126</td><td>no</td></tr>
+      <tr><td>Bf nuevo (referencia R1)</td><td>50,74 %</td><td>65,60 %</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr><td>mezcla v3 (paquete <code>mixture-50-50-v1</code>)</td><td>49,20 %</td><td>64,20 %</td><td>−1,540</td><td>[−1,692, −1,381]</td><td>−2.257</td><td>—</td></tr>
+    </table></div>
+    <p class="sub" style="margin-top:12px">Por segmento, M2 vs Bf nuevo: 1 objeto +0,81 [+0,69, +0,93] · varios +1,05 [+0,83, +1,26] · SAVE −0,11 [−0,83, +0,61] (no resuelto) · solo-ward −0,77 [−1,21, −0,34]. Atribución: econ vs control +0,27 [+0,20, +0,34] (+398 netas; top-3 +0,12). M2 vs sus padres: +0,55 [+0,45, +0,64] sobre econ_ft_new y +0,88 [+0,78, +1,00] sobre wardfree_new. Unión oráculo de los padres 54,69 %.</p>
+  </section>
+
+  <section>
+    <h2>Cómo se verificó</h2>
+    <ul>
+      <li>Recomputado de forma independiente desde las filas por decisión de los ocho conjuntos (R1, Bf antiguo, mezcla antigua, wardfree_new, control, econ, M2 y las re-decodificaciones de los padres en la etapa de mezcla): identidad (partida, ts, campeón) idéntica; todos los agregados, deltas, movimientos y segmentos reproducen; CI a ruido de bootstrap.</li>
+      <li>Puertas de integridad: R1 reprodujo sus filas de la etapa 1 (0/0, fase <code>gate</code> en GPU); la mezcla reprodujo las filas de sus dos padres (0/0); corrección inicial del fine-tune exactamente 0 y CE del padre en el subconjunto fijo 1,7395, coherente con el checkpoint de la etapa 1.</li>
+      <li>Reglas declaradas antes de correr: pesos 50/50 sin buscar; ep8/ep16 fijos; topes 6/12/8 h por segmento; «progreso práctico» solo si se supera a R1 con IC &gt; 0; ganar solo al control gemelo no cuenta.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Costes medidos (todos los topes respetados)</h2>
+    <div class="wrap"><table>
+      <tr><th>segmento</th><th>piloto / bench</th><th>medido</th><th>pico de commit</th></tr>
+      <tr><td>A · dominios top-128 de R1 (CPU)</td><td>—</td><td>3 h 20 (forward en CPU patológico, ≈64 filas/s; la próxima vez en GPU)</td><td>8,4 GB</td></tr>
+      <tr><td>A · features económicas (CPU)</td><td>16,9 ms/decisión → 4,24 h secuencial (tope 6 h)</td><td>en paralelo: 8 fragmentos / 4 trabajadores ≈ 62 min + cohorte 41,5 min (+49 min por dos piezas perdidas); idéntico bit a bit al secuencial</td><td>3,9 GB</td></tr>
+      <tr><td>gate (GPU)</td><td>—</td><td>23,5 min</td><td>7,1 GB</td></tr>
+      <tr><td>C · ward-free (GPU, 16 épocas)</td><td>0,517 s/lote → 6,81 h (tope 8)</td><td>6,97 h + 5,5 min de evaluación</td><td>9,7 GB</td></tr>
+      <tr><td>B · fine-tune gemelo (GPU, 8 × 2 brazos)</td><td>0,610 s/lote → 8,03 h (tope 12)</td><td>4,50 h + 4,47 h + 13 min de evaluación</td><td>15,1 GB</td></tr>
+      <tr><td>D · mezcla M2 (GPU)</td><td>—</td><td>34 min</td><td>8,0 GB</td></tr>
+    </table></div>
+    <p class="sub" style="margin-top:12px">≈23 h de máquina; 26,5 h de pared (00:33 del 26 → 03:09 del 27) con cuatro incidentes, todos en el ledger: pausa del propietario (la cadena pasó a ser consciente del juego: tramos de CPU con prioridad baja, tramos de GPU suspendidos durante la partida); un tope disparado por un bench inflado (recolector de basura sobre las filas de la cohorte + mantenimiento de Windows; re-medido a 14-17 ms); dos trabajadores paralelos muertos sin ruido y un código de salida mal leído en PowerShell (5 h paradas); y un «CUDA out of memory» con 4,8 GB de VRAM libres causado por el techo de 12 GB del job del segmento.</p>
+  </section>
+
+  <section>
+    <h2>Límites</h2>
+    <ul>
+      <li><b>Selección sobre la cohorte</b>: ya se han puntuado ocho configuraciones en ella; adoptar M2 es una selección. El test sellado (3.112 partidas) queda para una única confirmación final de lo que se adopte, no antes.</li>
+      <li><b>M2 no es un paquete</b>: son dos checkpoints, un dominio congelado y una regla. Promocionar exige el paquete versionado (como <code>mixture-50-50-v1</code>), el informe de política mostrada con cero cestas inasequibles, independencia del corpus y una latencia medida (el paquete v1 estimó ≈40 ms/decisión; M2 añade un forward ward-free, sin medir).</li>
+      <li><b>Solo-ward pierde 0,77 puntos</b> (5.884 decisiones): la regla de producto ya deja los wards fuera de la cesta, pero el coste en esta métrica es real.</li>
+      <li>Cartera estimada; la mezcla de volumen y recencia y las cautelas de catálogo de la etapa 1 siguen aplicando; pesos 50/50 sin ajustar por diseño; ep8/ep16 fijados de antemano.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Qué dice para producto y qué sigue</h2>
+    <ul>
+      <li>En la misma cohorte posterior al entrenamiento, la mejor configuración disponible pasa del <b>49,20 %</b> (mezcla de los modelos v3) al <b>51,53 %</b>: <b>+2,33 puntos, +3.421 decisiones netas de 146.597</b>, en dos pasos medidos esta semana: más datos y más frescos para el modelo único (+1,54) y, sobre esos datos, economía + compañero ward-free reaprendidos y combinados (+0,79).</li>
+      <li>Se confirman las dos lecciones de la v3 en la generación nueva: ninguna pieza vale mucho a solas; la pareja sí. Y esta vez contra una referencia congelada, con puertas de integridad y recomputación independiente.</li>
+      <li><b>Referencia práctica nueva: M2 (51,53 %)</b>, con digests en <code>frozen_reference_stage2.json</code>; el Bf nuevo sigue como referencia de modelo único. Decisiones pendientes del propietario y del revisor: empaquetar M2 para la vía de promoción (contrato de paquete + informe de política mostrada + latencia), y si volver a ampliar los datos.</li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="foot">Procedencia: <code>docs/experiment_stage2_econ_wardfree_v1.md</code> (protocolo, presupuesto medido y RESULT) · <code>docs/stage2_result_v4_20260927.md</code> (dossier) · cadena <code>scripts/run_stage2_v4.py</code> · <code>data/experiments/16.18-stage2-v4/</code> (informes por segmento, filas por decisión de cada brazo, checkpoints econ_ft_new_ep8 670dd7bd…, wardfree_new_ep16 ffbfc40a…, run/status*.json, logs) · referencias <code>frozen_reference_v4.json</code> (R1) y <code>frozen_reference_stage2.json</code> (R2) · test sellado · nada promocionado · código sin commit (decisión del propietario).</p>
+  </section>
+</main>
+</body>
+</html>

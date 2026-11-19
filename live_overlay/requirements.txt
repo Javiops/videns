@@ -1,0 +1,11 @@
+# versiones verificadas el 2026-09-29 (Python 3.14); subir a propósito, no por arrastre
+fastapi==0.141.1
+starlette==1.7.0
+uvicorn[standard]==0.54.0
+httpx==0.28.1
+pywebview==6.2.1
+pythonnet==3.2.0
+pytest==9.1.1
+# captura de pantalla para scripts/capture.py (2026-10-04)
+mss==10.2.0
+pillow==12.3.0

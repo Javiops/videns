@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Videns · Buscador de invocadores</title>
+<meta name="description" content="Busca un Riot ID y mira lo que hizo de verdad: rango, últimas partidas, KDA, CS y objetos, leídos directamente de la API de Riot.">
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    --bg: #0d0f13;
+    --panel: #14171d;
+    --panel-2: #191d25;
+    --line: #232832;
+    --text: #e8eaef;
+    --muted: #8b94a6;
+    --faint: #5f6878;
+    --accent: #c9a227;
+    --win: #5b8fc9;
+    --win-bg: rgba(91, 143, 201, 0.09);
+    --loss: #c9705b;
+    --loss-bg: rgba(201, 112, 91, 0.09);
+    --remake: #6f7787;
+    --remake-bg: rgba(111, 119, 135, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font: 400 16px/1.6 ui-sans-serif, -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  img { max-width: 100%; display: block; }
+
+  .wrap { width: 100%; max-width: 62rem; margin: 0 auto; padding: 0 1.25rem; }
+
+  /* ---------- hero + search ---------- */
+  .hero {
+    padding: clamp(3rem, 12vh, 7rem) 0 2rem;
+    transition: padding 0.25s ease;
+  }
+  body.has-results .hero { padding: 1.75rem 0 1.25rem; }
+
+  .mark {
+    font-size: clamp(2.5rem, 9vw, 3.75rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    margin: 0;
+    line-height: 1;
+  }
+  .mark span { color: var(--accent); }
+  body.has-results .mark { font-size: 1.75rem; }
+
+  .etym {
+    color: var(--muted);
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0.85rem 0 0;
+  }
+  .lede {
+    font-size: clamp(1rem, 2.4vw, 1.1875rem);
+    color: var(--text);
+    margin: 1.75rem 0 0;
+    max-width: 36rem;
+  }
+  body.has-results .etym,
+  body.has-results .lede { display: none; }
+
+  .searchbar {
+    display: flex;
+    gap: 1px;
+    margin: 2rem 0 0;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 40rem;
+    transition: border-color 0.15s ease;
+  }
+  .searchbar:focus-within { border-color: #3a424f; }
+  body.has-results .searchbar { margin-top: 1rem; }
+
+  .searchbar select,
+  .searchbar input,
+  .searchbar button {
+    font: inherit;
+    border: 0;
+    background: var(--panel);
+    color: var(--text);
+    padding: 0.85rem 0.9rem;
+  }
+  .searchbar select {
+    color: var(--muted);
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    padding-right: 0.6rem;
+    cursor: pointer;
+    appearance: none;
+    text-align: center;
+  }
+  .searchbar select:focus-visible,
+  .searchbar input:focus-visible,
+  .searchbar button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .searchbar input { flex: 1; min-width: 0; }
+  .searchbar input::placeholder { color: var(--faint); }
+  .searchbar button {
+    background: var(--accent);
+    color: #1a1400;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    padding-inline: 1.35rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .searchbar button:hover { background: #d9b02c; }
+  .searchbar button:disabled { opacity: 0.55; cursor: progress; }
+
+  .hint {
+    margin: 0.85rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    align-items: center;
+  }
+  .chip {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .chip:hover { border-color: #3a424f; color: var(--text); }
+
+  /* ---------- corpus strip ---------- */
+  .corpus-strip {
+    margin: 2.5rem 0 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  }
+  body.has-results .corpus-strip { display: none; }
+  .corpus-strip dt {
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .corpus-strip dd {
+    margin: 0.35rem 0 0;
+    font-size: 1.375rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .corpus-note {
+    margin: 1.25rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--faint);
+    max-width: 38rem;
+  }
+  body.has-results .corpus-note { display: none; }
+
+  /* ---------- states ---------- */
+  .state { margin: 2rem 0 0; }
+  .error {
+    border: 1px solid #45302c;
+    background: rgba(201, 112, 91, 0.08);
+    color: #e7b4a8;
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.9375rem;
+  }
+  .loading {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    color: var(--muted);
+    font-size: 0.9375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .spinner {
+    width: 14px; height: 14px; flex: none;
+    border: 2px solid var(--line);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+
+  /* ---------- profile ---------- */
+  .profile { margin: 2rem 0 0; display: none; }
+  body.has-results .profile { display: block; }
+
+  .identity {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    flex-wrap: wrap;
+  }
+  .avatar { position: relative; flex: none; }
+  .avatar img {
+    width: 76px; height: 76px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+  }
+  .avatar .lvl {
+    position: absolute;
+    bottom: -8px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    padding: 0.05rem 0.5rem;
+    color: var(--muted);
+  }
+  .who h2 { margin: 0; font-size: 1.5rem; letter-spacing: -0.02em; font-weight: 600; }
+  .who h2 .tag { color: var(--muted); font-weight: 400; }
+  .who .meta { margin: 0.3rem 0 0; color: var(--faint); font-size: 0.8125rem; }
+
+  .grid {
+    display: grid;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 1.75rem 0 0;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 46rem) { .grid.cols-2 { grid-template-columns: 1fr 1fr; } }
+  .card { background: var(--panel); padding: 1.15rem 1.25rem; }
+  .card h3 {
+    margin: 0 0 0.9rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .rank-row { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+  .rank-tier { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; }
+  .rank-lp { color: var(--accent); font-variant-numeric: tabular-nums; font-size: 0.9375rem; }
+  .rank-wl { color: var(--muted); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+  .unranked { color: var(--faint); font-size: 0.9375rem; }
+
+  .stat-row { display: flex; flex-wrap: wrap; gap: 1.5rem 2rem; }
+  .stat { min-width: 5rem; }
+  .stat b {
+    display: block;
+    font-size: 1.375rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat span { color: var(--muted); font-size: 0.75rem; letter-spacing: 0.04em; }
+
+  .bar {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--loss);
+    overflow: hidden;
+    margin: 1rem 0 0.6rem;
+  }
+  .bar i { display: block; height: 100%; background: var(--win); }
+
+  .form { display: flex; gap: 4px; flex-wrap: wrap; }
+  .form b {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
+    font-size: 0.6875rem;
+    font-weight: 600;
+  }
+  .form b.V { background: var(--win-bg); color: var(--win); }
+  .form b.D { background: var(--loss-bg); color: var(--loss); }
+  .form b.R { background: var(--remake-bg); color: var(--remake); }
+  /* Not in the averages above: dimmed and outlined so the strip cannot be
+     recounted into a different record than the one stated. */
+  .form b.off { background: transparent; border: 1px dashed var(--line); color: var(--faint); }
+
+  .champ-line {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .champ-line:last-child { border-bottom: 0; }
+  .champ-line img { width: 30px; height: 30px; border-radius: 6px; flex: none; }
+  .champ-line .n { flex: 1; min-width: 0; font-size: 0.875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .champ-line .g { color: var(--faint); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+  .champ-line .w { font-size: 0.8125rem; font-variant-numeric: tabular-nums; width: 3.4rem; text-align: right; }
+  .champ-line .k { color: var(--muted); font-size: 0.8125rem; font-variant-numeric: tabular-nums; width: 3.6rem; text-align: right; }
+
+  .roles { display: flex; flex-direction: column; gap: 0.55rem; }
+  .role-row { display: flex; align-items: center; gap: 0.7rem; font-size: 0.8125rem; }
+  .role-row span:first-child { width: 4.5rem; color: var(--muted); }
+  .role-row .track { flex: 1; height: 5px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .role-row .track i { display: block; height: 100%; background: var(--accent); opacity: 0.75; }
+  .role-row .pct { width: 2.5rem; text-align: right; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  /* ---------- corpus panel ---------- */
+  .corpus-card { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start; }
+  .corpus-card .stat b { color: var(--accent); }
+  .corpus-card p { margin: 0; font-size: 0.8125rem; color: var(--faint); flex: 1; min-width: 14rem; }
+
+  /* ---------- matches ---------- */
+  .matches { margin: 1.75rem 0 0; display: flex; flex-direction: column; gap: 6px; }
+  .match {
+    display: grid;
+    grid-template-columns: 4px 6.5rem 1fr auto;
+    gap: 0 0.9rem;
+    align-items: center;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.8rem 1rem 0.8rem 0;
+    overflow: hidden;
+  }
+  .match::before { content: ""; grid-column: 1; align-self: stretch; margin: -0.8rem 0; background: var(--remake); }
+  .match.win::before { background: var(--win); }
+  .match.loss::before { background: var(--loss); }
+  .match.win { background: linear-gradient(90deg, var(--win-bg), transparent 40%), var(--panel); }
+  .match.loss { background: linear-gradient(90deg, var(--loss-bg), transparent 40%), var(--panel); }
+
+  .m-when { font-size: 0.75rem; color: var(--muted); line-height: 1.45; min-width: 0; }
+  .m-when b { display: block; font-size: 0.8125rem; font-weight: 600; color: var(--text); }
+  .m-when .res { font-weight: 600; }
+  .m-when .res.win { color: var(--win); }
+  .m-when .res.loss { color: var(--loss); }
+  .m-when .res.remake { color: var(--remake); }
+
+  .m-body { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; min-width: 0; }
+
+  .m-champ { display: flex; align-items: center; gap: 0.45rem; }
+  .m-champ .portrait { position: relative; flex: none; }
+  .m-champ .portrait img { width: 44px; height: 44px; border-radius: 8px; }
+  .m-champ .portrait b {
+    position: absolute; bottom: -3px; right: -3px;
+    background: #0b0d11;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 0.625rem;
+    line-height: 1;
+    padding: 2px 4px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .m-runes { display: flex; flex-direction: column; gap: 3px; }
+  .m-runes img { width: 20px; height: 20px; border-radius: 50%; background: #0b0d11; }
+  .m-runes img.tree { width: 20px; height: 20px; padding: 3px; }
+  .m-spells { display: flex; flex-direction: column; gap: 3px; }
+  .m-spells img { width: 20px; height: 20px; border-radius: 5px; }
+
+  .m-kda { min-width: 6.5rem; }
+  .m-kda .line { font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+  .m-kda .line s { color: var(--faint); text-decoration: none; margin: 0 2px; }
+  .m-kda .ratio { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .m-kda .ratio.perfect { color: var(--accent); }
+
+  .m-num { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.5; min-width: 5.5rem; }
+
+  .m-items { display: grid; grid-template-columns: repeat(4, 24px); gap: 3px; }
+  .m-items .slot {
+    width: 24px; height: 24px;
+    border-radius: 5px;
+    background: #0b0d11;
+    border: 1px solid #1b1f27;
+  }
+  .m-items .slot img { width: 100%; height: 100%; border-radius: 4px; }
+  .m-items .slot.trinket { border-radius: 999px; }
+  .m-items .slot.trinket img { border-radius: 999px; }
+
+  .m-board { display: none; font-size: 0.6875rem; color: var(--faint); gap: 0.35rem; }
+  @media (min-width: 62rem) {
+    .m-board { display: grid; grid-template-columns: 1fr 1fr; gap: 1px 0.75rem; }
+  }
+  .m-board span { display: flex; align-items: center; gap: 0.3rem; white-space: nowrap; overflow: hidden; }
+  .m-board img { width: 15px; height: 15px; border-radius: 3px; flex: none; }
+  .m-board span.me { color: var(--text); }
+  .m-board span i { overflow: hidden; text-overflow: ellipsis; font-style: normal; max-width: 6.5rem; }
+  .review-link { display: inline-flex; align-items: center; gap: .25rem; margin-top: .35rem;
+    color: var(--accent); font-size: .75rem; font-weight: 600; text-decoration: none; }
+  .review-link:hover { text-decoration: underline; }
+
+  @media (max-width: 52rem) {
+    .match { grid-template-columns: 4px 1fr; padding-right: 0.85rem; row-gap: 0.75rem; }
+    .m-when { grid-column: 2; }
+    .m-body { grid-column: 2; }
+  }
+
+  footer {
+    margin: 3.5rem 0 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.75rem;
+    line-height: 1.65;
+    color: var(--faint);
+  }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1 class="mark">Videns<span>.</span></h1>
+    <p class="etym">Latín · «el que ve»</p>
+    <p class="lede">
+      Busca un Riot ID y mira lo que hizo de verdad: rango, últimas partidas,
+      KDA, CS y los objetos con los que terminó cada una.
+    </p>
+
+    <form class="searchbar" id="form" autocomplete="off">
+      <label class="sr" for="region">Región</label>
+      <select id="region" name="region"></select>
+      <label class="sr" for="q">Riot ID</label>
+      <input id="q" name="q" placeholder="Nombre#TAG" spellcheck="false" required>
+      <button id="go" type="submit">Buscar</button>
+    </form>
+
+    <p class="hint" id="hint">
+      <span>Prueba con</span>
+    </p>
+
+    <dl class="corpus-strip" id="corpus-strip"></dl>
+    <p class="corpus-note">
+      Un registro de comportamiento: partidas reales reconstruidas desde el
+      timeline. El buscador de arriba no lee ese corpus — consulta la API de
+      Riot en directo — pero te dirá cuánto de ese jugador tenemos ya dentro.
+    </p>
+  </header>
+
+  <div class="state" id="state"></div>
+
+  <main class="profile" id="profile" aria-live="polite"></main>
+
+  <footer>
+    Videns es un proyecto independiente, sin relación ni respaldo de Riot Games.
+    League of Legends y sus marcas son propiedad de Riot Games, Inc.
+    Los datos de partida vienen de la API oficial de Riot; los iconos, de Data Dragon.
+  </footer>
+</div>
+
+<script>
+const REGIONS = [
+  ["euw", "EUW"], ["eune", "EUNE"], ["na", "NA"], ["kr", "KR"], ["br", "BR"],
+  ["lan", "LAN"], ["las", "LAS"], ["jp", "JP"], ["tr", "TR"], ["ru", "RU"],
+  ["me", "ME"], ["oce", "OCE"], ["sg", "SG"], ["ph", "PH"], ["th", "TH"],
+  ["tw", "TW"], ["vn", "VN"],
+];
+const EXAMPLES = [
+  ["Hide on bush#KR1", "kr"],
+  ["Agurin#EUW", "euw"],
+  ["Caps#10T", "euw"],
+];
+const RECENTS_KEY = "videns.recents";
+
+const $ = (sel) => document.querySelector(sel);
+const form = $("#form"), input = $("#q"), regionSel = $("#region"), button = $("#go");
+const state = $("#state"), profile = $("#profile");
+
+const nf = new Intl.NumberFormat("es-ES");
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => (
+  { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+));
+
+for (const [key, label] of REGIONS) {
+  const opt = document.createElement("option");
+  opt.value = key; opt.textContent = label;
+  regionSel.append(opt);
+}
+
+/* ---------- formatting ---------- */
+function ago(ms) {
+  const s = Math.max(0, (Date.now() - ms) / 1000);
+  if (s < 3600) return `hace ${Math.floor(s / 60)} min`;
+  if (s < 86400) return `hace ${Math.floor(s / 3600)} h`;
+  const d = Math.floor(s / 86400);
+  if (d < 30) return `hace ${d} d`;
+  const months = Math.floor(d / 30);
+  return months < 12 ? `hace ${months} mes${months > 1 ? "es" : ""}` : `hace ${Math.floor(d / 365)} a`;
+}
+const clock = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+const pct = (n) => `${n.toFixed(0)}%`;
+
+/* ---------- recent searches ---------- */
+function recents(add) {
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem(RECENTS_KEY) || "[]"); } catch { list = []; }
+  if (!Array.isArray(list)) list = [];
+  if (add) {
+    list = [add, ...list.filter((r) => !(r[0] === add[0] && r[1] === add[1]))].slice(0, 5);
+    try { localStorage.setItem(RECENTS_KEY, JSON.stringify(list)); } catch { /* private mode */ }
+  }
+  return list;
+}
+
+function renderHint() {
+  const saved = recents();
+  const list = saved.length ? saved : EXAMPLES;
+  const hint = $("#hint");
+  hint.innerHTML = `<span>${saved.length ? "Recientes" : "Prueba con"}</span>`;
+  for (const [id, region] of list) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.textContent = `${id} · ${region.toUpperCase()}`;
+    chip.onclick = () => { input.value = id; regionSel.value = region; form.requestSubmit(); };
+    hint.append(chip);
+  }
+}
+
+/* ---------- corpus strip ---------- */
+async function loadCorpus() {
+  try {
+    const res = await fetch("/api/corpus");
+    if (!res.ok) return;
+    const { totals } = await res.json();
+    if (!totals || !totals.games) return;
+    $("#corpus-strip").innerHTML = `
+      <div><dt>Partidas reconstruidas</dt><dd>${nf.format(totals.games)}</dd></div>
+      <div><dt>Decisiones de tienda</dt><dd>${nf.format(totals.shop_decisions)}</dd></div>
+      <div><dt>Jugadores</dt><dd>${nf.format(totals.players)}</dd></div>
+      <div><dt>Parches</dt><dd>${totals.patches.join(" · ") || "—"}</dd></div>`;
+  } catch { /* the strip is decoration; a dead API must not break search */ }
+}
+
+/* ---------- search ---------- */
+let inFlight = null;
+
+async function search(riotId, region, { push = true } = {}) {
+  const id = riotId.trim();
+  if (!id) return;
+  if (inFlight) inFlight.abort();
+  const controller = new AbortController();
+  inFlight = controller;
+
+  button.disabled = true;
+  profile.innerHTML = "";
+  document.body.classList.remove("has-results");
+  const started = Date.now();
+  state.innerHTML = `<div class="loading"><span class="spinner"></span>
+    <span>Consultando la API de Riot… <b id="elapsed">0 s</b><br>
+    <small>1,3 s entre peticiones para respetar el límite de Riot. Las partidas ya archivadas salen al instante.</small></span></div>`;
+  const ticker = setInterval(() => {
+    const el = $("#elapsed");
+    if (el) el.textContent = `${Math.round((Date.now() - started) / 1000)} s`;
+  }, 250);
+
+  try {
+    const url = `/api/summoner?riot_id=${encodeURIComponent(id)}&region=${encodeURIComponent(region)}&count=10`;
+    const res = await fetch(url, { signal: controller.signal });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.detail || `La búsqueda falló (${res.status}).`);
+    state.innerHTML = "";
+    render(body);
+    document.body.classList.add("has-results");
+    recents([body.riot_id, region]);
+    renderHint();
+    if (push) {
+      const qs = new URLSearchParams({ q: body.riot_id, region });
+      history.pushState({ q: body.riot_id, region }, "", `?${qs}`);
+    }
+    document.title = `${body.riot_id} · Videns`;
+  } catch (err) {
+    if (err.name === "AbortError") return;
+    state.innerHTML = `<div class="error">${esc(err.message)}</div>`;
+  } finally {
+    clearInterval(ticker);
+    if (inFlight === controller) { inFlight = null; button.disabled = false; }
+  }
+}
+
+/* ---------- render ---------- */
+function render(p) {
+  const t = p.totals;
+  const ranks = p.ranks.length ? p.ranks.map((r) => `
+    <div class="rank-row" style="margin-bottom:.55rem">
+      <span class="rank-tier">${esc(r.tier)} ${esc(r.division)}</span>
+      <span class="rank-lp">${nf.format(r.lp)} LP</span>
+      <span class="rank-wl">${esc(r.queue)} · ${r.wins}V ${r.losses}D · ${pct(r.winrate)}</span>
+      ${r.hot_streak ? '<span class="rank-wl" style="color:var(--accent)">racha</span>' : ""}
+    </div>`).join("") : `<p class="unranked">Sin clasificar esta temporada.</p>`;
+
+  const champions = p.champions.length ? p.champions.map((c) => `
+    <div class="champ-line">
+      <img src="${esc(c.icon)}" alt="" loading="lazy">
+      <span class="n">${esc(c.champion)}</span>
+      <span class="g">${c.games}p</span>
+      <span class="k">${c.kda.toFixed(2)} KDA</span>
+      <span class="w" style="color:${c.winrate >= 50 ? "var(--win)" : "var(--loss)"}">${pct(c.winrate)}</span>
+    </div>`).join("") : `<p class="unranked">Nada que agrupar.</p>`;
+
+  const roles = p.roles.length ? p.roles.map((r) => `
+    <div class="role-row">
+      <span>${esc(r.role)}</span>
+      <span class="track"><i style="width:${r.share}%"></i></span>
+      <span class="pct">${r.share}%</span>
+    </div>`).join("") : `<p class="unranked">Sin rol registrado (ARAM, Arena…).</p>`;
+
+  const corpus = p.corpus.games
+    ? `<div class="stat"><b>${nf.format(p.corpus.games)}</b><span>PARTIDAS</span></div>
+       <div class="stat"><b>${nf.format(p.corpus.shop_decisions)}</b><span>DECISIONES</span></div>
+       <p>De este jugador ya hay partidas reconstruidas en el corpus de Videns: cada
+          decisión es una visita a la tienda con su oro, inventario y estado de partida.</p>`
+    : `<p>Este jugador todavía no está en el corpus de Videns. El corpus se llena
+          desde la escalera de KR y EUW, no bajo demanda.</p>`;
+
+  profile.innerHTML = `
+    <div class="identity">
+      <div class="avatar">
+        <img src="${esc(p.icon)}" alt="" width="76" height="76">
+        <span class="lvl">${p.level}</span>
+      </div>
+      <div class="who">
+        <h2>${esc(p.game_name)}<span class="tag">#${esc(p.tag_line)}</span></h2>
+        <p class="meta">${esc(p.region.label)} · compilado con Data Dragon ${esc(p.ddragon_version)}</p>
+      </div>
+    </div>
+
+    <div class="grid cols-2">
+      <section class="card"><h3>Clasificatoria</h3>${ranks}</section>
+      <section class="card">
+        <h3>Últimas ${t.games} ${t.basis === "arena" ? "de Arena" : t.excluded_arena ? "de Grieta" : "partidas"}</h3>
+        <div class="stat-row">
+          <div class="stat"><b>${pct(t.winrate)}</b><span>${t.wins}V ${t.losses}D</span></div>
+          <div class="stat"><b>${t.kda.toFixed(2)}</b><span>${t.kills_avg} / ${t.deaths_avg} / ${t.assists_avg}</span></div>
+          ${t.basis === "arena" ? "" : `
+          <div class="stat"><b>${t.cs_per_min}</b><span>CS POR MIN</span></div>
+          <div class="stat"><b>${pct(t.kill_participation)}</b><span>PARTICIPACIÓN</span></div>`}
+        </div>
+        <div class="bar"><i style="width:${t.winrate}%"></i></div>
+        <div class="form">${t.form.map((f) => {
+          const cls = f.counted ? f.result : "off";
+          const face = f.arena && f.placement ? f.placement : f.result;
+          const title = f.arena ? `Arena · ${f.placement || "?"}.º` : f.result === "R" ? "Remake" : "";
+          return `<b class="${cls}"${title ? ` title="${esc(title)}"` : ""}>${face}</b>`;
+        }).join("")}</div>
+        ${t.excluded_arena ? `<p class="corpus-note" style="margin-top:.9rem;display:block">
+          Los recuadros punteados son ${t.excluded_arena} partida${t.excluded_arena > 1 ? "s" : ""} de
+          Arena, fuera del promedio: ahí el número es el puesto, el CS no es farmeo y la
+          participación se reparte entre un subequipo, no entre cinco.</p>` : ""}
+      </section>
+      <section class="card"><h3>Campeones</h3>${champions}</section>
+      <section class="card"><h3>Rol</h3><div class="roles">${roles}</div></section>
+      <section class="card corpus-card" style="grid-column:1/-1"><h3 style="width:100%">En el corpus de Videns</h3>${corpus}</section>
+    </div>
+
+    <div class="matches">${p.matches.map((m) => matchRow(m, p.region.key)).join("")}</div>`;
+}
+
+function matchRow(m, region) {
+  // Arena is placed, not won: 1.º of 9 is the result, and the win flag Riot
+  // sets for the top half would read as a normal victory if we printed it.
+  const result = m.remake ? "remake" : m.win ? "win" : "loss";
+  const label = m.remake
+    ? "Remake"
+    : m.arena && m.placement
+      ? `${m.placement}.º${m.teams ? ` de ${m.teams}` : ""}`
+      : m.win ? "Victoria" : "Derrota";
+  const slots = [...m.items, m.trinket].map((it, i) => `
+    <span class="slot${i === 6 ? " trinket" : ""}">${
+      it && it.icon ? `<img src="${esc(it.icon)}" alt="" loading="lazy">` : ""
+    }</span>`).join("");
+
+  // Arena boards carry the whole 16-player lobby; this row lists the duo only.
+  const board = (m.arena ? m.board.filter((b) => b.subteam === m.subteam) : m.board).map((b) => `
+    <span class="${b.is_me ? "me" : ""}">
+      <img src="${esc(b.icon)}" alt="" loading="lazy"><i>${esc(b.name || b.champion)}</i>
+    </span>`).join("");
+
+  return `
+  <article class="match ${result}">
+    <div class="m-when">
+      <b>${esc(m.queue)}</b>
+      <span class="res ${result}">${label}</span> · ${clock(m.duration_s)}<br>
+      ${ago(m.ended_at_ms)}${m.patch ? ` · ${esc(m.patch)}` : ""}
+      ${m.mode === "CLASSIC" && m.match_id && m.participant_id ? `<br><a class="review-link" href="/review?match_id=${encodeURIComponent(m.match_id)}&region=${encodeURIComponent(region)}&participant_id=${m.participant_id}">Revisar partida →</a>` : ""}
+    </div>
+    <div class="m-body">
+      <div class="m-champ">
+        <span class="portrait">
+          <img src="${esc(m.champion_icon)}" alt="${esc(m.champion)}" loading="lazy">
+          <b>${m.level}</b>
+        </span>
+        <span class="m-spells">
+          ${m.spells.map((s) => s ? `<img src="${esc(s.icon)}" alt="${esc(s.name)}" title="${esc(s.name)}" loading="lazy">` : `<span></span>`).join("")}
+        </span>
+        <span class="m-runes">
+          ${m.keystone ? `<img src="${esc(m.keystone.icon)}" alt="" title="${esc(m.keystone.name)}" loading="lazy">` : ""}
+          ${m.secondary_tree ? `<img class="tree" src="${esc(m.secondary_tree.icon)}" alt="" title="${esc(m.secondary_tree.name)}" loading="lazy">` : ""}
+        </span>
+      </div>
+      <div class="m-kda">
+        <div class="line">${m.kills} <s>/</s> ${m.deaths} <s>/</s> ${m.assists}</div>
+        <div class="ratio${m.deaths === 0 ? " perfect" : ""}">${m.deaths === 0 ? "KDA perfecta" : `${m.kda.toFixed(2)} KDA`}</div>
+      </div>
+      <div class="m-num">
+        ${m.arena ? "Sin fase de líneas" : `${m.cs} CS (${m.cs_per_min})`}<br>
+        ${pct(m.kill_participation)} part.${m.role ? ` · ${esc(m.role)}` : ""}
+      </div>
+      <div class="m-items">${slots}</div>
+      <div class="m-board">${board}</div>
+    </div>
+  </article>`;
+}
+
+/* ---------- wiring ---------- */
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  search(input.value, regionSel.value);
+});
+
+window.addEventListener("popstate", () => fromUrl({ push: false }));
+
+function fromUrl(opts) {
+  const params = new URLSearchParams(location.search);
+  const q = params.get("q");
+  const region = params.get("region") || "euw";
+  regionSel.value = REGIONS.some(([k]) => k === region) ? region : "euw";
+  if (q) { input.value = q; search(q, regionSel.value, opts); }
+}
+
+renderHint();
+loadCorpus();
+fromUrl({ push: false });
+</script>
+</body>
+</html>

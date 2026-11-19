@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informe 2026-09-30 — modelo de draft — videns.gg</title>
+<style>
+  :root { color-scheme: light;
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e;
+    --muted:#898781; --grid:#e1e0d9; --base:#c3c2b7; --border:rgba(11,11,11,.10);
+    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --good:#006300; --bad:#a3231c; }
+  @media (prefers-color-scheme: dark) { :root { color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink2:#c3c2b7;
+    --muted:#898781; --grid:#2c2c2a; --base:#383835; --border:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --good:#0ca30c; --bad:#e0524a; } }
+  *{box-sizing:border-box;margin:0}
+  body{background:var(--page);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;padding:32px 16px 64px}
+  main{max-width:880px;margin:0 auto;display:grid;gap:26px}
+  h1{font-size:25px} header p{color:var(--ink2);margin-top:4px}
+  section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 24px}
+  h2{font-size:17px;margin-bottom:4px} .sub{color:var(--ink2);font-size:13.5px;margin-bottom:14px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
+  .tile{border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:grid;gap:2px}
+  .tile .k{font-size:12.5px;color:var(--ink2)} .tile .v{font-size:26px;font-weight:650}
+  .tile .d{font-size:12.5px;color:var(--muted)} .v.good{color:var(--good)} .v.bad{color:var(--bad)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:right;padding:7px 9px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left} th{color:var(--ink2);font-weight:600;font-size:12.5px}
+  tr:last-child td{border-bottom:none}
+  ul{padding-left:20px;display:grid;gap:7px} li::marker{color:var(--muted)}
+  .foot{color:var(--muted);font-size:12px}
+  code{font-size:12.5px;background:color-mix(in oklab,var(--ink) 6%,transparent);padding:1px 5px;border-radius:4px}
+  .wrap{overflow-x:auto}
+  .null{color:var(--s2);font-weight:600} .no{color:var(--bad);font-weight:600} .yes{color:var(--good);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Informe — 30 sep · 1 oct de 2026 · modelo de draft</h1>
+    <p>Réplica de la receta de iTero con nuestras partidas: funciona al nivel esperable en solo queue; la coherencia es gratis; la experiencia del jugador es la palanca; counters y sinergias no son medibles a nuestro volumen; el orden de picks no está en nuestros datos.</p>
+  </header>
+
+  <section>
+    <h2>Resultado en una línea</h2>
+    <p class="sub">Split de desarrollo: 6,903 partidas (16.18–16.19), posteriores a todas las de ajuste; acierto con umbral 0.5. La confirmación (6,903 partidas) sigue sellada.</p>
+    <div class="tiles">
+      <div class="tile"><span class="k">Solo el lado</span><span class="v">50.5 %</span><span class="d">log loss 0.6933</span></div>
+      <div class="tile"><span class="k">Réplica iTero (por perspectiva)</span><span class="v">55.2 %</span><span class="d">log loss 0.6856 · AUC 0.571</span></div>
+      <div class="tile"><span class="k">Modelo coherente</span><span class="v good">56.5 %</span><span class="d">log loss 0.6805 · AUC 0.591</span></div>
+      <div class="tile"><span class="k">Coherente + autofill/secundario</span><span class="v good">57.0 %</span><span class="d">log loss 0.6792 · AUC 0.596</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Qué hace iTero (sondeo de su API pública)</h2>
+    <p class="sub"><code>POST itero.gg/api/draft-picks</code>: los 10 huecos del draft (los desconocidos como <code>"avg"</code>), rango, región, lado, carril y un peso de maestría; devuelve un % de victoria para cada uno de ~170 candidatos del carril. Oro EUW, ~20 llamadas.</p>
+    <ul>
+      <li>Ensamble declarado: modelos lineales + gradient boosting; un submodelo predice el oro de la línea al minuto 12 y alimenta la predicción final; validación temporal.</li>
+      <li>Variables: win rate del campeón, counters y sinergias por pareja de carriles, oro@12, economía/snowball, escalado early/mid/late, mezcla de daño AD/AP, maestría.</li>
+      <li>Incoherente: el mismo draft da azul 53.2–55.9 % y rojo 49.6–55.6 % según el carril consultado (suman ~106 %).</li>
+      <li>Sin cuenta, la maestría se asume en 2k; con el deslizador al 100 % (lo que recomienda) todo cae al 18–24 %.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Datos y aislamiento</h2>
+    <div class="wrap"><table>
+      <tr><th>paso</th><th>resultado</th></tr>
+      <tr><td>Admisión (solo metadatos)</td><td>46,888 partidas admitidas; 5,029 reservas denegadas antes de leer nada (tests de build_tracker 3,112, macro_coach 6, confirmación de winprob 1,911); 71 ficheros de split atados por digest</td></tr>
+      <tr><td>Extracción</td><td>46,019 partidas válidas (ranked solo, sin remakes, 5 roles por equipo); 97 % con timeline; PUUID sustituido por hash con sal; 14 min</td></tr>
+      <tr><td>Split cronológico</td><td>ajuste 32,213 (510 de parches anteriores a 16.17 excluidas → 31,703) / desarrollo 6,903 / confirmación 6,903 sellada</td></tr>
+      <tr><td>Población</td><td>KR + EUW muestreado desde jugadores de ladder (mayoría apex; rango por partida desconocido). Azul ganó el 48.3 % en ajuste y el 49.5 % en desarrollo</td></tr>
+      <tr><td>Orden de picks</td><td class="no">no recuperable: match-v5 ordena a los jugadores por rol; solo los bans tienen <code>pickTurn</code>; no hay captura de champ select en videns.gg</td></tr>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Modelos en desarrollo</h2>
+    <p class="sub">Tablas estadísticas solo con partidas de ajuste (fuera de pliegue para las filas de ajuste), con encogimiento empírico-bayesiano. Receta fija: media de regresión logística estandarizada y LightGBM (400 árboles).</p>
+    <div class="wrap"><table>
+      <tr><th>modelo</th><th>log loss</th><th>Brier</th><th>acierto</th><th>AUC</th><th>pendiente cal.</th></tr>
+      <tr><td>R0 — solo el lado</td><td>0.69334</td><td>0.2501</td><td>50.5 %</td><td>0.500</td><td>—</td></tr>
+      <tr><td>R1 — win rate campeón-rol</td><td>0.68713</td><td>0.2470</td><td>54.5 %</td><td>0.566</td><td>1.31</td></tr>
+      <tr><td>I — réplica iTero, lectura por TOP</td><td>0.68561</td><td>0.2463</td><td>55.2 %</td><td>0.571</td><td>1.25</td></tr>
+      <tr><td>I — media de las 10 perspectivas</td><td>0.68575</td><td>0.2463</td><td>54.7 %</td><td>0.571</td><td>1.32</td></tr>
+      <tr><td>C — coherente (una fila por partida)</td><td>0.68048</td><td>0.2437</td><td>56.5 %</td><td>0.591</td><td>1.14</td></tr>
+      <tr><td>C sin experiencia</td><td>0.68618</td><td>0.2465</td><td>54.1 %</td><td>0.567</td><td>1.12</td></tr>
+      <tr><td>C + contexto autofill/secundario</td><td>0.67918</td><td>0.2431</td><td>57.0 %</td><td>0.596</td><td>1.16</td></tr>
+    </table></div>
+    <ul style="margin-top:12px">
+      <li>Pendientes de calibración &gt; 1 en todos: los modelos son demasiado prudentes en desarrollo.</li>
+      <li>Experiencia = partidas previas del mismo jugador con ese campeón dentro de nuestro archivo (sin API; la maestría real no está en match-v5).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Lecturas emparejadas</h2>
+    <p class="sub">Diferencia de log loss (negativo = mejor el primero); bootstrap por partida, 2,000 remuestreos; veredicto solo si el IC 95 % excluye el cero. Las filas marcadas v1b son exploratorias (declaradas tras ver v1).</p>
+    <div class="wrap"><table>
+      <tr><th>lectura</th><th>diferencia</th><th>IC 95 %</th><th>veredicto</th></tr>
+      <tr><td>Réplica I frente a solo lado</td><td>−0.0077</td><td>[−0.0100, −0.0054]</td><td class="yes">mejor</td></tr>
+      <tr><td>Réplica I frente a win rate del campeón</td><td>−0.0015</td><td>[−0.0027, −0.0004]</td><td class="yes">mejor</td></tr>
+      <tr><td>Coherente C frente a réplica I</td><td>−0.0051</td><td>[−0.0075, −0.0028]</td><td class="yes">mejor*</td></tr>
+      <tr><td>Estructura sin experiencia, priors v1 (v1b)</td><td>−0.0004</td><td>[−0.0015, +0.0006]</td><td class="null">nulo</td></tr>
+      <tr><td>Estructura sin experiencia, priors congelados (v1b)</td><td>−0.0012</td><td>[−0.0024, −0.0001]</td><td class="yes">mejor</td></tr>
+      <tr><td>Experiencia de los 10 jugadores (C − C sin exp.)</td><td>−0.0057</td><td>[−0.0079, −0.0035]</td><td class="yes">mejor</td></tr>
+      <tr><td>Experiencia solo del que elige (I − I sin exp., v1b)</td><td>−0.0010</td><td>[−0.0017, −0.0003]</td><td class="yes">mejor</td></tr>
+      <tr><td>Contexto autofill/secundario</td><td>−0.0013</td><td>[−0.0022, −0.0004]</td><td class="yes">mejor</td></tr>
+      <tr><td>Historial desconocido como media en vez de cero</td><td>+0.0000</td><td>[−0.0004, +0.0005]</td><td class="null">nulo</td></tr>
+      <tr><td>Counters/sinergias casi brutos, k = 50 (v1b, C)</td><td>+0.0008</td><td>[+0.0000, +0.0015]</td><td class="no">peor</td></tr>
+      <tr><td>Ídem sin experiencia (v1b)</td><td>+0.0012</td><td>[+0.0005, +0.0020]</td><td class="no">peor</td></tr>
+    </table></div>
+    <ul style="margin-top:12px">
+      <li>* Casi toda la ventaja de C sobre I viene de ver la experiencia de los diez jugadores (I, como iTero, solo ve la del que elige). Sin experiencia, la estructura coherente empata o gana por poco: arreglar la incoherencia no cuesta acierto.</li>
+      <li>A nuestro volumen el prior empírico no encuentra varianza entre parejas: counters entre carriles y sinergias quedan en cero y un enfrentamiento de línea necesita ~2,000 partidas para pesar la mitad. Usarlos casi en bruto empeora la predicción.</li>
+      <li>Coeficientes: más partidas con el campeón suma; más partidas en total resta (jugar fuera de tus campeones habituales pierde).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>La réplica reproduce la incoherencia de iTero</h2>
+    <p class="sub">Mismo draft final, leído desde cada carril: P(azul vía carril L) + P(rojo vía carril L) − 1, en las 6,903 partidas de desarrollo.</p>
+    <div class="tiles">
+      <div class="tile"><span class="k">Desviación media |suma − 1|</span><span class="v bad">1.8 pp</span><span class="d">p90 3.7 · p99 5.6 pp</span></div>
+      <div class="tile"><span class="k">Partidas con |suma − 1| &gt; 2 pp</span><span class="v bad">40 %</span><span class="d">el modelo se contradice</span></div>
+      <div class="tile"><span class="k">Dispersión de P(azul) entre carriles</span><span class="v bad">3.5 pp</span><span class="d">p90 5.0 pp</span></div>
+      <div class="tile"><span class="k">Modelo coherente</span><span class="v good">0 pp</span><span class="d">exacto por construcción (verificado)</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Drafts parciales: «campeón medio» frente a promediar picks probables</h2>
+    <p class="sub">Huecos ocultos rellenados con el campeón medio (como iTero) o con 64 muestras de las tasas de pick del rol, excluyendo bans y picks visibles; puntuado contra el resultado real.</p>
+    <div class="wrap"><table>
+      <tr><th>escenario</th><th>medio</th><th>muestreo</th><th>diferencia</th><th>IC 95 %</th><th>veredicto</th></tr>
+      <tr><td>Equipo rival oculto</td><td>0.68766</td><td>0.68749</td><td>−0.0002</td><td>[−0.0005, +0.0002]</td><td class="null">nulo</td></tr>
+      <tr><td>Rival de línea oculto (10 variantes)</td><td>0.68200</td><td>0.68190</td><td>−0.0001</td><td>[−0.0002, −0.0000]</td><td class="null">ínfimo</td></tr>
+      <tr><td>Solo el top azul conocido (C)</td><td>0.69245</td><td>0.69239</td><td>−0.0001</td><td>[−0.0005, +0.0004]</td><td class="null">nulo</td></tr>
+      <tr><td>Solo el top azul conocido (réplica I)</td><td>0.69232</td><td>0.69260</td><td>+0.0003</td><td>[−0.0001, +0.0006]</td><td class="null">nulo</td></tr>
+    </table></div>
+    <ul style="margin-top:12px">
+      <li>Con un modelo de esta fuerza, la regla de relleno no cambia la predicción del resultado.</li>
+      <li>El relleno medio no sesga nuestra réplica (media 0.486–0.488 en todas las variantes frente a 0.495 observado; la diferencia es la deriva del lado entre ajuste y desarrollo). El sesgo hacia el 49 % visto en iTero es propio de sus variables.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Turnos — simulación con el modelo, no validada con resultados</h2>
+    <p class="sub">Secuencia de solo queue A1 R1 R2 A2 A3 R3 R4 A4 A5 R5 con orden de roles aleatorio por equipo; modelo coherente sin experiencia (solo información de campeones); 500–800 drafts de desarrollo; candidatos = 30 campeones más jugados del rol.</p>
+    <div class="wrap"><table>
+      <tr><th>posición</th><th>rival de línea elige después</th><th>exposición a su mejor respuesta</th><th>exposición a respuesta por tasa de pick</th></tr>
+      <tr><td>1 (A1)</td><td>100 %</td><td>3.9 pp</td><td>0.5 pp</td></tr>
+      <tr><td>2–3 (R1 R2)</td><td>78 %</td><td>3.5 pp</td><td>0.1 pp</td></tr>
+      <tr><td>4–5 (A2 A3)</td><td>59 %</td><td>3.5 pp</td><td>0.0 pp</td></tr>
+      <tr><td>6–7 (R3 R4)</td><td>40 %</td><td>3.8 pp</td><td>0.1 pp</td></tr>
+      <tr><td>8–9 (A4 A5)</td><td>22 %</td><td>3.7 pp</td><td>0.0 pp</td></tr>
+      <tr><td>10 (R5)</td><td>0 %</td><td>—</td><td>—</td></tr>
+    </table></div>
+    <div class="wrap" style="margin-top:14px"><table>
+      <tr><th>valor de ver al rival de línea antes de elegir</th><th>top</th><th>jungla</th><th>mid</th><th>bot</th><th>support</th><th>media</th></tr>
+      <tr><td>pp de probabilidad de victoria</td><td>0.31</td><td>0.48</td><td>0.23</td><td>0.30</td><td>0.18</td><td>0.30 [0.29, 0.32]</td></tr>
+    </table></div>
+    <ul style="margin-top:12px">
+      <li>La «mejor respuesta» de ~3.5 pp es sobre todo elegir un campeón fuerte; lo específico del counter (mismo abanico, puntuado contra el rival real) vale ~0.3 pp por línea y cambia la elección en el 39 % de los casos.</li>
+      <li>Reglas de recomendación en los picks expuestos: codiciosa contra el medio (iTero), respuesta esperada y maximin coinciden en el 84 % / 67 % de los casos y quedan a ≤ 0.2 pp entre sí; maximin gana ~0.2 pp en el peor caso a cambio de ~0.15 pp en el caso medio.</li>
+      <li>Es una cantidad del modelo: el ruido de las tablas la infla. Validarla exige capturar el orden real de picks.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Qué muestra y qué no</h2>
+    <ul>
+      <li>La receta de iTero se reproduce con nuestras partidas al nivel típico de solo queue (55–57 %); su estructura aporta poco más allá de fuerza del campeón, oro@12 y experiencia.</li>
+      <li>Las palancas medibles son la experiencia jugador-campeón y el contexto de asignación de rol; no los counters/sinergias (no medibles con ~32k partidas) ni la regla de relleno.</li>
+      <li>No compara con la precisión real de iTero (su población por defecto es Oro y sus cifras de 70 % son de pro con fuerza de equipo); nuestro archivo es mayoritariamente apex.</li>
+      <li>Las asociaciones de las tablas no son valores causales de un pick. Nada promocionado; la confirmación sigue sellada.</li>
+      <li>Siguiente: capturar <code>/lol-champ-select/v1/session</code> desde live_overlay para tener el orden real; ~10× más partidas para counters; calibración; una confirmación única de un candidato congelado.</li>
+    </ul>
+    <p class="foot" style="margin-top:12px">Fuentes: <code>draft/docs/protocol_v1.md</code> (+ addendum v1b), <code>draft/docs/result_v1.md</code>; <code>draft/data/runs/v1/report.json</code> (0cb2b425…), <code>blind_report.json</code> (aa0f59a1…), <code>turns_report.json</code> (5bcccb63…), <code>turns_value_report.json</code> (ed719aed…), <code>draft/data/runs/v1b/report.json</code> (cf0482d0…); admisión <code>draft/data/admission/admission_v1.json</code>. Puerta de reproducción v1 → v1b exacta.</p>
+  </section>
+
+  <section>
+    <h2>Actualización 1 de octubre — oro por línea y herramienta de draft</h2>
+    <p class="sub">Protocolo <code>draft/docs/protocol_gold_v1.md</code> declarado antes de ajustar. Objetivo: oro del jugador azul menos el del rojo en cada línea al minuto 12, solo con los campeones del draft. Desarrollo: 6,254 partidas con fotograma de 12:00; la confirmación sigue sellada.</p>
+    <div class="wrap"><table>
+      <tr><th>línea</th><th>desviación real</th><th>error (medias del campeón)</th><th>error modelo</th><th>R²</th><th>r</th><th>dif. error² (miles²)</th><th>IC 95 %</th><th>veredicto</th></tr>
+      <tr><td>Top</td><td>1,257</td><td>1,205</td><td>1,200</td><td>0.090</td><td>0.30</td><td>-0.0131</td><td>[-0.0224, -0.0037]</td><td class="yes">mejor</td></tr>
+      <tr><td>Jungla</td><td>1,097</td><td>1,045</td><td>1,039</td><td>0.103</td><td>0.32</td><td>-0.0128</td><td>[-0.0187, -0.0069]</td><td class="yes">mejor</td></tr>
+      <tr><td>Mid</td><td>1,113</td><td>1,077</td><td>1,072</td><td>0.073</td><td>0.27</td><td>-0.0104</td><td>[-0.0181, -0.0027]</td><td class="yes">mejor</td></tr>
+      <tr><td>ADC</td><td>1,588</td><td>1,559</td><td>1,549</td><td>0.049</td><td>0.22</td><td>-0.0317</td><td>[-0.0477, -0.0157]</td><td class="yes">mejor</td></tr>
+      <tr><td>Support</td><td>703</td><td>670</td><td>668</td><td>0.097</td><td>0.31</td><td>-0.0030</td><td>[-0.0054, -0.0007]</td><td class="yes">mejor</td></tr>
+    </table></div>
+    <ul style="margin-top:12px">
+      <li>El modelo (tabla de oro entre roles: cuánto mueve cada campeón el oro de cada línea, incluido el efecto del jungla y del support, más el residuo del enfrentamiento y el lado) mejora a las medias de oro del campeón en las cinco líneas. No se ha separado qué componente aporta la mejora.</li>
+      <li>El draft explica solo el 5–10 % del oro de cada línea al 12 (r 0.22–0.32); el error típico va de ±668 (support) a ±1,549 (ADC). Equipo completo: R² 0.074. Es una inclinación, no un pronóstico.</li>
+      <li>La experiencia de los jugadores añade algo en todas las líneas, pero la herramienta no la usa: en champion select no se conoce la del rival.</li>
+      <li><b>Herramienta de draft</b> local en <code>http://127.0.0.1:8030</code> (<code>draft/scripts/start_tool.ps1</code>): para cualquier hueco ordena NUESTROS candidatos por nuestra probabilidad de ganar, no por lo probable que sea que se elijan. Las tasas de pick solo sirven para promediar la respuesta del rival en esa línea («Esperada»), buscar su mejor counter («Peor caso») y limitar los candidatos a campeones con ≥100 partidas en el rol. Cada recomendación muestra los grupos de variables que más la mueven, y el panel inferior el oro esperado por línea con su banda de error.</li>
+      <li>Un test de la herramienta encontró un fallo real antes de entregarla: al reevaluar un hueco ya ocupado, el campeón que estaba en él desaparecía de su propia lista. Corregido; 10/10 tests.</li>
+    </ul>
+    <p class="foot" style="margin-top:12px">Fuentes: <code>draft/docs/result_gold_v1.md</code>, <code>draft/data/runs/gold_v1/report.json</code>, modelo de victoria congelado v1 (<code>C_noexp</code>).</p>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Videns · Draft overlay</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/videns-mark.svg" type="image/svg+xml">
+<link rel="preload" href="/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/rows.css">
+<style>
+  /* Overlay de selección de campeones: una sola ventana con secciones (WIN, PICK, LANE, TEAMS), como las del
+     overlay de partida (fondo #0b0e13, BLUE / RED, filas con la franja del splash de /faces); el rótulo es
+     VIDENS. y el morado del drafting tool marca la mejor elección. */
+  @font-face { font-family: "Inter"; font-style: normal; font-weight: 400 900; font-display: block; src: url("/inter-var-latin.woff2") format("woff2"); }
+  :root { color-scheme: dark; --order: #4f8bff; --chaos: #ff5c5c; --card: #0b0e13; --edge: #1f2738; --dim: #7a8494;
+          --text: #e8e6e3; --gold: #f0c75e; --ad: #f0a35e; --ap: #8fa8ff; --tr: #ece9f5; --mark: #c77dff;
+          --fill: linear-gradient(135deg, #dcaaff 0%, #b556ff 48%, #6a1ccf 100%); }
+  * { box-sizing: border-box; margin: 0; }
+  [hidden] { display: none !important; }   /* .msg pone display: grid; sin esto el aviso de carga seguía debajo */
+  body { font: 14px/1.4 "Segoe UI", system-ui, sans-serif; background: #07090c; color: var(--text); overflow: hidden; }
+  .order { color: var(--order); } .chaos { color: var(--chaos); } .dim { color: var(--dim); }
+  .view { position: relative; overflow: hidden; height: 100vh; }
+  .stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0;
+           background: radial-gradient(ellipse 80% 70% at 50% 45%, #171b22, #0c0e12); }
+  .msg { position: absolute; inset: 0; display: grid; place-items: center; color: var(--dim); font-size: 20px; text-align: center; }
+  .msg code { font: 16px Consolas, monospace; color: var(--text); }
+
+  /* cliente simulado (solo contexto, sin estilo de Riot): equipos, bans, rejilla y botón */
+  .client { position: absolute; left: 320px; top: 180px; width: 1280px; height: 720px; border-radius: 4px; overflow: hidden;
+            background: linear-gradient(180deg, #10151c, #080b0f); box-shadow: 0 0 0 1px #222a35, 0 30px 80px rgba(0,0,0,.6); }
+  .ct { position: absolute; left: 0; right: 0; top: 0; height: 76px; display: grid; grid-template-columns: 1fr auto 1fr;
+        align-items: center; padding: 0 24px; border-bottom: 1px solid #1a212b; }
+  .ct .bset { display: flex; gap: 6px; } .ct .bset.r { justify-content: flex-end; }
+  .bsq { width: 38px; height: 38px; border-radius: 3px; background: #0b0f14; box-shadow: inset 0 0 0 1px #262e3a; overflow: hidden; position: relative; }
+  .bsq img { width: 100%; height: 100%; filter: grayscale(1) brightness(.6); }
+  .bsq.hv { box-shadow: inset 0 0 0 2px #e8e6e3; } .bsq.hv img { filter: none; opacity: .75; }
+  .bsq.x::after { content: ""; position: absolute; inset: 0; background: linear-gradient(45deg, transparent 47%, #c94b4b 47% 53%, transparent 53%); }
+  .ph { text-align: center; } .ph b { display: block; font-size: 22px; font-weight: 600; letter-spacing: .12em; color: #d6dbe2; }
+  .team { position: absolute; top: 96px; width: 262px; display: grid; gap: 8px; }
+  .team.l { left: 22px; } .team.r { right: 22px; }
+  .slot { position: relative; height: 108px; display: flex; align-items: center; gap: 14px; padding: 0 14px; border-radius: 4px;
+          background: rgba(255,255,255,.025); box-shadow: inset 0 0 0 1px #1c232d; }
+  .team.r .slot { flex-direction: row-reverse; text-align: right; }
+  .slot .av { flex: none; width: 76px; height: 76px; border-radius: 50%; overflow: hidden; background: #0b0f14; box-shadow: 0 0 0 2px #262e3a; }
+  .slot .av img { width: 100%; height: 100%; transform: scale(1.1); }
+  .slot .av.hv img { opacity: .45; }
+  .slot .who b { display: block; font-size: 16px; font-weight: 600; color: #d6dbe2; }
+  .slot .who span { font-size: 13px; letter-spacing: .1em; color: #6f7a89; }
+  .slot.me .who b.named::after { content: " · You"; color: var(--dim); font-weight: 400; }
+  .slot.go { background: rgba(79,139,255,.09); box-shadow: inset 0 0 0 1px rgba(79,139,255,.55); }
+  .team.r .slot.go { background: rgba(255,92,92,.08); box-shadow: inset 0 0 0 1px rgba(255,92,92,.5); }
+  .slot.go .who span::after { content: " · picking"; color: #aeb7c7; }
+  .grid { position: absolute; left: 330px; top: 100px; width: 620px; }
+  .grid .q { height: 36px; margin-bottom: 18px; border-radius: 3px; background: #0b0f14; box-shadow: inset 0 0 0 1px #262e3a;
+             color: #59636f; font-size: 14px; line-height: 36px; padding: 0 12px; }
+  .grid .g { display: grid; grid-template-columns: repeat(8, 64px); gap: 14px 15px; }
+  .grid .g span { width: 64px; height: 64px; border-radius: 3px; overflow: hidden; background: #0b0f14; box-shadow: 0 0 0 1px #262e3a; }
+  .grid .g img { width: 100%; height: 100%; }
+  .grid .g span.off img { filter: grayscale(1) brightness(.45); }
+  .grid .g span.hv { box-shadow: 0 0 0 2px #e8e6e3; }
+  .lock { position: absolute; left: 50%; bottom: 44px; width: 210px; height: 46px; margin-left: -105px; border-radius: 3px;
+          display: grid; place-items: center; font-weight: 600; letter-spacing: .14em; color: #59636f; box-shadow: inset 0 0 0 1px #262e3a; }
+  .lock.on { color: #e8e6e3; box-shadow: inset 0 0 0 1px #9aa4b2; background: rgba(255,255,255,.04); }
+
+  /* el overlay: una sola ventana a la izquierda del cliente, la ventana es la tarjeta; borde con el degradado
+     de Videns, suave en reposo y entero cuando te toca (.now) */
+  .panel { position: absolute; left: 12px; top: 180px; width: 302px; border: 5px solid transparent; border-radius: 11px;
+           box-shadow: 0 12px 32px rgba(0,0,0,.55);
+           background: linear-gradient(var(--card), var(--card)) padding-box,
+                       linear-gradient(135deg, rgba(220,170,255,.55) 0%, rgba(181,86,255,.3) 48%, rgba(106,28,207,.6) 100%) border-box; }
+  .panel.now { background: linear-gradient(var(--card), var(--card)) padding-box, var(--fill) border-box;
+               box-shadow: 0 0 0 3px rgba(181,86,255,.16), 0 12px 32px rgba(0,0,0,.55); }
+  /* rótulo VIDENS. como en la web: Inter Black, ensanchada al 118 % e inclinada 20,97° a la izquierda; el punto sin deformar */
+  .phd { display: flex; align-items: center; height: 42px; padding: 0 12px; }
+  .logo { display: inline-block; white-space: nowrap; font: 900 19px/1 "Inter", "Segoe UI", sans-serif; letter-spacing: -.04em;
+          font-variant-numeric: normal; color: #f6f4fb; transform: skewX(20.97deg) scaleX(1.18); transform-origin: 0 55%; }
+  .logo i { display: inline-block; font-style: normal; color: #b556ff; transform: scaleX(.8475) skewX(-20.97deg); }
+  .sec { padding: 8px 10px 10px; border-top: 2px solid var(--edge); }
+  .wh { display: flex; align-items: center; gap: 7px; min-height: 20px; margin-bottom: 6px; font-size: 11px; font-weight: 800;
+        letter-spacing: .08em; color: var(--dim); }
+  .wh .r { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; letter-spacing: .04em; }
+  .ci { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; overflow: hidden; flex: none; background: #1f2738; vertical-align: middle; }
+  .ci img { width: 100%; height: 100%; transform: scale(1.12); }
+  .turn { padding: 2px 8px; border-radius: 99px; background: var(--fill); color: #12051f; animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 4px rgba(181,86,255,.28); } }
+
+  /* WIN */
+  .wl { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 10px; }
+  .wl b { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 56px; }
+  .wl b.chaos { text-align: right; }
+  .wbar { position: relative; height: 10px; border-radius: 99px; background: var(--chaos); overflow: hidden; }
+  .wbar i { position: absolute; inset: 0 auto 0 0; background: var(--order); transition: width .45s; }
+  .wbar::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: var(--card); }
+  #wd { font-weight: 600; letter-spacing: .02em; }
+  #wd b { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* filas de campeón: la franja del splash (rows.css, 150x34) y, al lado, el texto */
+  .drow { display: grid; grid-template-columns: 150px minmax(0,1fr) auto; align-items: center; gap: 8px; height: 34px; margin: 3px 0; border-radius: 3px; }
+  .drow .prow { margin: 0; }
+  .drow.mirror { grid-template-columns: auto minmax(0,1fr) 150px; }
+  .drow .dt { min-width: 0; line-height: 1.15; }
+  .drow .dt b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; font-weight: 700; }
+  .drow .dt small { font-size: 11.5px; font-weight: 700; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .drow .dt.r { text-align: right; }
+  .drow .dp { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; padding-right: 2px; }
+  .drow.mirror .dp { padding: 0 0 0 2px; }
+  .drow .dp.fit { background: linear-gradient(135deg, #f0d9ff 0%, var(--mark) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .drow.top .prow { box-shadow: inset 3px 0 0 var(--mark); }
+  .drow.hov { outline: 2px solid rgba(232,230,227,.75); outline-offset: 0; }
+  .foot { margin-top: 7px; padding-top: 7px; border-top: 2px solid var(--edge); font-size: 11.5px; color: var(--dim); line-height: 1.5; }
+  .foot b { color: var(--text); font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  /* LANE y TEAMS: tres fases como en el drafting tool */
+  .tb { display: grid; grid-template-columns: 52px repeat(3, minmax(0,1fr)); align-items: center; row-gap: 5px; font-variant-numeric: tabular-nums; }
+  .tb .hd { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: var(--dim); text-align: center; }
+  .tb .k, .dmg .k { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: var(--dim); }
+  .dmg .k.order { color: var(--order); } .dmg .k.chaos { color: var(--chaos); }
+  .tb .v { text-align: center; font-size: 14.5px; font-weight: 800; }
+  .tb .v.na { color: #4b5463; }
+  .tb .v small { font-size: 12.5px; font-weight: 800; }
+  .tb .v.pr { font-size: 13px; letter-spacing: -.01em; white-space: nowrap; }
+  .tb .v.pr i { font-style: normal; color: #4b5463; margin: 0 2px; }
+  .gb { position: relative; height: 8px; margin: 4px 8px 0; border-radius: 99px; background: #151b27; }
+  .gb::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: #3a4458; }
+  .gb i { position: absolute; top: 0; bottom: 0; border-radius: 99px; }
+  .vs { display: inline-flex; align-items: center; gap: 5px; color: var(--text); font-weight: 600; letter-spacing: 0; }
+  .vs em { font-style: normal; color: var(--dim); font-weight: 400; }
+  .dmg { display: grid; grid-template-columns: 64px minmax(0,1fr); align-items: center; gap: 5px 0; margin-top: 8px; }
+  .stack { display: flex; height: 16px; border-radius: 99px; overflow: hidden; background: #151b27; }
+  .stack i { display: grid; place-items: center; font-style: normal; font-size: 11px; font-weight: 800; color: #14111b; }
+  .stack .ad { background: var(--ad); } .stack .ap { background: var(--ap); } .stack .tr { background: var(--tr); }
+  .dmg.part .stack { opacity: .45; }
+  .lg { grid-column: 2; display: flex; gap: 10px; font-size: 9.5px; font-weight: 700; letter-spacing: .08em; }
+  .lg .ad { color: var(--ad); } .lg .ap { color: var(--ap); } .lg .tr { color: var(--tr); }
+</style>
+</head>
+<body>
+<div class="view" id="view">
+  <div class="stage" id="stage">
+    <div class="msg" id="msg">Loading the draft…</div>
+    <div class="client" id="client" hidden></div>
+    <div class="panel" id="panel" hidden>
+      <div class="phd"><span class="logo" aria-label="Videns">VIDENS<i>.</i></span></div>
+      <section class="sec">
+        <div class="wh">WIN<span class="r" id="wd"></span></div>
+        <div class="wl"><b class="order" id="wb">—</b><div class="wbar" aria-hidden="true"><i id="wbi" style="width:50%"></i></div><b class="chaos" id="wr">—</b></div>
+      </section>
+      <div id="rest" style="display:contents"></div>
+    </div>
+  </div>
+</div>
+<script src="/rows.js"></script>
+<script>
+// Vista previa del overlay de selección de campeones: una sola ventana con secciones. Muestra tu turno con
+// los otros nueve campeones ya elegidos (?step=N enseña otro momento del draft). Para cada momento pide al
+// drafting tool (draft/scripts/tool_server.py, :8030) lo mismo que pediría el overlay real con la sesión de
+// selección del cliente: /api/state y /api/recommend. Tú: BLUE MID; los demás eligen de una lista de
+// preferencias; tú, la primera recomendación.
+const $ = (s) => document.querySelector(s);
+const params = new URLSearchParams(location.search);
+const DRAFT_API = (params.get("draft_api") || "http://127.0.0.1:8030").replace(/\/$/, "");
+const ROLE = ["Top", "Jungle", "Mid", "ADC", "Support"], RS = ["TOP", "JGL", "MID", "ADC", "SUP"];
+const SIDE = ["BLUE", "RED"], SC = ["order", "chaos"];
+let ME = { side: 0, role: 2 };     // ?session= lo cambia por el de la selección grabada
+const MINUTES = [12, 24, 30], PHASE = { 12: "EARLY", 24: "MID", 30: "LATE" };
+const LANE_SCALE = { 12: 1500, 24: 3000, 30: 3750 }, TEAM_SCALE = { 12: 3000, 24: 6000, 30: 7500 };
+const WHY = { "Champion strength": "strength", "Damage mix": "damage mix", "Lane matchup": "lane", "Scaling": "scaling", "Economy": "economy",
+              "Lane gold @12": "lane gold", "Synergies": "synergies" };
+// todos eligen antes que tú: tu turno llega con los otros nueve campeones a la vista (el owner lo pidió así)
+const PICKS = [
+  { side: 0, role: 1, prefer: ["Vi", "Jarvan IV", "Xin Zhao", "Viego"] },
+  { side: 1, role: 2, prefer: ["Syndra", "Orianna", "Azir", "Ahri"] },
+  { side: 1, role: 1, prefer: ["Lee Sin", "Graves", "Nidalee", "Kindred"] },
+  { side: 0, role: 3, prefer: ["Jinx", "Caitlyn", "Ezreal", "Miss Fortune"] },
+  { side: 0, role: 0, prefer: ["Ornn", "Sion", "Gnar", "Malphite"] },
+  { side: 1, role: 0, prefer: ["Aatrox", "Renekton", "K'Sante", "Jax"] },
+  { side: 1, role: 3, prefer: ["Kai'Sa", "Xayah", "Varus", "Ashe"] },
+  { side: 0, role: 4, prefer: ["Thresh", "Rakan", "Braum", "Alistar"] },
+  { side: 1, role: 4, prefer: ["Nautilus", "Leona", "Rell", "Rakan"] },
+  { side: 0, role: 2, me: true },
+];
+const RED_BANS = ["Zed", "Yasuo", "Master Yi", "Blitzcrank", "Morgana", "Kayn", "Yone", "Shaco"];
+// fuera de PICK: Karthus mid sale arriba por un ajuste nuestro del modelo, no por el draft (owner, 2026-10-03)
+const HIDE_PICKS = new Set(["Karthus"]);
+const PICK_ROWS = 3;
+let META, CH = {}, BYNAME = {}, VER, faces = {}, STEPS = [], GRID = [], cur = 0;
+const CH_IMG = {};
+
+async function call(path, body) {
+  const init = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : undefined;
+  const r = await fetch(DRAFT_API + path, init);
+  if (!r.ok) throw new Error(`${path}: ${r.status}`);
+  return r.json();
+}
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const pct = (p) => (p * 100).toFixed(1) + "%";
+const pts = (d) => (Math.abs(d) * 100).toFixed(1);
+const r50 = (g) => Math.round(g / 50) * 50 || 0;
+const gold = (g) => { const v = r50(g); return v === 0 ? "0" : (v > 0 ? "+" : "−") + Math.abs(v); };
+const icon = (id) => `https://ddragon.leagueoflegends.com/cdn/${VER}/img/champion/${CH[id].img}.png`;
+const ci = (id) => `<span class="ci"><img src="${icon(id)}" alt=""></span>`;
+const clone = (s) => ({ picks: s.picks.map((t) => [...t]), bans: s.bans.map((t) => [...t]) });
+const body = (s) => ({ blue: s.picks[0], red: s.picks[1], bans: [...s.bans[0], ...s.bans[1]] });
+const taken = (s) => new Set([...s.picks[0], ...s.picks[1], ...s.bans[0], ...s.bans[1]].filter(Boolean));
+const firstFree = (names, used) => (names.map((n) => BYNAME[n]).find((c) => c && !used.has(c.id)) || {}).id || 0;
+const withPick = (s, a, id) => { const t = clone(s); t.picks[a.side][a.role] = id; return t; };
+let uiHover = 0;   // en tu turno, el campeón bajo el ratón (en el cliente real: tu hover en la selección)
+
+// lo que ve el panel: en tu turno, el draft como quedaría si bloquearas el campeón que tienes en hover
+function eff(x) {
+  if (!x.mine) return { st: x.st, picks: x.picks, hov: 0 };
+  const h = uiHover || x.hover.id, st = x.hyp[h];
+  if (!st) return { st: x.st, picks: x.picks, hov: h };
+  return { st, picks: withPick(x, x.turn, h).picks, hov: h };
+}
+async function hoverOn(id) {
+  const x = STEPS[cur];
+  if (!x || !x.mine || !id || id === uiHover || taken(x).has(id) || !CH[id]) return;
+  uiHover = id;
+  if (!x.hyp[id]) {
+    try { x.hyp[id] = await call("/api/state", body(withPick(x, x.turn, id))); } catch (e) { return; }
+    if (uiHover !== id || STEPS[cur] !== x) return;
+  }
+  render();
+}
+
+// --- el draft, paso a paso, con lo que el drafting tool dice en cada momento ---------------------------
+async function build() {
+  META = await call("/api/meta");
+  VER = META.version;
+  for (const c of META.champions) { CH[c.id] = c; BYNAME[c.name] = c; CH_IMG[c.img] = c.name; }
+  try { const r = await fetch("/api/faces"); if (r.ok) faces = await r.json(); } catch (e) {}
+  const s = { picks: [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0]], bans: [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0]] };
+  const at = async (extra, recs) => {
+    const st = await call("/api/state", body(s));
+    const r = recs ? await call("/api/recommend", { ...body(s), side: ME.side, role: ME.role, minute: 12 }) : null;
+    if (r) r.candidates = r.candidates.filter((c) => !HIDE_PICKS.has(CH[c.id].name));
+    return { ...clone(s), st, recs: r, ...extra };
+  };
+  // bans: lo mejor que puede elegir RED en cada línea con el draft vacío (su probabilidad de ganar si lo coge)
+  const threats = [];
+  for (let role = 0; role < 5; role++) {
+    const r = await call("/api/recommend", { ...body(s), side: 1 - ME.side, role, minute: 12 });
+    for (const c of r.candidates.slice(0, 4)) threats.push({ ...c, role });
+  }
+  threats.sort((a, b) => b.p_expected - a.p_expected);
+  const seen = new Set();
+  const top = threats.filter((t) => !seen.has(t.id) && seen.add(t.id)).slice(0, 5);
+  const steps = [];
+  const plan = await at({ label: "Planning", phase: "plan", turn: null, did: null }, true);
+  plan.hover = { side: ME.side, role: ME.role, id: plan.recs.candidates[0].id };     // tu intención: la mejor opción
+  steps.push(plan);
+  steps.push(await at({ label: "Ban phase", phase: "ban", turn: null, did: null, threats: top,
+                        hover: { ban: true, side: ME.side, idx: ME.role, id: top[0].id } }, true));
+  s.bans[ME.side] = top.map((t) => t.id);                                            // BLUE banea lo que dice BAN
+  const used = taken(s);
+  s.bans[1 - ME.side] = RED_BANS.map((n) => BYNAME[n]).filter((c) => c && !used.has(c.id)).slice(0, 5).map((c) => c.id);
+  steps.push(await at({ label: "Bans locked", phase: "pick", turn: PICKS[0], did: null }, true));
+  for (let i = 0; i < PICKS.length; i++) {
+    const a = PICKS[i], next = PICKS[i + 1] || null;
+    if (a.me) {
+      const mine = await at({ label: "Your turn · last pick", phase: "pick", turn: a, did: null, mine: true }, true);
+      const best = mine.recs.candidates[0].id;
+      mine.hover = { side: a.side, role: a.role, id: best };
+      // el draft completo con cada una de tus mejores opciones, para cambiar de hover sin esperar
+      mine.hyp = {};
+      for (const c of mine.recs.candidates.slice(0, PICK_ROWS)) mine.hyp[c.id] = await call("/api/state", body(withPick(s, a, c.id)));
+      steps.push(mine);
+      s.picks[a.side][a.role] = best;
+      steps.push(await at({ label: `You lock ${CH[best].name}`, phase: next ? "pick" : "final", turn: next, did: { ...a, id: best } }, false));
+    } else {
+      const id = firstFree(a.prefer, taken(s));
+      s.picks[a.side][a.role] = id;
+      const mineDone = s.picks[ME.side][ME.role] !== 0;
+      steps.push(await at({ label: `${SIDE[a.side]} ${RS[a.role]} locks ${CH[id].name}`, phase: next ? "pick" : "final", turn: next, did: { side: a.side, role: a.role, id } }, !mineDone));
+    }
+  }
+  STEPS = steps;
+  // rejilla del cliente simulado: los campeones del guion y de las recomendaciones, completada con los más jugados
+  const ids = new Set();
+  for (const x of steps) {
+    for (const t of [...x.picks, ...x.bans]) t.forEach((id) => id && ids.add(id));
+    if (x.recs) x.recs.candidates.slice(0, 5).forEach((c) => ids.add(c.id));
+  }
+  const popular = [...META.champions].sort((a, b) => b.games.reduce((p, q) => p + q, 0) - a.games.reduce((p, q) => p + q, 0));
+  for (const c of popular) { if (ids.size >= 40) break; ids.add(c.id); }
+  GRID = [...ids].slice(0, 40).sort((a, b) => CH[a].name.localeCompare(CH[b].name));
+}
+
+// --- secciones del panel -----------------------------------------------------------------------------------
+// franja del splash marcada en /faces (rows.js), la misma que en el panel de oro; RED en espejo
+function art(img, mirror) {
+  const ini = esc(String(CH_IMG[img] || img).replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase());
+  return `<div class="prow splash${mirror ? " mirror" : ""}"><div class="ini">${ini}</div><img class="art" src="${Rows.artUrl(img, 0)}" alt=""
+    style="${Rows.artStyle(faces[img])}" onerror="this.remove()"></div>`;
+}
+
+function renderWin(x, prev, e) {
+  const p = e.st.p_blue;
+  $("#wb").textContent = pct(p);
+  $("#wr").textContent = pct(1 - p);
+  $("#wbi").style.width = (p * 100).toFixed(2) + "%";
+  // en tu turno: cuánto suma el campeón en hover frente a un campeón medio en tu hueco; si no, el último pick
+  const [name, d, pre] = e.hov && e.st !== x.st ? [CH[e.hov].name, p - x.st.p_blue, "if "]
+    : x.did && prev ? [CH[x.did.id].name, p - prev.st.p_blue, ""] : ["", 0, ""];
+  $("#wd").innerHTML = name && Math.abs(d) >= 0.0005
+    ? `${pre}${esc(name)} <b class="${d > 0 ? "order" : "chaos"}">+${pts(d)} ${d > 0 ? "BLUE" : "RED"}</b>`
+    : "";
+}
+
+function pickSec(x, e) {
+  if (!x.recs) return "";                     // ya has elegido: la sección se va
+  const r = x.recs, list = r.candidates.slice(0, PICK_ROWS), topId = list[0].id;
+  const hov = x.mine ? e.hov : x.hover && !x.hover.ban && x.hover.side === ME.side && x.hover.role === ME.role ? x.hover.id : 0;
+  // un hover fuera de las mejores entra como fila propia, al final
+  const extra = hov && !list.some((c) => c.id === hov)
+    ? r.candidates.find((c) => c.id === hov) || (x.hyp && x.hyp[hov] ? { id: hov, p_expected: ME.side === 0 ? x.hyp[hov].p_blue : 1 - x.hyp[hov].p_blue, gold: null } : null)
+    : null;
+  const row = (c) => `<div class="drow${c.id === topId ? " top" : ""}${c.id === hov ? " hov" : ""}" data-id="${c.id}" title="${esc(CH[c.id].name)}${c.games ? ` · ${c.games} games as ${ROLE[ME.role]}` : ""}">
+      ${art(CH[c.id].img)}<div class="dt"><b>${esc(CH[c.id].name)}</b><small>${c.gold == null ? "&nbsp;" : gold(c.gold) + " g"}</small></div>
+      <div class="dp${c.id === topId ? " fit" : ""}">${pct(c.p_expected)}</div></div>`;
+  // el porqué del campeón en hover (o de la mejor opción)
+  const lead = r.candidates.find((c) => c.id === hov && c.why) || list[0];
+  const why = Object.entries(lead.why || {}).filter(([, v]) => v >= 0.0005).sort((a, b) => b[1] - a[1]).slice(0, 3)
+    .map(([k, v]) => `${WHY[k] || k.toLowerCase()} <b>+${pts(v)}</b>`).join(" · ");
+  const opp = x.picks[1 - ME.side][ME.role];
+  const right = x.mine ? `<span class="turn">YOUR TURN</span>` : opp ? `<span class="vs"><em>vs</em> ${ci(opp)}</span>` : "";
+  return `<section class="sec pick"><div class="wh">PICK · ${RS[ME.role]}<span class="r">${right}</span></div>
+    ${[...list, ...(extra ? [extra] : [])].map(row).join("")}
+    <div class="foot">${esc(CH[lead.id].name)}: ${why || "—"}</div></section>`;
+}
+
+function phaseCell(v, scale) {                   // cifra y barra centrada (azul a la izquierda si gana BLUE)
+  if (v === null) return `<div class="v na">—</div>`;
+  const g = Math.max(-scale, Math.min(scale, v)), w = Math.abs(g) / scale * 50;
+  const cls = v >= 0 ? "order" : "chaos";
+  return `<div class="v"><span class="${cls}">${gold(v)}</span><div class="gb"><i style="left:${v >= 0 ? 50 - w : 50}%;width:${w}%;background:var(--${cls})"></i></div></div>`;
+}
+
+// tu línea: oro de la línea (el modelo del drafting tool, tu campeón contra el suyo) y CS/min y KP esperados
+// de cada uno en esa línea (tablas del drafting tool), tú · rival; en tu turno, con el campeón en hover
+function laneSec(x, e) {
+  const me = e.picks[ME.side][ME.role], opp = e.picks[1 - ME.side][ME.role];
+  const ph = (m) => e.st.phases.find((p) => p.minute === m);
+  const head = `${me ? ci(me) : `<span class="dim">?</span>`} <em>vs</em> ${opp ? ci(opp) : `<span class="dim">?</span>`}`;
+  const goldRow = MINUTES.map((m) => { const l = ph(m).lanes[ME.role]; return phaseCell(l.both_known ? l.gold : null, LANE_SCALE[m]); }).join("");
+  const pair = (f) => MINUTES.map((m) => {
+    const a = me ? f(me, m) : null, b = opp ? f(opp, m) : null;
+    if (a == null && b == null) return `<div class="v na">—</div>`;
+    return `<div class="v pr"><span class="${SC[ME.side]}">${a ?? "—"}</span><i>·</i><span class="${SC[1 - ME.side]}">${b ?? "—"}</span></div>`;
+  }).join("");
+  const cs = pair((id, m) => { const v = META.cs[m][ME.role][id]; return v == null ? null : (v / m).toFixed(1); });
+  const kp = pair((id, m) => { const v = META.kp[m][ME.role][id]; return v == null ? null : Math.round(v * 100) + "%"; });
+  return `<section class="sec lane"><div class="wh">LANE · ${RS[ME.role]}<span class="r"><span class="vs">${head}</span></span></div>
+    <div class="tb"><span></span>${MINUTES.map((m) => `<div class="hd">${PHASE[m]}</div>`).join("")}
+      <span class="k">GOLD</span>${goldRow}
+      <span class="k">CS/MIN</span>${cs}
+      <span class="k">KP</span>${kp}</div></section>`;
+}
+
+function teamsSec(x, e) {
+  const ph = (m) => e.st.phases.find((p) => p.minute === m);
+  const goldRow = MINUTES.map((m) => {
+    const known = ph(m).lanes.filter((l) => l.both_known);        // como en el drafting tool: solo líneas con los dos campeones
+    return phaseCell(known.length ? known.reduce((a, l) => a + r50(l.gold), 0) : null, TEAM_SCALE[m]);
+  }).join("");
+  const drakes = MINUTES.map((m) => { const d = ph(m).dragons; return `<div class="v"><small class="order">${d[0].toFixed(1)}</small> <small class="dim">·</small> <small class="chaos">${d[1].toFixed(1)}</small></div>`; }).join("");
+  const bar = (d) => [["ad", d[0]], ["ap", d[1]], ["tr", d[2]]].map(([k, v]) => `<i class="${k}" style="width:${(v * 100).toFixed(1)}%">${v >= 0.14 ? Math.round(v * 100) : ""}</i>`).join("");
+  return `<section class="sec teams"><div class="wh">TEAMS<span class="r"><span class="order">BLUE</span><span class="chaos">RED</span></span></div>
+    <div class="tb"><span></span>${MINUTES.map((m) => `<div class="hd">${PHASE[m]}</div>`).join("")}
+      <span class="k">GOLD</span>${goldRow}
+      <span class="k">DRAKES</span>${drakes}</div>
+    <div class="dmg${e.st.complete ? "" : " part"}"><span class="k">DAMAGE</span><div class="lg"><span class="ad">AD</span><span class="ap">AP</span><span class="tr">TRUE</span></div>
+      <span class="k order">BLUE</span><div class="stack">${bar(e.st.damage[0])}</div>
+      <span class="k chaos">RED</span><div class="stack">${bar(e.st.damage[1])}</div></div></section>`;
+}
+
+function banSec(x) {
+  if (!x.threats) return "";
+  const hov = x.hover && x.hover.ban ? x.hover.id : 0;
+  const rows = x.threats.map((t) => `<div class="drow mirror${t.id === hov ? " hov" : ""}" title="RED wins ${pct(t.p_expected)} if they pick ${esc(CH[t.id].name)} ${ROLE[t.role]}">
+      <div class="dp chaos">${pct(t.p_expected)}</div><div class="dt r"><b>${esc(CH[t.id].name)}</b><small>${RS[t.role]}</small></div>${art(CH[t.id].img, true)}</div>`).join("");
+  return `<section class="sec ban"><div class="wh">BAN<span class="r chaos">IF RED GETS IT</span></div>${rows}</section>`;
+}
+
+// --- cliente simulado ------------------------------------------------------------------------------------
+function clientHtml(x, e) {
+  const used = taken(x);
+  const mineHover = x.mine ? e.hov : 0;
+  const bans = (side) => x.bans[side].map((id, k) => {
+    const hv = x.hover && x.hover.ban && x.hover.side === side && x.hover.idx === k;
+    const show = id || (hv ? x.hover.id : 0);
+    return `<span class="bsq${hv ? " hv" : ""}${id ? " x" : ""}">${show ? `<img src="${icon(show)}" alt="">` : ""}</span>`;
+  }).join("");
+  const slot = (side, role) => {
+    const id = x.picks[side][role];
+    const hv = id ? 0 : x.mine && side === ME.side && role === ME.role ? mineHover
+      : x.hover && !x.hover.ban && x.hover.side === side && x.hover.role === role ? x.hover.id : 0;
+    const go = x.turn && x.turn.side === side && x.turn.role === role;
+    const me = side === ME.side && role === ME.role;
+    const show = id || hv;
+    return `<div class="slot${go ? " go" : ""}${me ? " me" : ""}">
+      <span class="av${hv ? " hv" : ""}">${show ? `<img src="${icon(show)}" alt="">` : ""}</span>
+      <span class="who"><b${show ? ' class="named"' : ""}>${show ? esc(CH[show].name) : me ? "You" : "&nbsp;"}</b><span>${RS[role]}</span></span></div>`;
+  };
+  const hoverId = x.mine ? mineHover : x.hover ? x.hover.id : 0;
+  const mine = x.turn && x.turn.side === ME.side && x.turn.role === ME.role;
+  const title = x.phase === "plan" ? "DECLARE YOUR CHAMPION" : x.phase === "ban" ? "BAN A CHAMPION" : x.phase === "final" ? "FINALIZATION"
+    : mine ? "CHOOSE YOUR CHAMPION" : x.turn ? `${SIDE[x.turn.side]} TEAM IS PICKING` : "FINALIZATION";
+  return `<div class="ct"><div class="bset">${bans(0)}</div><div class="ph"><b>${title}</b></div><div class="bset r">${bans(1)}</div></div>
+    <div class="team l">${[0, 1, 2, 3, 4].map((r) => slot(0, r)).join("")}</div>
+    <div class="team r">${[0, 1, 2, 3, 4].map((r) => slot(1, r)).join("")}</div>
+    <div class="grid"><div class="q">Search</div><div class="g">${GRID.map((id) => `<span class="${used.has(id) ? "off" : ""}${id === hoverId ? " hv" : ""}" data-id="${id}"><img src="${icon(id)}" alt="" title="${esc(CH[id].name)}"></span>`).join("")}</div></div>
+    <div class="lock${mine || x.phase === "ban" ? " on" : ""}">${x.phase === "ban" ? "BAN" : "LOCK IN"}</div>`;
+}
+
+// --- vista ---------------------------------------------------------------------------------------------------
+function render() {
+  const x = STEPS[cur], e = eff(x);
+  $("#client").innerHTML = clientHtml(x, e);
+  renderWin(x, STEPS[cur - 1], e);
+  $("#rest").innerHTML = banSec(x) + pickSec(x, e) + laneSec(x, e) + teamsSec(x, e);
+  $("#panel").classList.toggle("now", !!(x.mine || x.threats));
+}
+function show(i) {
+  cur = Math.max(0, Math.min(STEPS.length - 1, i));
+  uiHover = 0;
+  render();
+}
+function fit() {
+  const v = $("#view"), k = Math.min(v.clientWidth / 1920, v.clientHeight / 1080);
+  const st = $("#stage");
+  st.style.transform = `scale(${k})`;
+  st.style.left = `${(v.clientWidth - 1920 * k) / 2}px`;
+}
+addEventListener("resize", fit);
+fit();
+// en tu turno, pasar el ratón por una fila de PICK o por la rejilla del cliente hace de hover del cliente real
+$("#stage").addEventListener("mouseover", (ev) => {
+  const t = ev.target.closest(".pick [data-id], .grid [data-id]");
+  if (t) hoverOn(+t.dataset.id);
+});
+
+// una selección grabada (web/preview/<nombre>.json): tu turno con los otros nueve ya elegidos, sin guion
+async function buildSession(name) {
+  const fx = await (await fetch(`/preview/${encodeURIComponent(name)}.json`)).json();
+  META = await call("/api/meta");
+  VER = META.version;
+  for (const c of META.champions) { CH[c.id] = c; BYNAME[c.name] = c; CH_IMG[c.img] = c.name; }
+  try { const r = await fetch("/api/faces"); if (r.ok) faces = await r.json(); } catch (e) {}
+  ME = fx.me;
+  const s = { picks: fx.picks.map((t) => [...t]), bans: fx.bans.map((t) => [...t]) };
+  const st = await call("/api/state", body(s));
+  const recs = await call("/api/recommend", { ...body(s), side: ME.side, role: ME.role, minute: 12 });
+  recs.candidates = recs.candidates.filter((c) => !HIDE_PICKS.has(CH[c.id].name));
+  const turn = { side: ME.side, role: ME.role, me: true };
+  const mine = { ...clone(s), st, recs, label: "Your turn", phase: "pick", turn, did: null, mine: true,
+                 hover: { side: ME.side, role: ME.role, id: fx.hover || recs.candidates[0].id }, hyp: {} };
+  for (const id of new Set([...recs.candidates.slice(0, PICK_ROWS).map((c) => c.id), mine.hover.id]))
+    mine.hyp[id] = await call("/api/state", body(withPick(s, turn, id)));
+  STEPS = [mine];
+  GRID = [...new Set([...recs.candidates.slice(0, 30).map((c) => c.id)])].slice(0, 40);
+}
+
+(async () => {
+  try {
+    if (params.get("session")) await buildSession(params.get("session")); else await build();
+  } catch (e) {
+    $("#msg").innerHTML = `The drafting tool server is not answering at <code>${esc(DRAFT_API)}</code>.<br>Start it with <code>draft\\scripts\\start_tool.ps1</code> and reload.`;
+    return;
+  }
+  $("#msg").hidden = true;
+  $("#client").hidden = false;
+  $("#panel").hidden = false;
+  // tu turno: los otros nueve ya han elegido
+  show(params.has("step") ? +params.get("step") - 1 : STEPS.findIndex((x) => x.mine));
+})();
+</script>
+</body>
+</html>

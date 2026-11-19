@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Videns · Atelier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0b09; --bg-2:#100e0b; --paper:#15120e;
+    --ink:#f2ede3; --dim:#a39a8a; --faint:#6e6558;
+    --rule:rgba(242,237,227,.12); --rule-2:rgba(242,237,227,.2);
+    --gold:#c9a227; --gold-b:#e3bb46;
+    --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+    --sans:"Inter",ui-sans-serif,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.7 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  img{max-width:100%;display:block}
+  .wrap{width:100%;max-width:72rem;margin:0 auto;padding:0 2.5rem}
+  @media(max-width:44rem){.wrap{padding:0 1.35rem}}
+
+  .label{font:500 .625rem/1 var(--sans);letter-spacing:.28em;text-transform:uppercase;color:var(--faint)}
+
+  /* ---------- masthead ---------- */
+  .mast{border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:40;
+    background:rgba(12,11,9,.88);backdrop-filter:blur(12px)}
+  .mast .wrap{display:flex;align-items:center;height:70px;gap:1.5rem}
+  .mark{font:400 1.5rem/1 var(--serif);letter-spacing:-.01em}
+  .mark i{color:var(--gold);font-style:normal}
+  .mast .label{margin-left:auto}
+
+  /* ---------- hero ---------- */
+  .hero{padding:clamp(4rem,10vw,8rem) 0 clamp(3rem,6vw,5rem);text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:-40% -10% auto;height:52rem;pointer-events:none;
+    background:radial-gradient(ellipse 45% 45% at 50% 50%,rgba(201,162,39,.12),transparent 70%)}
+  .hero .wrap{position:relative}
+  .rule-top{width:1px;height:3.5rem;margin:0 auto 2rem;background:linear-gradient(180deg,transparent,var(--gold))}
+
+  h1{margin:0;font:400 clamp(1.8rem,8.4vw,6.25rem)/1 var(--serif);letter-spacing:-.02em;white-space:nowrap}
+  h1 em{font-style:italic;color:var(--gold)}
+  .sub{margin:1.75rem auto 0;max-width:30rem;font-size:clamp(1rem,1.7vw,1.1875rem);color:var(--dim)}
+
+  .cta{margin:2.75rem 0 0;display:flex;flex-direction:column;align-items:center;gap:1rem}
+  .dl{display:inline-flex;align-items:center;gap:.7rem;cursor:pointer;
+    background:transparent;color:var(--ink);border:1px solid var(--rule-2);
+    padding:.95rem 2rem;border-radius:999px;font:500 .9375rem/1 var(--sans);
+    transition:border-color .2s,background .2s,color .2s}
+  .dl:hover{border-color:var(--gold);background:var(--gold);color:#17120a}
+  .dl svg{width:16px;height:16px}
+
+  /* ---------- plate ---------- */
+  .plate{position:relative;margin:clamp(3rem,6vw,4.5rem) auto 0;max-width:62rem;aspect-ratio:2/1;
+    border:1px solid var(--rule);overflow:hidden;background:
+      radial-gradient(ellipse 55% 65% at 30% 35%,rgba(201,162,39,.11),transparent 65%),
+      radial-gradient(ellipse 65% 75% at 80% 75%,rgba(60,50,80,.24),transparent 70%),
+      linear-gradient(180deg,var(--paper),var(--bg-2))}
+  .plate video{width:100%;height:100%;object-fit:cover}
+  .plate figcaption{position:absolute;left:1.5rem;bottom:1.15rem}
+
+  /* ---------- editorial section ---------- */
+  section{padding:clamp(4rem,9vw,7rem) 0;border-top:1px solid var(--rule)}
+  .ed{display:grid;gap:2rem}
+  @media(min-width:56rem){.ed{grid-template-columns:14rem 1fr;gap:4rem}}
+  .ed>.aside .label{display:block;margin-bottom:.9rem}
+  .ed>.aside p{margin:0;font-size:.875rem;color:var(--faint);line-height:1.75}
+  h2{margin:0;font:400 clamp(1.9rem,4.4vw,3rem)/1.12 var(--serif);letter-spacing:-.015em;max-width:18ch}
+  h2 em{font-style:italic;color:var(--gold)}
+  .lead{margin:1.4rem 0 0;color:var(--dim);max-width:46ch;font-size:1.0625rem}
+
+  .pair{display:grid;gap:3rem;margin-top:3.5rem}
+  @media(min-width:56rem){.pair{grid-template-columns:1fr 1fr;gap:3.5rem}}
+  .pane>h3{margin:0 0 .5rem;font:400 1.375rem/1.2 var(--serif)}
+  .pane>h3 em{font-style:italic;color:var(--gold)}
+  .pane>p{margin:0 0 1.75rem;color:var(--dim);font-size:.9375rem;max-width:40ch}
+
+  /* refined table */
+  .tbl{width:100%;border-collapse:collapse;font-size:.9375rem}
+  .tbl th{text-align:left;font:500 .625rem/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;
+    color:var(--faint);padding:0 0 .8rem;border-bottom:1px solid var(--rule-2);font-weight:500}
+  .tbl th.r,.tbl td.r{text-align:right}
+  .tbl td{padding:.85rem 0;border-bottom:1px solid var(--rule)}
+  .tbl tr:last-child td{border-bottom:0}
+  .tbl .it{display:flex;align-items:center;gap:.85rem}
+  .tbl .it img{width:34px;height:34px;border-radius:3px;border:1px solid var(--rule)}
+  .tbl .pc{font:400 1.25rem/1 var(--serif);color:var(--gold);font-variant-numeric:tabular-nums}
+
+  .record{border-top:1px solid var(--rule-2);padding-top:1.5rem}
+  .record dl{display:grid;grid-template-columns:auto 1fr;gap:.65rem 1.5rem;margin:0 0 1.5rem}
+  .record dt{font:500 .625rem/1.5 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .record dd{margin:0;font-size:.9375rem;font-variant-numeric:tabular-nums}
+  .record dd.g{color:var(--gold)}
+  .strip{display:flex;gap:.45rem;margin:0 0 1.5rem}
+  .strip img{width:36px;height:36px;border-radius:3px;border:1px solid var(--rule)}
+  .quote{display:flex;gap:1rem;align-items:center;border-left:1px solid var(--gold);padding-left:1.25rem}
+  .quote img{width:44px;height:44px;border-radius:3px;flex:none}
+  .quote b{display:block;font:400 1.1875rem/1.25 var(--serif)}
+  .quote span{display:block;font-size:.875rem;color:var(--dim);margin-top:.2rem}
+  .quote span i{font-style:normal;color:var(--gold)}
+
+  /* macro list */
+  .moves{list-style:none;margin:0;padding:0}
+  .moves li{display:flex;align-items:baseline;gap:1.25rem;padding:.9rem 0;border-bottom:1px solid var(--rule)}
+  .moves li:last-child{border-bottom:0}
+  .moves time{font:400 1.0625rem/1 var(--serif);color:var(--faint);width:3.2rem;font-variant-numeric:tabular-nums}
+  .moves b{font-weight:400;font-size:.9375rem;color:var(--dim)}
+  .moves li.k time,.moves li.k b{color:var(--gold)}
+  .moves li.k b{font-weight:500}
+
+  /* ---------- figures ---------- */
+  .figs{display:grid;gap:3rem 2.5rem;margin-top:1rem}
+  @media(min-width:44rem){.figs{grid-template-columns:1fr 1fr}}
+  @media(min-width:68rem){.figs{grid-template-columns:repeat(4,1fr)}}
+  .fig{border-top:1px solid var(--rule-2);padding-top:1.25rem}
+  .fig b{display:block;font:400 clamp(2.6rem,5.6vw,3.75rem)/1 var(--serif);color:var(--gold);
+    letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .fig span{display:block;margin-top:.65rem;font-size:.875rem;color:var(--dim);max-width:20ch}
+  .note{margin:3rem 0 0;font-size:.8125rem;color:var(--faint)}
+
+  .closer{text-align:center}
+  .closer h2{margin:0 auto;max-width:16ch}
+  blockquote{margin:0 auto;max-width:34rem;font:400 clamp(1.25rem,2.4vw,1.625rem)/1.45 var(--serif);color:var(--ink)}
+  blockquote+p{margin:1.5rem auto 0;max-width:34rem;color:var(--dim);font-size:.9375rem}
+
+  footer{border-top:1px solid var(--rule);padding:2.5rem 0 3.5rem}
+  .fw{display:flex;flex-wrap:wrap;gap:1.25rem 2rem;justify-content:space-between;align-items:baseline}
+  .fw p{margin:0;font-size:.75rem;color:var(--faint);max-width:40rem;line-height:1.8}
+  .fw em{font-style:italic;font-family:var(--serif);font-size:.9375rem;color:var(--dim)}
+</style>
+</head>
+<body>
+
+<div class="mast"><div class="wrap">
+  <span class="mark">Videns<i>.</i></span>
+  <span class="label">In development</span>
+</div></div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="rule-top"></div>
+    <h1>League without <em>Limits</em></h1>
+    <p class="sub">Become the summoner you were supposed to</p>
+    <div class="cta">
+      <button class="dl">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10 4.6v6.9H3V5.5Zm8-1 10-1.3v8.2H11V4.5ZM3 12.6h7v6.9l-7-.9v-6ZM11 12.6h10v8.2l-10-1.3v-6.9Z"/></svg>
+        Download for Windows
+      </button>
+      <span class="label">Free · Beta coming soon</span>
+    </div>
+
+    <!-- BACKGROUND VIDEO: <video src="hero.mp4" autoplay muted loop playsinline></video> -->
+    <figure class="plate">
+      <figcaption class="label">Fig. 1 — Demo</figcaption>
+    </figure>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="ed">
+      <div class="aside">
+        <span class="label">Chapter One</span>
+        <p>A post-game coach for the two decisions that decide the game: what you bought, and where you went.</p>
+      </div>
+      <div>
+        <h2>It sees what you bought and <em>where you went</em></h2>
+        <p class="lead">Both read back from real matches. Nothing is guessed — if it cannot be observed, it is not labelled.</p>
+
+        <div class="pair">
+          <article class="pane">
+            <h3>The <em>build</em> coach</h3>
+            <p>At a shop stop, what high-elo players completed from a comparable state.</p>
+            <table class="tbl">
+              <thead><tr><th>Bought from here</th><th class="r">Share</th></tr></thead>
+              <tbody>
+                <tr><td><span class="it"><img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/3100.png" alt="">Lich Bane</span></td><td class="r"><span class="pc">12.0</span></td></tr>
+                <tr><td><span class="it"><img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/4645.png" alt="">Shadowflame</span></td><td class="r"><span class="pc">9.3</span></td></tr>
+                <tr><td><span class="it"><img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/3175.png" alt="">Spellslinger's Shoes</span></td><td class="r"><span class="pc">8.9</span></td></tr>
+                <tr><td><span class="it"><img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/3152.png" alt="">Hextech Rocketbelt</span></td><td class="r"><span class="pc">8.7</span></td></tr>
+              </tbody>
+            </table>
+            <p class="note" style="margin-top:1.25rem">Mid lane · patch 16.18 · 1,700–2,700 gold · Dark Seal held · n = 5,546.</p>
+          </article>
+
+          <article class="pane">
+            <h3>One <em>record</em></h3>
+            <p>Every shop visit rebuilt from the match timeline.</p>
+            <div class="record">
+              <dl>
+                <dt>Match</dt><dd>KR_8376630711</dd>
+                <dt>Champion</dt><dd>Vladimir · Mid · 14:16</dd>
+                <dt>Gold</dt><dd class="g">2,213</dd>
+                <dt>Level / CS</dt><dd>11 · 111</dd>
+              </dl>
+              <div class="strip">
+                <img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/1056.png" alt="Doran's Ring" title="Doran's Ring">
+                <img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/1082.png" alt="Dark Seal" title="Dark Seal">
+                <img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/4629.png" alt="Cosmic Drive" title="Cosmic Drive">
+                <img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/3363.png" alt="Farsight" title="Farsight Alteration">
+              </div>
+              <div class="quote">
+                <img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/3041.png" alt="Mejai's Soulstealer">
+                <span><b>Mejai's Soulstealer</b><span>Paid <i>1,150</i> of 1,500 — already held the Dark Seal.</span></span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="ed">
+      <div class="aside">
+        <span class="label">Chapter Two</span>
+        <p>Thirteen map regions, twenty-five moves. Transit is not a decision.</p>
+      </div>
+      <div>
+        <h2>Your match, told as the <em>moves you made</em></h2>
+        <p class="lead">Read from the replay and the official timeline — Evelynn, jungle, EUW1_7983109023.</p>
+        <ol class="moves" style="margin-top:2.25rem">
+          <li><time>3:28</time><b>Farm · red quadrant</b></li>
+          <li><time>4:02</time><b>Farm · blue quadrant</b></li>
+          <li><time>4:23</time><b>Reset</b></li>
+          <li class="k"><time>5:04</time><b>Dragon</b></li>
+          <li class="k"><time>5:19</time><b>Gank top</b></li>
+          <li><time>5:52</time><b>Invade · blue side</b></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="ed">
+      <div class="aside">
+        <span class="label">The corpus</span>
+        <p>Counted 18 September 2026. Patches 16.17–16.18, ranked solo, Korea and Europe West.</p>
+      </div>
+      <div>
+        <h2>Built on real <em>high-elo games</em></h2>
+        <div class="figs">
+          <div class="fig"><b>2,995,568</b><span>Shop decisions rebuilt</span></div>
+          <div class="fig"><b>30,738</b><span>Complete ten-player games</span></div>
+          <div class="fig"><b>249,979</b><span>Player-game perspectives</span></div>
+          <div class="fig"><b>17,563</b><span>Ladder players</span></div>
+        </div>
+        <p class="note">The macro side is an earlier prototype and is not counted here.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="closer">
+  <div class="wrap">
+    <blockquote>“The corpus stands and the reconstruction works. The measurement doesn't yet — and nothing gets published here until it does.”</blockquote>
+    <p class="label" style="margin-top:1.5rem">Status</p>
+  </div>
+</section>
+
+<footer><div class="wrap fw">
+  <div><span class="mark">Videns<i>.</i></span> <em>— the one who sees</em></div>
+  <p>An independent project, not endorsed by or affiliated with Riot Games. League of Legends is a trademark of Riot Games, Inc. Match data from Riot's official API; item art from Data Dragon.</p>
+</div></footer>
+
+</body>
+</html>

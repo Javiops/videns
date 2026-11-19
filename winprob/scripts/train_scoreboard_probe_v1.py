@@ -1,0 +1,206 @@
+"""Fixed real/zero/shuffled KDA information experiment; no new source payloads."""
+from __future__ import annotations
+import argparse
+import gc
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import sys
+import time
+for key in ('OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS'):os.environ[key]='1'
+ROOT=Path(__file__).resolve().parents[1];sys.path[:0]=[str(ROOT),str(ROOT/'scripts')]
+import numpy as np
+import torch
+from winprob import admission
+from winprob.history_probe_training import HistoryDataset
+from winprob.history_probe_evaluation import summarize_logits
+from winprob.iql_dataset_contract import current_reservations
+from winprob.iql_training import RuntimeGuard,adam,file_hash,tree_hash,set_below_normal_priority
+from winprob.scoreboard_probe_v1 import (ARMS,SEED,EPOCHS,BATCH,ScoreCache,ScoreStore,ScoreBatch,
+    initial_models,enable_fastpath,epoch_order,evaluate)
+from train_multiset_probe_v1 import write,save_checkpoint,load_reference_scores,synthetic_board,MEMORY,MEMORY_SHA,OLD,OLD_SHA,sidecar
+
+PROTOCOL=ROOT/'docs/scoreboard_probe_protocol_v1.md'
+CACHE=ROOT/'data/runs/history-cache-20260930-v1/cache'
+FEATURES=ROOT/'data/runs/scoreboard-features-20261001-v1/cache/manifest.json'
+EVAL_BATCH=256
+
+
+def preflight(dataset,score_cache,store,device,guard):
+    models=initial_models(dataset.num_champions,dataset.num_items,9333,0)
+    public=synthetic_board(dataset,device)
+    gen=torch.Generator(device=device);gen.manual_seed(SEED)
+    real=torch.randint(0,16,(BATCH,10,3),generator=gen,device=device).float()/20.;real[:,0]=0.
+    board=ScoreBatch(public,real,real[:,[0,4,3,2,1,9,8,7,6,5]])
+    y=torch.tensor(np.random.default_rng(SEED).integers(0,9333,size=BATCH),device=device)
+    reference_model=models['zero'].to(device)
+    with torch.no_grad():base_reference=reference_model.head(reference_model.state.base(public))
+    del reference_model
+    steps={};inference={}
+    for arm in ARMS:
+        model=models.pop(arm).to(device);optimizer=adam(model.parameters())
+        with torch.no_grad():
+            if not torch.equal(model.predict(board),base_reference.to(device)):raise ValueError('zero-projection initialization does not reproduce base')
+        enable_fastpath(model,dataset,score_cache);times=[]
+        for i in range(30):
+            guard();torch.cuda.synchronize();start=time.monotonic()
+            optimizer.zero_grad(set_to_none=True);loss=model.loss(board,y)
+            loss.backward();torch.nn.utils.clip_grad_norm_(model.parameters(),10.,error_if_nonfinite=True);optimizer.step()
+            torch.cuda.synchronize()
+            if i>=10:times.append(time.monotonic()-start)
+            if not bool(torch.isfinite(loss)):raise ValueError('nonfinite synthetic preflight loss')
+        steps[arm]=float(np.mean(times));times=[];model.eval()
+        with torch.inference_mode():
+            for i in range(6):
+                guard();torch.cuda.synchronize();start=time.monotonic()
+                raw=model.predict(store.states(dataset.selected[:EVAL_BATCH]))
+                summarize_logits(raw.cpu().numpy(),np.zeros(EVAL_BATCH,dtype=np.int64));torch.cuda.synchronize()
+                if i>=2:times.append(time.monotonic()-start)
+        inference[arm]=float(np.mean(times));del model,optimizer,raw,loss;gc.collect();torch.cuda.empty_cache()
+    gather=[];rng=np.random.default_rng(SEED+99)
+    for i in range(15):
+        rows=rng.choice(dataset.n,BATCH,replace=False);torch.cuda.synchronize();start=time.monotonic()
+        temporary=store.states(rows);torch.cuda.synchronize()
+        if i>=5:gather.append(time.monotonic()-start)
+        del temporary
+    fold=dataset.arrays['fold'];updates=EPOCHS*sum(int(np.ceil(np.sum(fold!=f)/BATCH)) for f in (0,1))
+    vb=sum(int(np.ceil(np.sum(fold[dataset.selected]==f)/EVAL_BATCH)) for f in (0,1))
+    train=updates*(sum(steps.values())+3*np.mean(gather));validation=2*vb*sum(inference.values());projected=1.25*(train+validation)+180.
+    remaining=guard.deadline-(time.monotonic()-guard.started)
+    return {'synthetic_optimizer_steps':90,'real_optimizer_steps':0,'initial_base_parity_verified':True,'all_updates':3*updates,
+        'updates_per_arm':updates,'step_mean_s':steps,'state_gather_mean_s':float(np.mean(gather)),
+        'inference_batch_size':EVAL_BATCH,'inference_batch_mean_s':inference,'inference_batches_per_arm':vb,'inference_passes':2,
+        'projected_training_s':float(train),'projected_inference_s':float(validation),'safety_factor':1.25,'fixed_overhead_s':180.,
+        'projected_remaining_s':float(projected),'remaining_stage_s':remaining,'projection_gate_passed':bool(projected<=.8*remaining),
+        'preloaded_states':store.preloaded}
+
+
+def run(args):
+    args.output=args.output.resolve();args.output.mkdir(parents=True,exist_ok=False)
+    if args.deadline_seconds!=3600:raise ValueError('fixed60minute worker bound required')
+    guard=RuntimeGuard(args.deadline_seconds);set_below_normal_priority()
+    torch.set_num_threads(1);torch.set_num_interop_threads(1)
+    torch.backends.cuda.matmul.allow_tf32=False;torch.backends.cudnn.allow_tf32=False
+    real_started=False
+    def status(stage,**extra):
+        value={'stage':stage,'elapsed_s':time.monotonic()-guard.started,'real_training_started':real_started,**extra}
+        (args.output/'status.json').write_text(json.dumps(value,allow_nan=False));print(json.dumps(value),flush=True)
+    try:
+        status('validating_inputs')
+        paths=[Path(__file__),PROTOCOL,ROOT/'scripts/train_multiset_probe_v1.py']+sorted((ROOT/'winprob').glob('*.py'))
+        bindings={str(p.resolve()):file_hash(p) for p in paths}
+        if file_hash(CACHE/'manifest.json')!='1bae0e5e58c752e23a82e461c072b6e5e64162732c98322a8c1ac11b9c79831b':raise ValueError('base history cache changed')
+        dataset=HistoryDataset(CACHE,ROOT/'docs/history_probe_protocol_v1.md');bindings.update(dataset.bindings)
+        score_cache=ScoreCache(FEATURES,dataset,guard);bindings.update(score_cache.bindings)
+        bindings[str(MEMORY)]=MEMORY_SHA;bindings[str(OLD)]=OLD_SHA
+        for raw,want in bindings.items():
+            if file_hash(raw)!=want:raise ValueError('initial binding changed: '+raw)
+        guard.bind(bindings);a=dataset.arrays;selected=np.array(dataset.selected);n=len(selected)
+        if n!=3350 or len(np.unique(a['game_index'][selected]))!=3350:raise ValueError('fixed3350-game evaluation sample changed')
+        labels=np.array(a['main_group_id'][selected]);folds=np.array(a['fold'][selected]);games=np.array(a['game_index'][selected])
+        memory,old=load_reference_scores(selected,labels,folds,games)
+        write(args.output/'input_audit.json',{'dataset':dataset.audit,'scoreboard_sha256':file_hash(FEATURES),'bindings_sha256':bindings,
+            'selection':dataset.selection,'focal_score_channel_zeroed':True,'all_permutations_reproduced':True,'reward_arrays_opened':False})
+        device=torch.device('cuda:0')
+        if not torch.cuda.is_available():raise RuntimeError('idle CUDA runtime required')
+        store=ScoreStore(dataset,score_cache,device,guard);labels_gpu=torch.tensor(np.asarray(a['main_group_id']),dtype=torch.long,device=device)
+        status('full_synthetic_preflight');timing=preflight(dataset,score_cache,store,device,guard);write(args.output/'preflight.json',timing)
+        if not timing['projection_gate_passed']:raise RuntimeError('complete recipe does not pass fixed80percent projection gate')
+        if not args.execute:status('preflight_complete_no_real_fit');return
+        scores={arm:{'top1':np.full(n,-1,dtype=np.int64),'top3':np.full((n,3),-1,dtype=np.int64),
+                     'target_log_probability':np.full(n,np.nan)} for arm in ARMS};scores.update(memory=memory,old_state=old)
+        checkpoints={};orders={};initial={};steps_by_model={};training_ids={};mutation={arm:0 for arm in ARMS};parameters={}
+        real_started=True
+        for fold in (0,1):
+            train=np.flatnonzero(a['fold']!=fold);positions=np.flatnonzero(folds==fold);queries=selected[positions]
+            allowed=sorted(g['match_id'] for g in dataset.games if g['fold']!=fold);training_ids[str(fold)]=allowed
+            if set(a['game_index'][train])&set(a['game_index'][queries]):raise ValueError('whole-game overlap')
+            models=initial_models(dataset.num_champions,dataset.num_items,9333,fold)
+            hashes={arm:tree_hash(model.state_dict()) for arm,model in models.items()}
+            if len(set(hashes.values()))!=1:raise ValueError('initial model tensors differ across controls')
+            if any(bool(model.state.score_projection.weight.any()) for model in models.values()):raise ValueError('score projection did not start at zero')
+            initial[str(fold)]=hashes
+            original_main,original_full=a['main_group_id'],a['full_action_id'];heldout=a['fold']==fold
+            changed_main=np.array(original_main);changed_full=np.array(original_full)
+            changed_main[heldout]=(changed_main[heldout]+1)%9333;changed_full[heldout]=(changed_full[heldout]+1)%13166
+            for arm in ARMS:
+                model=models.pop(arm).to(device);enable_fastpath(model,dataset,score_cache);optimizer=adam(model.parameters());steps=0
+                parameters[arm]={'encoder':sum(p.numel() for p in model.state.parameters()),'head':sum(p.numel() for p in model.head.parameters()),'score_projection':192}
+                for epoch in range(EPOCHS):
+                    status('training',fold=fold,arm=arm,epoch=epoch+1);order=epoch_order(train,fold,epoch)
+                    sha=hashlib.sha256(order.tobytes()).hexdigest();key=f'{fold}:{epoch}'
+                    if key in orders and orders[key]!=sha:raise ValueError('epoch order differs across arms')
+                    orders[key]=sha;started=time.monotonic();total=0.;maxnorm=0.;model.train()
+                    for offset in range(0,len(order),BATCH):
+                        if offset%(BATCH*20)==0:guard()
+                        rows=order[offset:offset+BATCH];board=store.states(rows);y=labels_gpu[torch.as_tensor(rows,device=device)]
+                        optimizer.zero_grad(set_to_none=True);loss=model.loss(board,y)
+                        if not bool(torch.isfinite(loss)):raise ValueError('nonfinite real loss')
+                        loss.backward();norm=torch.nn.utils.clip_grad_norm_(model.parameters(),10.,error_if_nonfinite=True);optimizer.step()
+                        steps+=1;total+=float(loss.detach())*len(rows);maxnorm=max(maxnorm,float(norm))
+                    if arm=='zero' and bool(model.state.score_projection.weight.any()):raise ValueError('zero-input projection changed from0')
+                    with (args.output/'epochs.jsonl').open('a',encoding='utf-8') as stream:
+                        stream.write(json.dumps({'fold':fold,'arm':arm,'epoch':epoch+1,'updates':steps,'transitions':len(train),
+                            'mean_training_loss':total/len(train),'max_gradient_before_clip':maxnorm,'elapsed_s':time.monotonic()-started})+'\n')
+                expected=EPOCHS*int(np.ceil(len(train)/BATCH))
+                if steps!=expected or {int(s['step']) for s in optimizer.state.values()}!={expected}:raise ValueError('incomplete Adam accounting')
+                steps_by_model[f'{fold}:{arm}']=steps;name=f'actor_{arm}_fold{fold}.pt'
+                checkpoints[name]=save_checkpoint(args.output/name,{'actor':model.state_dict(),'optimizer':optimizer.state_dict(),'arm':arm,
+                    'scored_fold':fold,'seed':SEED+fold,'epochs':EPOCHS,'steps':steps,'training_game_ids':allowed,
+                    'initial_model_sha256':initial[str(fold)],'protocol_sha256':file_hash(PROTOCOL),'feature_manifest_sha256':file_hash(FEATURES)})
+                status('predicting_frozen_checkpoint',fold=fold,arm=arm);model.eval()
+                with torch.inference_mode():
+                    for offset in range(0,len(queries),EVAL_BATCH):
+                        guard();rows=queries[offset:offset+EVAL_BATCH];raw=model.predict(store.states(rows))
+                        try:
+                            a['main_group_id'],a['full_action_id']=changed_main,changed_full
+                            changed=model.predict(store.states(rows))
+                        finally:a['main_group_id'],a['full_action_id']=original_main,original_full
+                        if not torch.equal(raw,changed):raise ValueError('heldout label mutation changed full predictions')
+                        pos=positions[offset:offset+len(rows)];summary=summarize_logits(raw.cpu().numpy(),labels[pos])
+                        for key,value in summary.items():scores[arm][key][pos]=value
+                        mutation[arm]+=len(rows)
+                del model,optimizer,board,y,loss,raw,changed;gc.collect();torch.cuda.empty_cache();guard()
+            del models,changed_main,changed_full
+        if sum(steps_by_model.values())!=timing['all_updates'] or mutation!=dict.fromkeys(ARMS,n):raise ValueError('full recipe/mutation accounting failed')
+        write(args.output/'training_lock.json',{'epochs_complete':True,'updates':steps_by_model,'shared_epoch_order_sha256':orders,
+            'initial_model_sha256':initial,'training_game_ids_by_fold':training_ids,'checkpoints':checkpoints,
+            'heldout_target_mutation_rows':mutation,'comparison_metrics_inspected':False})
+        arrays={'selected_state_indices':selected,'labels':labels,'fold':folds,'game_index':games}
+        for arm,score in scores.items():
+            for key,value in score.items():arrays[arm+'_'+key]=value
+        np.savez_compressed(args.output/'predictions.npz',**arrays);sidecar(args.output/'predictions.npz')
+        status('evaluating_complete_recipe')
+        groups=dataset.catalogue['group_main'];sizes=np.array([sum(c for _,c in groups[int(g)]) for g in labels])
+        patches=np.array([dataset.games[int(i)]['patch'] for i in games]);kinds=[]
+        for row in selected:
+            full_id=int(a['full_action_id'][row]);bag=dataset.catalogue['full_actions'][full_id]
+            kinds.append('no_buy' if full_id==0 else 'ward_only' if not any(i not in (2055,772043) for i,c in bag) else 'mixed' if any(i in (2055,772043) for i,c in bag) else 'purchase')
+        result=evaluate(labels,scores,patches,sizes,kinds)
+        snapshot=args.output/'code_snapshot';snapshot.mkdir()
+        for path in paths:
+            dest=snapshot/path.resolve().relative_to(ROOT);dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(path,dest)
+        for path,want in bindings.items():
+            guard()
+            if file_hash(path)!=want:raise ValueError('bound input/code changed before publication')
+        admission.verify_manifest_sources(dataset.admission)
+        if {g['match_id'] for g in dataset.games}&current_reservations(dataset.admission):raise ValueError('FIT game became reserved')
+        result.update(schema='scoreboard-probe-experiment-v1',state='complete',scope='already exposed internal OOF; no source-native legal decoder',
+            ledger_games=4001,unavailable_focal_games=651,parameters=parameters,preflight=timing,checkpoints=checkpoints,
+            training_lock_sha256=file_hash(args.output/'training_lock.json'),predictions_sha256=file_hash(args.output/'predictions.npz'),
+            bindings_sha256=bindings,epochs_per_model=20,updates=steps_by_model,heldout_target_mutation_rows=mutation,
+            training_performed=True,raw_payload_reads=False,reward_arrays_opened=False,outcomes_analyzed=False,
+            test_payload_reads=False,confirmation_payload_reads=False,source_runtime_imported=False,
+            policy_benefit_established=False,breakthrough_established=False,promotion_authorized=False,
+            elapsed_s=time.monotonic()-guard.started,host_memory=guard.memory_report(),peak_cuda_allocated_bytes=int(torch.cuda.max_memory_allocated(device)),
+            runtime={'torch':str(torch.__version__),'numpy':np.__version__,'gpu':torch.cuda.get_device_name(device)})
+        write(args.output/'report.json',result);status('complete',metric_gate_passed=result['metric_gate_passed'])
+    except Exception as error:status('failed',error=str(error),error_type=type(error).__name__);raise
+
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',required=True,type=Path)
+    parser.add_argument('--deadline-seconds',type=int,default=3600);parser.add_argument('--execute',action='store_true')
+    run(parser.parse_args())

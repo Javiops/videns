@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informe 2026-09-29 — videns.gg</title>
+<style>
+  :root { color-scheme: light;
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e;
+    --muted:#898781; --grid:#e1e0d9; --base:#c3c2b7; --border:rgba(11,11,11,.10);
+    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --good:#006300; --bad:#a3231c; }
+  @media (prefers-color-scheme: dark) { :root { color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink2:#c3c2b7;
+    --muted:#898781; --grid:#2c2c2a; --base:#383835; --border:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --good:#0ca30c; --bad:#e0524a; } }
+  *{box-sizing:border-box;margin:0}
+  body{background:var(--page);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;padding:32px 16px 64px}
+  main{max-width:880px;margin:0 auto;display:grid;gap:26px}
+  h1{font-size:25px} header p{color:var(--ink2);margin-top:4px}
+  section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 24px}
+  h2{font-size:17px;margin-bottom:4px} .sub{color:var(--ink2);font-size:13.5px;margin-bottom:14px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
+  .tile{border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:grid;gap:2px}
+  .tile .k{font-size:12.5px;color:var(--ink2)} .tile .v{font-size:26px;font-weight:650}
+  .tile .d{font-size:12.5px;color:var(--muted)} .v.good{color:var(--good)} .v.bad{color:var(--bad)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:right;padding:7px 9px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left} th{color:var(--ink2);font-weight:600;font-size:12.5px}
+  tr:last-child td{border-bottom:none}
+  ul{padding-left:20px;display:grid;gap:7px} li::marker{color:var(--muted)}
+  .foot{color:var(--muted);font-size:12px}
+  code{font-size:12.5px;background:color-mix(in oklab,var(--ink) 6%,transparent);padding:1px 5px;border-radius:4px}
+  .wrap{overflow-x:auto}
+  .null{color:var(--s2);font-weight:600} .no{color:var(--bad);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Informe — 27 a 29 de septiembre de 2026</h1>
+    <p>Transferencia desde el parche anterior (16.17 → 16.18): resultado nulo. Corpus histórico 16.17 verificable, cadena con puertas, parche 16.19 abierto y en recolección.</p>
+  </header>
+
+  <section>
+    <h2>Resultado en una línea</h2>
+    <p class="sub">Cohorte forward v4: 146,597 decisiones / 1,209 partidas de 16.18; primer acto exacto sin guardas, legalidad a gold_est, bootstrap emparejado por partida. Recalculado de forma independiente desde las filas persistidas.</p>
+    <div class="tiles">
+      <div class="tile"><span class="k">H — preentrenado en 16.17</span><span class="v">50.85 %</span><span class="d">11,844 updates en 16.17 + 16 épocas en 16.18</span></div>
+      <div class="tile"><span class="k">T — control de igual presupuesto</span><span class="v">50.74 %</span><span class="d">mismos updates y épocas, todo en 16.18</span></div>
+      <div class="tile"><span class="k">R1 — Bf actual (congelado)</span><span class="v">50.74 %</span><span class="d">referencia de acierto</span></div>
+      <div class="tile"><span class="k">R2 — M2 (mezcla)</span><span class="v">51.53 %</span><span class="d">referencia práctica; sigue siendo la mejor</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Las tres lecturas declaradas antes del run</h2>
+    <p class="sub">Diferencias emparejadas en puntos porcentuales; el veredicto exige que el intervalo del 95 % excluya el cero.</p>
+    <div class="wrap"><table>
+      <tr><th>lectura</th><th>diferencia</th><th>IC 95 %</th><th>decisiones netas</th><th>veredicto</th></tr>
+      <tr><td>H frente a T — ¿ayuda la historia?</td><td>+0.111</td><td>[−0.028, +0.244]</td><td>+162</td><td class="null">nulo</td></tr>
+      <tr><td>H frente a R1 — ¿supera al Bf actual?</td><td>+0.117</td><td>[−0.015, +0.270]</td><td>+172</td><td class="null">nulo</td></tr>
+      <tr><td>H frente a M2 — ¿supera a nuestra mejor configuración?</td><td>−0.677</td><td>[−0.818, −0.540]</td><td>−992</td><td class="no">no</td></tr>
+      <tr><td>T frente a R1 — ¿ayuda entrenar más, sin historia?</td><td>+0.007</td><td>[−0.117, +0.134]</td><td>+10</td><td class="null">nulo</td></tr>
+    </table></div>
+    <ul style="margin-top:12px">
+      <li>La dirección es positiva pero dentro del ruido: unas 160 decisiones de 146,597, concentradas en las decisiones de un solo objeto (+0.15 [−0.00, +0.31]).</li>
+      <li>Las decisiones de guardar oro empeoran frente a R1 (−1.25 [−2.29, −0.35]), pero H frente a T no resuelve ese segmento (−0.49, intervalo por el cero): ese coste no es atribuible específicamente al parche histórico.</li>
+      <li>El control es limpio en tasa, no en decisiones: T iguala la tasa de R1 (+0.007) cambiando 20,725 primeras recomendaciones (14.1 %); ganarle a T no habría sido ganarle a un control debilitado.</li>
+      <li>Decisión del dueño: se mantiene M2 y se cierra esta receta sin adoptarla. Siguen dos trabajos acotados: mezclas fijas ½ M2 + ½ H y ½ M2 + ½ T (solo inferencia) y un benchmark limpio en 16.19 antes de otro entrenamiento largo.</li>
+      <li>Decisión por las reglas declaradas: la historia no aporta acierto a esta dosis; H no es progreso práctico. Nada se promociona; M2 sigue siendo la referencia.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Trabajo 1 — mezclas fijas con los modelos ya entrenados (solo inferencia)</h2>
+    <p class="sub">Misma cohorte de 146,597 decisiones; ½ M2 + ½ H y ½ M2 + ½ T con pesos declarados, sin búsqueda; puertas: M2 reproduce sus filas byte a byte, H y T las suyas 0/0/0.</p>
+    <div class="wrap"><table>
+      <tr><th>lectura</th><th>primer acto</th><th>IC 95 %</th><th>netas</th><th>top-3</th><th>IC 95 %</th></tr>
+      <tr><td>½ M2 + ½ H frente a M2</td><td>+0.066</td><td>[−0.029, +0.162]</td><td>+97</td><td>+0.134</td><td>[+0.066, +0.200]</td></tr>
+      <tr><td>½ M2 + ½ T frente a M2</td><td>−0.064</td><td>[−0.157, +0.031]</td><td>−94</td><td>+0.064</td><td>[+0.001, +0.134]</td></tr>
+      <tr><td>½ M2 + ½ H frente a ½ M2 + ½ T (lo específico de la historia)</td><td>+0.130</td><td>[+0.031, +0.231]</td><td>+191</td><td>+0.070</td><td>[−0.009, +0.140]</td></tr>
+    </table></div>
+    <ul style="margin-top:12px">
+      <li>Nada se adopta: ninguna mezcla supera a M2 en el primer acto con el intervalo fuera del cero (51.597 % frente a 51.531 %).</li>
+      <li>La señal específica favorable al historial aparece en el primer acto: con los mismos pesos, la mezcla con H supera a la mezcla con T (+0.13, unas 190 decisiones netas). En top-3 ambas mezclas mejoran a M2 (la de T por un margen mínimo) y H frente a T no se resuelve: la ventaja adicional del historial en top-3 no está demostrada.</li>
+      <li>Cierra la receta de transferencia con todo lo que los modelos entrenados podían dar sin volver a entrenar.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Cómo se construyó el corpus histórico (mismas garantías, otro formato)</h2>
+    <p class="sub">Condición del dueño: instantánea congelada sin tests reservados ni holdouts históricos antes de abrir datos; reconstrucción 16.17 con todas las puertas; export exacto; manifiesto y validador propios usados al exportar y al entrenar.</p>
+    <div class="wrap"><table>
+      <tr><th>paso</th><th>resultado</th></tr>
+      <tr><td>Instantánea r1 (retirada)</td><td>14,217 fuentes con 153 validaciones históricas dentro (ficheros de split en tres formatos); detectada por revisión adversaria a los 40 min; retirada, nada exportado</td></tr>
+      <tr><td>Instantánea r2</td><td>20,859 partidas 16.17 → 14,064 fuentes; 3,840 holdouts + 2,955 tests reservados excluidos; 45 ficheros de split escaneados por una única función compartida por las cuatro puertas</td></tr>
+      <tr><td>Reconstrucción + auditoría completa</td><td>11,562 partidas cualificadas; 1,381,011 decisiones admitidas, 4,725 excluidas por frontera; auditoría 0 fallos / 0 cuarentenas; 4 h 36</td></tr>
+      <tr><td>Export histórico</td><td>1,381,011 filas = exactamente las admitidas; 0 exclusiones; validador + cotejo de 36,389 filas contra el corpus congelado</td></tr>
+      <tr><td>Vocabulario común</td><td>173 campeones, 205 objetos, 198 etiquetas, 197 objetos de cesta; todo id de 16.17 ya existía en 16.18; catálogos 17,436 (16.17) y 13,165 (16.18)</td></tr>
+      <tr><td>Puertas del entrenamiento</td><td>R1 reproduce sus filas 0/0/0 en el mismo proceso; referencias atadas por digest; pilotos T 2.16 h + 8.57 h, H 2.77 h + 8.67 h dentro de las cotas (3 h / 10 h por brazo)</td></tr>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Coste y operación</h2>
+    <ul>
+      <li>GPU: T 10.7 h, H 11.8 h, puerta R1 27 min, puntuación 10 min. Pared total 33.2 h, incluida una pausa de 9 h 49 a petición del dueño (suspensión de proceso, reanudada sin pérdida a mitad de época).</li>
+      <li>Reconstrucción 16.17: 4 h 36 (33 GB de corpus, ~2.9 MB por partida); export 26 min; cachés 53 + 54 min; pilotos 8 min.</li>
+      <li>Dos revisiones adversarias (33 y 32 agentes): 21 hallazgos confirmados y corregidos antes de producir artefactos; 22 + 3 casos de rechazo del validador probados.</li>
+      <li>Parche 16.19 abierto (revisión estática limpia: línea de soporte, botas, guardas y runa 8304 sin cambios; 2 objetos nuevos); recolección: 4,992 partidas en dos días, pull diario activo.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Qué muestra y qué no</h2>
+    <ul>
+      <li>Separa «historia» de «más entrenamiento»: T ≈ R1, así que el margen de H (dentro del ruido) es atribuible a los datos de 16.17, no a los updates extra.</li>
+      <li>Responde a la pregunta del revisor en negativo a esta dosis (cuatro épocas-equivalente de un parche adyacente, 1.38 M decisiones). No prueba otras dosis, preentrenamientos más largos ni mezclar la historia dentro del FIT actual.</li>
+      <li>Cierra una receta de transferencia; no demuestra que los datos de parches anteriores carezcan de valor. La palanca inmediata: aprovechar lo ya entrenado con una prueba barata y preparar el benchmark del parche actual.</li>
+    </ul>
+    <p class="foot" style="margin-top:12px">Fuentes: <code>docs/experiment_prior_patch_transfer_v1.md</code> §8–9; <code>data/experiments/16.18-prior-patch-transfer-v1/transfer_report_full.json</code>; filas <code>rows_T_full.jsonl</code> (3deb9184…) y <code>rows_H_full.jsonl</code> (7b5076e8…); corpus <code>data/corpora/16.17-history-v1</code>; export <code>data/history/16.17-history-v1</code>. Nada promocionado; el test sigue sellado.</p>
+  </section>
+</main>
+</body>
+</html>

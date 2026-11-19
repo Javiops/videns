@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informe 2026-09-24 — videns.gg</title>
+<style>
+  :root { color-scheme: light;
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e;
+    --muted:#898781; --grid:#e1e0d9; --base:#c3c2b7; --border:rgba(11,11,11,.10);
+    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --good:#006300; }
+  @media (prefers-color-scheme: dark) { :root { color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink2:#c3c2b7;
+    --muted:#898781; --grid:#2c2c2a; --base:#383835; --border:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --good:#0ca30c; } }
+  *{box-sizing:border-box;margin:0}
+  body{background:var(--page);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;padding:32px 16px 64px}
+  main{max-width:880px;margin:0 auto;display:grid;gap:26px}
+  h1{font-size:25px} header p{color:var(--ink2);margin-top:4px}
+  section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 24px}
+  h2{font-size:17px;margin-bottom:4px} .sub{color:var(--ink2);font-size:13.5px;margin-bottom:14px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
+  .tile{border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:grid;gap:2px}
+  .tile .k{font-size:12.5px;color:var(--ink2)} .tile .v{font-size:26px;font-weight:650}
+  .tile .d{font-size:12.5px;color:var(--muted)} .v.good{color:var(--good)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:right;padding:7px 9px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left} th{color:var(--ink2);font-weight:600;font-size:12.5px}
+  tr:last-child td{border-bottom:none}
+  ul{padding-left:20px;display:grid;gap:7px} li::marker{color:var(--muted)}
+  .foot{color:var(--muted);font-size:12px}
+  code{font-size:12.5px;background:color-mix(in oklab,var(--ink) 6%,transparent);padding:1px 5px;border-radius:4px}
+  .wrap{overflow-x:auto}
+  .pend{color:var(--s2);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Informe — 23/24 de septiembre de 2026</h1>
+    <p>build_tracker · ampliación de datos (diseño B, cohorte hacia delante 20-21 sep) · <b>el modelo reentrenado con 6.354 partidas supera a la mezcla congelada en +1,54 puntos</b> · dos abortos publicados · nada promocionado · test sellado</p>
+  </header>
+
+  <section>
+    <h2>Resumen ejecutivo</h2>
+    <p class="sub">Una sola pregunta: ¿sube el acierto de compra si entrenamos con más partidas? Respuesta medida sobre 146.597 decisiones de 1.209 partidas jugadas <b>después</b> de todas las de entrenamiento: sí. Métrica: exacto ward-free de la primera acción, decoder agrupado, igual para los tres modelos, emparejado por partida.</p>
+    <div class="tiles">
+      <div class="tile"><span class="k">Bf nuevo (6.354 partidas) vs mezcla congelada (nuestra mejor config.)</span><span class="v good">+1,54</span><span class="d">CI 95% [+1,38, +1,69] · 50,74% vs 49,20% · <b>+2.257 decisiones netas</b> (7.677 corregidas − 5.420 rotas)</span></div>
+      <div class="tile"><span class="k">Bf nuevo vs Bf antiguo (PRIMARIO, misma receta, 2.000 partidas)</span><span class="v good">+2,57</span><span class="d">CI [+2,40, +2,74] · 48,17% → 50,74% · +3.765 netas · criterio de continuación (≥ +1,0 y CI &gt; 0): <b>cumplido</b></span></div>
+      <div class="tile"><span class="k">Top-3 ward-free</span><span class="v good">65,60%</span><span class="d">vs 64,20% mezcla (+1,41 [+1,29, +1,51]) y 63,44% Bf antiguo (+2,16)</span></div>
+      <div class="tile"><span class="k">Ningún segmento negativo</span><span class="v good">4/4</span><span class="d">vs mezcla: 1 objeto +1,46 · varios +1,66 · SAVE +2,20 · solo-ward +1,85 (todas con CI &gt; 0)</span></div>
+      <div class="tile"><span class="k">Coste medido</span><span class="v">7,71 h</span><span class="d">16 épocas × 28,9 min (piloto proyectó 7,82 h) · reconstrucción 2 h 07 · evaluación 76 min</span></div>
+      <div class="tile"><span class="k">La mezcla en su tercera población</span><span class="v">+1,03</span><span class="d">vs Bf antiguo, CI [+0,92, +1,15] — su ventaja conocida (+0,9/+1,0) se reproduce en la cohorte</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Qué se hizo (cadena automática, 8 etapas, autorizada el 23 a las 12:00)</h2>
+    <ul>
+      <li><b>Snapshot</b> de 12.733 partidas 16.18 (149 IDs del test reservado excluidos antes de mirar nada) → <b>reconstrucción</b> de 10.344 (1.249.675 visitas a tienda; auditoría corregida: 0 fallos duros) → <b>admisión</b> con corte temporal explícito 2026-09-20 00:00 UTC.</li>
+      <li><b>Admitidas</b>: 7.563; <b>excluidas 2.781 por exposición previa a validación</b> (VAL antigua 1.601 + 1.180 cuarentenas de exposición de la v3). Exclusiones en origen (no excluyentes): undo sin IDs 1.129, inventario terminal no conciliado 974, estado Viego inexplicado 957, QA de botas 510, duración &lt;600 s 165, resto &lt;40.</li>
+      <li><b>Split</b>: TRAIN 6.354 partidas / 757.975 visitas (09-09 23:25 → 09-19 23:59:17 UTC) · <b>cohorte</b> 1.209 partidas / 146.597 visitas (09-20 00:04:14 → 09-21 04:46:46 UTC), posterior a <i>todas</i> las de entrenamiento (verificado en la base del corpus). Test 3.112 reservado, sin abrir. Techo del plan: 7.226 / 1.466.</li>
+      <li><b>Entrenamiento</b>: Bf d64, receta de fase 2, 16 épocas, ep16 fijado de antemano (sin elección retrospectiva) · catálogo 13.165 cestas / 9.333 grupos · puerta piloto medida en régimen estable.</li>
+      <li><b>Evaluación</b>: los tres modelos sobre exactamente las mismas 146.597 decisiones, emparejadas por partida, bootstrap 2.000 tiradas (semilla 16), costes por segmento.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Resultado, los tres modelos en la misma cohorte</h2>
+    <div class="wrap"><table>
+      <tr><th>modelo</th><th>entrenado con</th><th>exacto 1ª (ward-free)</th><th>top-3</th><th>aciertos 1 obj.</th><th>2 obj.</th><th>3 obj.</th></tr>
+      <tr><td><b>Bf nuevo d64 ep16</b></td><td>v4: 6.354 partidas, hasta 09-19</td><td><b>50,74%</b></td><td><b>65,60%</b></td><td>58.585</td><td>8.273</td><td>614</td></tr>
+      <tr><td>Mezcla congelada 50/50 (paquete <code>mixture-50-50-v1</code>)</td><td>v3: 2.000 partidas FIT (las 500 del probe interno no se usaron para entrenar), hasta 09-13</td><td>49,20%</td><td>64,20%</td><td>57.109</td><td>7.720</td><td>554</td></tr>
+      <tr><td>Bf antiguo ep16 (padre del paquete)</td><td>v3: 2.000 partidas FIT</td><td>48,17%</td><td>63,44%</td><td>55.985</td><td>7.362</td><td>495</td></tr>
+    </table></div>
+    <p class="sub" style="margin-top:12px">Emparejado por partida (puntos de exacto 1ª):</p>
+    <div class="wrap"><table>
+      <tr><th>contraste</th><th>Δ</th><th>CI 95%</th><th>corregidas</th><th>rotas</th><th>netas</th><th>Δ top-3</th></tr>
+      <tr><td><b>Bf nuevo vs mezcla</b></td><td><b>+1,54</b></td><td>[+1,38, +1,69]</td><td>7.677</td><td>5.420</td><td><b>+2.257</b></td><td>+1,41 [+1,29, +1,51]</td></tr>
+      <tr><td><b>Bf nuevo vs Bf antiguo</b> (primario)</td><td><b>+2,57</b></td><td>[+2,40, +2,74]</td><td>9.281</td><td>5.516</td><td><b>+3.765</b></td><td>+2,16 [+2,03, +2,29]</td></tr>
+      <tr><td>Mezcla vs Bf antiguo</td><td>+1,03</td><td>[+0,92, +1,15]</td><td>4.291</td><td>2.783</td><td>+1.508</td><td>+0,76 [+0,67, +0,84]</td></tr>
+    </table></div>
+    <p class="sub" style="margin-top:12px">Por segmento, Bf nuevo vs mezcla (n · Δ · CI): 1 objeto 101.005 · +1,46 · [+1,28, +1,65] — varios objetos 37.068 · +1,66 · [+1,33, +2,02] — SAVE (no comprar tras morir) 2.640 · +2,20 · [+1,17, +3,40] — solo ward 5.884 · +1,85 · [+1,27, +2,51]. Frente al Bf antiguo: +2,57 / +2,79 / +2,39 / +1,17. Unión oráculo Bf nuevo ∪ mezcla: 54,43% — la complementariedad sigue existiendo (+3,7 sobre el nuevo a solas).</p>
+  </section>
+
+  <section>
+    <h2>Cómo se verificó</h2>
+    <ul>
+      <li>Recomputado de forma independiente desde las filas por decisión persistidas (<code>rows_{new_bf,old_bf,mixture}_full.jsonl</code>, 146.597 cada una): identidad (partida, ts, campeón) idéntica en los tres brazos, 0 duplicados, conjunto de partidas igual al split <code>val</code> de la generación. Todos los agregados, deltas, recuentos de movimiento y segmentos reproducen exactos; los CI a ruido de bootstrap.</li>
+      <li>Piloto en régimen estable 0,594 s/lote → 7,82 h proyectadas; medido 16 × 1.734 s = 7,71 h (desviación 1,4%). La pérdida de FIT (3,20 → 1,74) NO es una métrica del harness y no se compara con nada.</li>
+      <li>Checkpoint <code>bf_newgen_ep16_full.pt</code> (sha256 c923d6ea…) · informe <code>bf_stage1_report_full.json</code> · generación <code>16.18-reconstructible-development-v4</code> (huella 6c78398c…, <code>promotion_allowed: false</code>) · paquete de la mezcla id 56e80a57….</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Dos abortos por el camino, los dos publicados</h2>
+    <ul>
+      <li><b>23 sep 20:37 — la auditoría rechazó 1 visita de 1.249.675.</b> Un Zed vendió sus seis objetos (5.255 g) antes de comprar; el reconstructor escribió correctamente «inventario de decisión vacío» y la puerta leyó la lista vacía como «campo ausente». Datos bien, puerta mal (mismo patrón que el precedente del 15-sep). Regla corregida y aislada en una función con test de 8 casos; el mismo fallo latente en el exportador <code>baseline.py</code> corregido; reconstrucción completa de nuevo porque el manifiesto fija el hash del auditor. Corpus fallido en cuarentena (solo se borró la base regenerable de 27,7 GB, con permiso del propietario, por disco).</li>
+      <li><b>24 sep 12:35 — la puerta piloto abortó: 10,60 h &gt; tope 10 h.</b> Cronometraba sus 6 primeros lotes en un contexto CUDA frío (carga de kernels, cuBLAS/cuDNN). Con 2 lotes de calentamiento sin cronometrar y 12 cronometrados: 7,82 h. Receta, épocas, checkpoint y tope intactos; el entrenamiento se re-siembra tras el piloto.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Límites, con su número</h2>
+    <ul>
+      <li><b>Volumen y recencia van juntos.</b> El Bf nuevo vio partidas hasta el 09-19; los modelos antiguos hasta el 09-13. Parte de la ganancia puede ser cercanía temporal a la cohorte y no cantidad de datos. Es la comparación relevante para producto (lo que se despliega se reentrena con datos frescos), pero no es un punto puro de la curva de aprendizaje; no se corrió un control de mismo volumen con ventana antigua.</li>
+      <li><b>Catálogos distintos</b>: 13.165 cestas (v4) frente a 7.937 (v3): algunas cestas verdaderas de la cohorte solo son alcanzables por el modelo nuevo. Que también gane en los segmentos de acción fija (SAVE +2,39, solo-ward +1,17 vs antiguo) dice que el modelo mejoró de verdad. Descomposición del revisor (25-sep, por soporte de la verdad): de las +2.257 netas frente a la mezcla, +2.049 son compras presentes en <b>ambos</b> catálogos, +167 decisiones sin compra principal y +41 verdades que solo contempla el catálogo nuevo (98,18 % sobre respuestas que la mezcla antigua ya podía dar). La ganancia <b>no</b> se explica principalmente por acertar acciones nuevas del catálogo; los demás efectos que ampliar el catálogo pueda tener sobre el ranking no están aislados (no hubo ablación con catálogo fijo).</li>
+      <li>Cartera estimada (<code>prequential-v3</code>), mismas limitaciones de legalidad de toda la semana; no es rendimiento en vivo.</li>
+      <li>La cohorte queda expuesta por esta comparación: no sirve para elegir entre varios candidatos futuros.</li>
+      <li>El Bf nuevo es un checkpoint, no un paquete: promocionar exige paquete + informe de política mostrada con cero cestas inasequibles, como con la mezcla.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Qué dice para producto y qué sigue</h2>
+    <ul>
+      <li>Reentrenar con 2,5× partidas (y más recientes) da <b>+1,54 puntos sobre nuestra mejor configuración desplegable</b> — unas 2.257 decisiones netas más acertadas de cada 146.597 — y +2,57 sobre su propio predecesor, sin ningún segmento perdedor. La hipótesis de la curva de aprendizaje se cumplió sin extrapolar.</li>
+      <li><b>Compensa continuar</b> por el criterio fijado antes de mirar. La fase 2 del plan (caché económica + fine-tune gemelo + compañero ward-free + nueva mezcla sobre el FIT nuevo, todo sobre esta cohorte) es una decisión nueva del propietario, con sus propios pilotos medidos; orden de magnitud: un día de máquina (extrapolado, no medido).</li>
+      <li><b>Paso 2, resultado (25-sep 23:10): NULO.</b> La combinación congelada 50/50 del Bf nuevo con la mezcla antigua da 50,80 % frente a 50,74 % del Bf nuevo: +0,061 [−0,049, +0,166], +89 netas, top-3 +0,002; en solo-ward cuesta −0,54 [−0,98, −0,11]. Recupera 3.054 de los 5.420 aciertos exclusivos de la mezcla antigua pero pierde 3.092 del Bf nuevo: las confianzas de los dos modelos no dicen cuál acierta (misma lección que la compuerta aprendida). Puerta de integridad 0/0; verificado desde las filas. <b>No se adopta; el Bf nuevo sigue siendo la referencia.</b></li>
+      <li><b>Presupuesto de la fase 2, medido</b> (piloto 22:51): caché económica 14,4 ms/decisión → 3,61 h de CPU; fine-tune gemelo 0,65 s/lote → 8,56 h de GPU; compañero ward-free 0,495 s/lote → 6,51 h de GPU. Todo dentro de los topes declarados (6/12/8 h): ~15 h de máquina solapando caché y ward-free, más ~1 día de ingeniería. Decisión del propietario.</li>
+      <li>Pasos adoptados con el revisor (25-sep): (1) el Bf nuevo queda <b>congelado como referencia</b> de acierto (todo candidato debe superar 50,74 % en esta cohorte y compararse con la mezcla antigua); (2) una única combinación congelada 50/50 del Bf nuevo con la mezcla antigua, sin buscar pesos (en ejecución 21:05); (3) después, economía y compañero ward-free con sus propios pilotos, conservando en la comparación al Bf nuevo y a la mejor combinación congelada.</li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="foot">Procedencia: <code>docs/expansion_plan_v1.md</code> (autorización, criterio de continuación, notas de reinicio A/B, intento 3 y 4) · <code>docs/expansion_result_v4_20260924.md</code> (dossier) · cadena <code>scripts/run_expansion_v4.py</code> · <code>data/experiments/16.18-expansion-v4/</code> (status, run_plan, logs por etapa, tests_gate) · <code>data/experiments/16.18-reconstructible-development-v4-bf-stage1/</code> (informe, checkpoint, filas por decisión de los tres brazos, curva por época, pilotos) · corpus <code>16.18-reconstructible-v4</code> · generación <code>16.18-reconstructible-development-v4</code> · cuarentena <code>16.18-reconstructible-v4_failed_gate_b</code> · test sellado · nada promocionado · cambios de código sin commit (decisión del propietario).</p>
+  </section>
+</main>
+</body>
+</html>

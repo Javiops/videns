@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Videns · Design lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0c0f;--panel:#14171d;--line:#242a34;--ink:#e9ecf1;--dim:#8d94a2;--faint:#5c6470;--gold:#c9a227}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:400 16px/1.6 "Inter",ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:66rem;margin:0 auto;padding:3.5rem 1.5rem 5rem}
+  h1{margin:0;font-size:1.75rem;font-weight:800;letter-spacing:-.035em}
+  h1 span{color:var(--gold)}
+  .intro{margin:.7rem 0 0;color:var(--dim);max-width:46rem}
+  .grid{display:grid;gap:1.25rem;margin-top:2.5rem}
+  @media(min-width:52rem){.grid{grid-template-columns:repeat(3,1fr)}}
+  a.card{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:14px;
+    background:var(--panel);overflow:hidden;transition:border-color .18s,transform .18s}
+  a.card:hover{border-color:var(--gold);transform:translateY(-3px)}
+  .swatch{height:104px;display:grid;place-items:center;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+  .swatch b{font-size:1.5rem;letter-spacing:-.04em}
+  .s-a{background:radial-gradient(ellipse 70% 90% at 50% 10%,rgba(232,193,74,.2),transparent 65%),linear-gradient(180deg,#0b0d13,#06070a)}
+  .s-a b{font-weight:900}.s-a b i{font-style:normal;color:#e8c14a}
+  .s-b{background:#0a0b0d;background-image:repeating-linear-gradient(90deg,transparent 0 33px,rgba(255,255,255,.07) 33px 34px)}
+  .s-b b{font-family:ui-monospace,Menlo,monospace;font-weight:800}.s-b b i{font-style:normal;color:#d4aa2e}
+  .s-c{background:radial-gradient(ellipse 60% 80% at 50% 30%,rgba(201,162,39,.16),transparent 65%),linear-gradient(180deg,#15120e,#0c0b09)}
+  .s-c b{font-family:Georgia,serif;font-weight:400;font-size:1.65rem}.s-c b i{color:#c9a227}
+  .body{padding:1.15rem 1.25rem 1.35rem}
+  .body h2{margin:0 0 .35rem;font-size:1rem;font-weight:600}
+  .body .tagline{margin:0 0 .75rem;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .body p{margin:0;font-size:.875rem;color:var(--dim)}
+  .body ul{margin:.85rem 0 0;padding-left:1.1rem;font-size:.8125rem;color:var(--faint)}
+  .body li{margin-bottom:.2rem}
+  .foot{margin-top:2.75rem;padding-top:1.5rem;border-top:1px solid var(--line);font-size:.8125rem;color:var(--faint)}
+  .foot code{font-family:ui-monospace,Menlo,monospace;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Design lab<span>.</span></h1>
+  <p class="intro">
+    Variants for videns.gg. Same slogan, same real data, same download CTA and background-video slot —
+    three different design languages. The current live draft stays untouched at <code>site/index.html</code>.
+  </p>
+
+  <div class="grid">
+    <a class="card" href="a-nocturne.html">
+      <div class="swatch s-a"><b>League without <i>Limits</i></b></div>
+      <div class="body"><p class="tagline">A · Corners</p><h2>Four corners</h2>
+      <p>Cards in the four corners, build and macro on opposite diagonals. The calmest of the set.</p></div>
+    </a>
+    <a class="card" href="a2-orbit.html">
+      <div class="swatch s-a"><b>League without <i>Limits</i></b></div>
+      <div class="body"><p class="tagline">A2 · Orbit</p><h2>Scattered</h2>
+      <p>Same cards, tilted a few degrees and pulled in tighter. Collage energy; straightens on hover.</p></div>
+    </a>
+    <a class="card" href="a3-hud.html">
+      <div class="swatch s-b"><b>League without <i>Limits</i></b></div>
+      <div class="body"><p class="tagline">A3 · HUD</p><h2>Docked rails</h2>
+      <p>Squared corners, no shadow, stacked against hairline rails. Reads like an in-game overlay.</p></div>
+    </a>
+    <a class="card" href="a4-feed.html">
+      <div class="swatch s-c"><b>League without <i>Limits</i></b></div>
+      <div class="body"><p class="tagline">A4 · Feed</p><h2>Live feed</h2>
+      <p>Title left, a running coach feed down the right, tail faded so it reads as continuing.</p></div>
+    </a>
+    <a class="card" href="b-ledger.html">
+      <div class="swatch s-b"><b>League without <i>Limits</i></b></div>
+      <div class="body"><p class="tagline">B · Ledger</p><h2>The record</h2>
+      <p>Mono type on a hairline grid. Kept for reference.</p></div>
+    </a>
+    <a class="card" href="c-atelier.html">
+      <div class="swatch s-c"><b>League without <i>Limits</i></b></div>
+      <div class="body"><p class="tagline">C · Atelier</p><h2>Editorial</h2>
+      <p>Serif, warm near-black. Kept for reference.</p></div>
+    </a>
+  </div>
+
+  <p class="foot">
+    All three are standalone static files in <code>build_tracker/design-lab/</code> — nothing here is deployed.
+    Pick one (or parts of several) and I'll fold it into <code>site/index.html</code>.
+  </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Match review · Videns</title>
+<meta name="description" content="Review the match timeline, builds, objectives and minute-sampled minimap.">
+<style>
+  :root { --bg:#0d0f13; --panel:#15181e; --panel2:#1c2028; --line:#2b3039;
+    --text:#f0f2f5; --muted:#a1a9b8; --faint:#707989; --gold:#e6c453;
+    --blue:#65a8ee; --red:#ef6b82; --mint:#4fe1bc; }
+  * { box-sizing:border-box; }
+  [hidden] { display:none!important; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font:400 15px/1.5 ui-sans-serif,-apple-system,"Segoe UI",Inter,system-ui,sans-serif; }
+  a { color:inherit; } button,input { font:inherit; }
+  button { cursor:pointer; }
+  button:focus-visible,a:focus-visible,summary:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
+  button:disabled { opacity:.4; cursor:default; }
+  .shell { width:min(100% - 2.5rem, 1280px); margin:auto; }
+  .top { border-bottom:1px solid var(--line); background:#101217; }
+  .top .shell { display:flex; align-items:center; gap:2rem; min-height:68px; }
+  .brand { text-decoration:none; font-weight:800; font-size:1.3rem; letter-spacing:-.04em; }
+  .brand i { color:var(--gold); font-style:normal; }
+  .tabs { display:flex; gap:1.4rem; align-self:stretch; align-items:center; }
+  .tabs a { text-decoration:none; color:var(--muted); font-weight:600; }
+  .tabs a.active { color:var(--text); border-bottom:2px solid var(--gold); padding:22px 0 20px; }
+  main { padding:2rem 0 4rem; }
+  .back { font-size:.84rem; color:var(--muted); text-decoration:none; }
+  .back:hover { color:var(--text); }
+  h1 { font-size:clamp(1.65rem,3vw,2.4rem); letter-spacing:-.035em; margin:.55rem 0 .2rem; }
+  .meta { color:var(--muted); margin:0 0 1.7rem; }
+  .lookup { display:flex; gap:.5rem; flex-wrap:wrap; margin:.5rem 0 1.6rem; }
+  .lookup input,.lookup select { color:var(--text); background:var(--panel); border:1px solid var(--line);
+    border-radius:8px; padding:.62rem .75rem; min-width:0; }
+  .lookup input { flex:1 1 15rem; }
+  .lookup button { background:var(--gold); border:0; border-radius:8px; padding:.62rem 1rem; font-weight:700; }
+  .lookup button:hover { filter:brightness(1.1); }
+  .error { border:1px solid #73414c; color:#f4b8c0; background:#251a20; padding:1rem; border-radius:10px; }
+  .loading { color:var(--muted); padding:2rem; border:1px solid var(--line); border-radius:12px; }
+  .review { display:none; }
+  .review.ready { display:block; }
+  .review-layout { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:1.25rem; }
+  .panel { border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+  .transport { padding:1rem; }
+  .transport-top { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; }
+  .time { font-size:2rem; font-variant-numeric:tabular-nums; font-weight:800; line-height:1; }
+  .source { color:var(--muted); font-size:.78rem; max-width:31rem; }
+  .controls { display:flex; align-items:center; gap:.5rem; }
+  .controls button { background:var(--panel2); color:var(--text); border:1px solid var(--line);
+    border-radius:7px; padding:.4rem .7rem; }
+  .controls button:hover { border-color:var(--gold); }
+  .event-rail { position:relative; max-height:770px; overflow:auto; padding:.45rem; scrollbar-gutter:stable; }
+  .rail-head { position:sticky; top:0; z-index:2; background:var(--panel); padding:.65rem .7rem;
+    border-bottom:1px solid var(--line); font-size:.77rem; color:var(--muted); }
+  .rail-filters { display:flex; gap:.3rem; flex-wrap:wrap; margin-top:.5rem; }
+  .rail-filters button { color:var(--muted); background:transparent; border:1px solid var(--line);
+    border-radius:99px; padding:.2rem .5rem; font-size:.69rem; }
+  .rail-filters button.active { background:var(--panel2); color:var(--text); border-color:var(--gold); }
+  .ev { display:grid; grid-template-columns:3.6rem minmax(0,1fr); gap:.55rem; width:100%;
+    text-align:left; border:0; border-bottom:1px solid var(--line); background:transparent;
+    color:var(--text); padding:.7rem .55rem; }
+  .ev:hover,.ev.active { background:#24212b; }
+  .ev.active { box-shadow:inset 3px 0 var(--gold); }
+  .ev time { color:var(--muted); font-variant-numeric:tabular-nums; }
+  .ev b { font-size:.82rem; font-weight:650; display:block; }
+  .ev small { color:var(--muted); font-size:.73rem; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ev.kill b { color:#f1a3af; } .ev.objective b { color:var(--gold); }
+  .ev.base b { color:var(--mint); } .ev.shop b { color:#bcb7ff; }
+  .ev .ci { width:22px; height:22px; border-radius:5px; display:block; border:1px solid var(--line); flex:none; }
+  .ev .ci.sm { width:17px; height:17px; border-radius:4px; }
+  .ev .ci.dead { filter:grayscale(.85) brightness(.62); }
+  .ev .ci.exec { display:grid; place-items:center; background:var(--panel2); color:var(--faint); font-size:11px; }
+  .kill-row { display:flex; align-items:center; gap:.3rem; margin-bottom:.2rem; }
+  .kill-row .x { color:var(--faint); font-size:.68rem; font-weight:700; display:inline; }
+  .assist-group { display:flex; align-items:center; gap:2px; margin-left:.3rem;
+    padding-left:.4rem; border-left:1px solid var(--line); }
+  .assist-group em { font-style:normal; color:var(--faint); font-size:.67rem; font-weight:700; }
+  .ev b .oi { width:18px; height:18px; vertical-align:-4px; margin-right:.35rem; }
+  .ev.minute { padding:.3rem .55rem; background:#181b21; }
+  .ev.minute time { color:var(--faint); font-weight:700; }
+  .lower { margin-top:1.25rem; }
+  .section-head { display:flex; justify-content:space-between; align-items:baseline; gap:1rem;
+    padding:1rem 1.1rem; border-bottom:1px solid var(--line); }
+  .section-head h2 { font-size:.92rem; margin:0; }
+  .section-head span { color:var(--faint); font-size:.75rem; }
+  .teams { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; padding:.75rem; }
+  .team-title { color:var(--muted); font-size:.7rem; letter-spacing:.13em; text-transform:uppercase;
+    margin:0 0 .35rem; padding:.2rem .15rem; }
+  .team-title.blue { color:var(--blue); } .team-title.red { color:var(--red); }
+  .player { display:grid; grid-template-columns:38px minmax(0,1fr) auto; align-items:center; gap:.55rem;
+    width:100%; min-height:72px; margin-bottom:.5rem; padding:.45rem; border:1px solid var(--line);
+    border-radius:9px; background:#111318; color:var(--text); text-align:left; }
+  .player:hover,.player.focus { border-color:var(--gold); }
+  .player img.champ { width:38px; height:38px; border-radius:7px; }
+  .portrait { position:relative; width:38px; height:38px; }
+  .player.is-down .champ { filter:grayscale(1) brightness(.55); }
+  .identity .summoner-name { color:var(--muted); font-size:.69rem; font-weight:400; overflow:hidden; text-overflow:ellipsis; }
+  .identity .life-status { color:#f2a6b5; font-size:.69rem; }
+  .player-stats { font-variant-numeric:tabular-nums; }
+  .identity { min-width:0; }
+  .identity b { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.79rem; }
+  .identity span { color:var(--muted); font-size:.7rem; display:block; }
+  .loadout { display:flex!important; gap:3px; margin-top:3px; }
+  .loadout img { width:17px; height:17px; border-radius:3px; }
+  .inventory { display:grid; grid-template-columns:repeat(4,23px); gap:3px; }
+  .slot { position:relative; width:23px; height:23px; background:#20242b; border:1px solid #30343d; border-radius:4px; }
+  .slot.trinket,.slot.trinket img { border-radius:50%; }
+  .quantity { position:absolute; bottom:-2px; right:-2px; color:white; background:#080a10; padding:0 2px; border-radius:3px; font:bold 10px/1.2 system-ui; }
+  .slot img { width:100%; height:100%; border-radius:3px; }
+  .map-wrap { padding:.9rem 0 0; }
+  .map { position:relative; width:min(100%,560px); aspect-ratio:1; margin:auto;
+    border:1px solid #3a414a; border-radius:10px;
+    background:#243343 center/cover no-repeat; overflow:hidden; }
+  .marker { position:absolute; z-index:2; width:27px; height:27px; transform:translate(-50%,-50%);
+    border:2px solid var(--red); border-radius:50%; background:#12141a; box-shadow:0 2px 8px #0009; }
+  .marker.blue { border-color:var(--blue); } .marker.focus { border-color:var(--gold); z-index:3; transform:translate(-50%,-50%) scale(1.2); }
+  .marker img { width:100%; height:100%; border-radius:50%; }
+  .marker { padding:0; }
+  .marker.last-position { border-style:dashed; }
+  .death-marker { position:absolute; z-index:2; width:27px; height:27px; padding:0;
+    transform:translate(-50%,-50%); border:2px solid #c8687b; border-radius:6px; background:#161016; }
+  .death-marker img { width:100%; height:100%; border-radius:4px; filter:grayscale(1) brightness(.45); }
+  .death-marker.focus { z-index:3; outline:2px solid var(--gold); outline-offset:2px; }
+  .death-cross { position:absolute; right:-6px; bottom:-5px; width:16px; height:16px;
+    display:grid; place-items:center; border-radius:50%; background:#632338; color:#ffdce4; font:800 14px/1 system-ui; }
+  .map-legend .death-key { color:#f2a6b5; font-size:16px; }
+  /* Riot's own minimap art, over a team-tinted halo rather than a lettered box. */
+  .structure { position:absolute; z-index:1; display:grid; place-items:center; transform:translate(-50%,-50%);
+    border-radius:50%; pointer-events:none; filter:drop-shadow(0 1px 3px #000c);
+    background:radial-gradient(circle,rgba(239,107,130,.42) 34%,rgba(239,107,130,0) 72%); }
+  .structure.blue { background:radial-gradient(circle,rgba(101,168,238,.45) 34%,rgba(101,168,238,0) 72%); }
+  .structure img { width:100%; height:100%; object-fit:contain; display:block; }
+  .structure.tower { width:18px; height:18px; }
+  .structure.inhibitor { width:21px; height:21px; }
+  .structure.nexus { width:28px; height:28px; }
+  .structure.down { opacity:.25; filter:grayscale(1); }
+  .event-pin { position:absolute; z-index:4; width:31px; height:31px; border:2px solid var(--gold);
+    border-radius:50%; transform:translate(-50%,-50%); box-shadow:0 0 0 5px #e6c4533d,0 0 16px #000;
+    pointer-events:none; }
+  .map-legend { display:flex; justify-content:center; flex-wrap:wrap; gap:.45rem 1rem;
+    margin:.7rem 0 0; color:var(--muted); font-size:.73rem; }
+  .map-legend span { display:inline-flex; align-items:center; gap:.3rem; }
+  .map-legend img { width:15px; height:15px; object-fit:contain; }
+  .map-legend b { color:var(--text); }
+  .map-note { color:var(--muted); font-size:.73rem; margin:.6rem .1rem 0; }
+  .map-note { text-align:center; font-variant-numeric:tabular-nums; }
+  .data-notes { color:var(--muted); font-size:.76rem; margin:.55rem 0 0; }
+  .data-notes summary { cursor:pointer; width:fit-content; margin:auto; }
+  .data-notes p { margin:.5rem auto; max-width:62ch; }
+  .compare .data-notes summary { margin:0; }
+  .compare { margin-top:1.25rem; padding:1.1rem 1.25rem; }
+  .compare h2 { font-size:1rem; margin:0 0 .3rem; }
+  .compare p { color:var(--muted); font-size:.82rem; margin:.3rem 0 .8rem; }
+  .compare .status { border:1px solid #635532; border-radius:8px; background:#242018;
+    color:#e3d198; padding:.65rem .75rem; font-size:.78rem; }
+  .status a { color:var(--gold); }
+  .peer-items { display:grid; gap:.45rem; margin:.75rem 0; }
+  .peer-item { display:flex; align-items:center; gap:.55rem; padding:.3rem 0;
+    border-top:1px solid #ffffff16; }
+  .peer-item img { width:31px; height:31px; border-radius:5px; }
+  .peer-item span { display:flex; flex-direction:column; }
+  .peer-item small { color:var(--muted); }
+  .item-list { display:flex; flex-wrap:wrap; gap:.35rem; min-height:30px; }
+  .item-list img { width:30px; height:30px; border:1px solid var(--line); border-radius:5px; }
+  .comparison-columns { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:.75rem; }
+  .comparison-columns h3 { color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.09em; margin:0 0 .45rem; }
+  .footnote { color:var(--faint); font-size:.72rem; margin:1.2rem 0 0; }
+  @media(max-width:950px) { .review-layout { grid-template-columns:1fr; } .event-rail { max-height:320px; } }
+  @media(max-width:650px) { .shell { width:min(100% - 1.5rem,1280px); } .teams { grid-template-columns:1fr; }
+    .top .shell { gap:1rem; } .tabs { margin-left:auto; } .comparison-columns { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="top"><div class="shell"><a class="brand" href="/search">VIDENS<i>.</i></a>
+  <nav class="tabs" aria-label="Primary"><a href="/search">Match history</a><a class="active" href="/review" aria-current="page">Review</a></nav>
+</div></header>
+<main class="shell">
+  <a class="back" href="/search">← Back to match history</a>
+  <h1 id="title">Review a match</h1>
+  <p class="meta" id="meta">Review match events, player builds and recorded positions.</p>
+  <form class="lookup" id="lookup">
+    <input id="match-id" name="match_id" placeholder="EUW1_7923240080" aria-label="Match ID" required>
+    <select id="region" name="region" aria-label="Region"><option value="euw">EUW</option><option value="eune">EUNE</option><option value="na">NA</option><option value="kr">KR</option><option value="br">BR</option><option value="lan">LAN</option><option value="las">LAS</option><option value="jp">JP</option><option value="tr">TR</option><option value="ru">RU</option><option value="me">ME</option><option value="oce">OCE</option><option value="sg">SG</option><option value="ph">PH</option><option value="th">TH</option><option value="tw">TW</option><option value="vn">VN</option></select>
+    <button type="submit">Load review</button>
+  </form>
+  <div id="state"></div>
+  <div class="review" id="review">
+    <div class="review-layout">
+      <section class="panel transport" aria-label="Match minimap and event controls">
+        <div class="transport-top"><div><div class="time" id="time">00:00</div><div class="source" id="at-time">Select an event to inspect the Rift.</div></div>
+          <div class="controls"><button id="prev" type="button" aria-label="Previous event">← Event</button><button id="next" type="button" aria-label="Next event">Event →</button></div></div>
+        <div class="map-wrap"><div class="map" id="map" role="group" aria-label="Summoner's Rift with recorded champion positions and structure state"></div>
+          <div class="map-legend"><span><img src="https://raw.communitydragon.org/latest/game/assets/ux/minimap/icons/tower.png" alt="">tower</span><span><img src="https://raw.communitydragon.org/latest/game/assets/ux/minimap/icons/inhibitor.png" alt="">inhibitor</span><span><img src="https://raw.communitydragon.org/latest/game/assets/ux/minimap/icons/nexus.png" alt="">Nexus</span><span>dimmed = destroyed</span></div>
+          <div class="map-legend"><span>Portrait = last recorded position</span><span><b class="death-key">×</b> death location</span></div>
+          <p class="map-note" id="map-note"></p>
+          <details class="data-notes"><summary>How positions work</summary><p>Riot records positions roughly once per minute. Each event updates the review using the latest recorded positions. A death removes the living marker; its death location remains marked until a later snapshot confirms positive health. The exact respawn time and movement between snapshots are unavailable.</p></details></div>
+      </section>
+      <aside class="panel event-rail" aria-label="Match events"><div class="rail-head">EVENT TIMELINE<div class="rail-filters" id="filters"></div></div><div id="events"></div></aside>
+    </div>
+    <div class="lower">
+      <section class="panel"><div class="section-head"><h2>Everyone's build at this moment</h2><span id="board-note"></span></div><div class="teams" id="teams"></div></section>
+    </div>
+    <section class="panel compare" aria-label="Build comparison"><h2>Build review · <span id="focused-player"></span></h2>
+      <p>Observed purchase versus nearby high-elo shop visits. A common purchase is not necessarily the right one.</p>
+      <div class="comparison-columns"><div><h3>Held before shop</h3><div class="item-list" id="held-items"></div>
+        <h3 style="margin-top:.9rem">Bought</h3><div class="item-list" id="actual-buy"></div><p id="buy-time"></p></div>
+        <div><h3>Comparable purchases</h3><div class="status" id="comparison-status"></div></div></div>
+    </section>
+    <p class="footnote">Match events and snapshots: Riot Games. Intermediate inventories may omit unreported automatic upgrades. The final inventory comes from the match record. Videns is not endorsed by Riot Games.</p>
+  </div>
+</main>
+<script src="review-faker-data.js"></script>
+<script src="review-playback.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const escapeHtml = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clock = ms => `${String(Math.floor(ms/60000)).padStart(2,"0")}:${String(Math.floor(ms/1000)%60).padStart(2,"0")}`;
+let data, playback, currentState, now = 0, focus = 0, filter = "all", visibleEvents = [], selectedEvent = null;
+function installReview(review){
+  data=review;playback=VidensPlayback.create(review);
+  focus=data.focus_participant_id;now=0;filter="all";selectedEvent=null;
+  currentState=playback.stateAt(0);
+}
+async function demoReview(){
+  const encoded=window.VIDENS_FAKER_REVIEW_GZIP;
+  if(!encoded) throw Error("The Faker review fixture is missing.");
+  const bytes=Uint8Array.from(atob(encoded),character=>character.charCodeAt(0));
+  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return JSON.parse(await new Response(stream).text());
+}
+const lastAt=VidensPlayback.lastAt;
+function player(pid) { return data.players.find(p => p.participant_id === pid); }
+const MM="https://raw.communitydragon.org/latest/game/assets/ux/minimap/icons";
+function structureIcon(kind){return kind==="inhibitor"?"inhibitor.png":kind==="nexus"?"nexus.png":"tower.png";}
+function baseIcon(title){const t=(title||"").toLowerCase();
+  return t.includes("inhibitor")?"inhibitor.png":t.includes("game ended")?"nexus.png":"tower.png";}
+function objectiveIcon(title,detail){const t=`${title} ${detail||""}`.toLowerCase();
+  if(t.includes("baron"))return "baron.png";
+  if(t.includes("herald"))return "riftherald.png";
+  if(t.includes("horde")||t.includes("grub"))return "grub.png";
+  if(t.includes("elder"))return "dragon_elder.png";
+  if(t.includes("water")||t.includes("ocean"))return "dragon_ocean.png";
+  if(t.includes("air")||t.includes("cloud"))return "dragon_cloud.png";
+  if(t.includes("fire")||t.includes("infernal"))return "dragon_infernal.png";
+  if(t.includes("earth")||t.includes("mountain"))return "dragon_mountain.png";
+  if(t.includes("hextech"))return "dragon_hextech.png";
+  if(t.includes("chemtech"))return "dragon_chemtech.png";
+  if(t.includes("dragon"))return "dragon.png";
+  return null;}
+function champIcon(pid,cls){const p=player(pid);
+  return p?`<img class="ci ${cls||""}" src="${escapeHtml(p.icon)}" alt="" title="${escapeHtml(p.champion)}">`:"";}
+// A kill is killer, victim AND assists. The scoreboard counts assists, so a
+// timeline that hides them disagrees with the game's own numbers.
+function eventBody(e){
+  if(e.kind==="kill"){
+    const killer=e.actors&&e.actors[0], victim=e.actors&&e.actors[1];
+    const assists=(e.assists||[]).filter(id=>id&&id!==killer);
+    const kn=(player(killer)||{}).champion, vn=(player(victim)||{}).champion||"?";
+    const names=assists.map(a=>(player(a)||{}).champion||"?");
+    const head=killer?champIcon(killer):`<span class="ci exec" title="Execution">\u2715</span>`;
+    const group=assists.length
+      ? `<span class="assist-group" title="Assisted by ${escapeHtml(names.join(", "))}"><em>+${assists.length}</em>${assists.map(a=>champIcon(a,"sm")).join("")}</span>`
+      : "";
+    const line=kn?`${kn} killed ${vn}`:`${vn} executed`;
+    const tail=names.length?` \u00b7 assist ${names.join(", ")}`:"";
+    return `<span class="kill-row">${head}<b class="x" aria-hidden="true">\u2715</b>${champIcon(victim,"dead")}${group}</span><small>${escapeHtml(line+tail)}</small>`;
+  }
+  if(e.kind==="objective"){
+    const f=objectiveIcon(e.title,e.detail);
+    const side=e.team_id?` \u00b7 ${e.team_id===100?"Blue":"Red"} team`:"";
+    return `<b>${f?`<img class="oi" src="${MM}/${f}" alt="">`:""}${escapeHtml(e.detail||e.title)}</b><small>${escapeHtml((e.detail?e.title:"Objective")+side)}</small>`;
+  }
+  if(e.kind==="base")
+    return `<b><img class="oi" src="${MM}/${baseIcon(e.title)}" alt="">${escapeHtml(e.title)}</b><small>${escapeHtml(e.detail||"")}</small>`;
+  return `<b>${escapeHtml(e.title)}</b><small>${escapeHtml(e.detail||"")}</small>`;
+}
+function itemIcon(id) { return `${data.item_icon_base}${id}.png`; }
+function itemName(id){return data.item_names?.[id]||`Item ${id}`;}
+function itemSlots(ids) {
+  const slots=[];
+  for(const id of ids){
+    const limit=data.item_meta?.[id]?.stacks||1;
+    const stack=limit>1?slots.find(slot=>slot.id===id&&slot.count<limit):null;
+    if(stack)stack.count++;else slots.push({id,count:1});
+  }
+  return Array.from({length:Math.max(8,slots.length)},(_,i)=>{
+    const slot=slots[i];if(!slot)return '<span class="slot empty" aria-hidden="true"></span>';
+    const name=`${itemName(slot.id)}${slot.count>1?` ×${slot.count}`:""}`;
+    return `<span class="slot ${data.item_meta?.[slot.id]?.trinket?"trinket":""}" title="${escapeHtml(name)}"><img src="${escapeHtml(itemIcon(slot.id))}" alt="${escapeHtml(name)}">${slot.count>1?`<small class="quantity">${slot.count}</small>`:""}</span>`;
+  }).join("");
+}
+function decisionEvents(){return (data.decisions||[]).filter(d=>d.participant_id===focus).map(d=>({
+  ts:d.ts_end??d.ts,kind:"shop",title:"Shop visit",detail:`${player(d.participant_id)?.champion||"Player"} · ${d.bought.map(itemName).join(", ")||"no retained buy"}`,
+  participant_id:d.participant_id
+}));}
+function timelineAll(){return [...data.events,...decisionEvents()].sort((a,b)=>a.ts-b.ts);}
+function eventKey(e){return e?`${e.kind}:${e.ts}:${e.participant_id||0}:${(e.actors||[]).join("-")}:${e.title||""}`:"";}
+function selectPlayer(id){focus=id;renderEvents();renderBoard();renderMap();renderComparison();}
+function setTime(ts, event=null, scrollEvent=false) {
+  now = Math.min(data.duration_ms, Math.max(0, Number(ts)||0));
+  currentState=playback.stateAt(now);
+  selectedEvent = event || timelineAll().filter(e=>e.ts<=now).at(-1) || null;
+  $("#time").textContent = clock(now);
+  $("#at-time").textContent = selectedEvent && Math.abs(selectedEvent.ts-now)<1500
+    ? `${selectedEvent.title||"Rift state"}${selectedEvent.detail ? ` · ${selectedEvent.detail}` : ""}`
+    : "Select an event to inspect the Rift.";
+  renderBoard(); renderMap(); renderComparison();
+  document.querySelectorAll(".ev").forEach(el=>{
+    const active=el.dataset.eventKey===eventKey(selectedEvent);
+    el.classList.toggle("active",active);el.setAttribute("aria-current",active?"true":"false");
+  });
+  const steps=visibleEvents.filter(e=>e.kind!=="minute");
+  const at=steps.findIndex(e=>eventKey(e)===eventKey(selectedEvent));
+  $("#prev").disabled=at>=0?at===0:!steps.some(e=>e.ts<now);
+  $("#next").disabled=at>=0?at===steps.length-1:!steps.some(e=>e.ts>now);
+  if(scrollEvent){
+    const row=document.querySelector(".ev.active"),rail=document.querySelector(".event-rail");
+    if(row&&rail){
+      const heading=rail.querySelector(".rail-head")?.offsetHeight||0;
+      if(row.offsetTop<rail.scrollTop+heading)rail.scrollTop=Math.max(0,row.offsetTop-heading);
+      else if(row.offsetTop+row.offsetHeight>rail.scrollTop+rail.clientHeight)rail.scrollTop=row.offsetTop+row.offsetHeight-rail.clientHeight;
+    }
+  }
+}
+function statsAt(pid) {
+  return currentState.players[pid].kda.join(" / ");
+}
+function renderBoard(){
+  $("#board-note").textContent=currentState.final_inventory?"Final inventory":`Items at ${clock(now)} · stats from the latest snapshot`;
+  $("#teams").innerHTML=[100,200].map(team=>`<div><h3 class="team-title ${team===100?"blue":"red"}">${team===100?"BLUE SIDE":"RED SIDE"}</h3>${data.players.filter(p=>p.team_id===team).map(p=>{
+    const seen=currentState.players[p.participant_id],death=seen.life==="death_recorded";
+    const loadout=[...(p.spells||[]),p.keystone,p.secondary_tree].filter(Boolean).map(i=>`<img src="${escapeHtml(i.icon)}" alt="${escapeHtml(i.name)}" title="${escapeHtml(i.name)}">`).join("");
+    const status=death?`<span class="life-status">Death at ${clock(seen.death_at)}</span>`:"";
+    return `<button type="button" class="player ${p.participant_id===focus?"focus":""} ${death?"is-down":""}" data-player="${p.participant_id}" data-life="${seen.life}" aria-pressed="${p.participant_id===focus}">
+      <span class="portrait"><img class="champ" src="${escapeHtml(p.icon)}" alt="">${death?'<span class="death-cross" aria-hidden="true">×</span>':""}</span>
+      <span class="identity"><b>${escapeHtml(p.champion)}<span class="summoner-name">${escapeHtml(p.name)}</span></b>
+      <span class="player-stats" title="Level and CS sampled at ${clock(seen.sample_at||0)}">Lv ${seen.level??"—"} · ${statsAt(p.participant_id)} · ${seen.cs??"—"} CS</span>${status}<span class="loadout">${loadout}</span></span>
+      <span class="inventory">${itemSlots(seen.inventory)}</span></button>`;
+  }).join("")}</div>`).join("");
+  document.querySelectorAll("[data-player]").forEach(button=>button.onclick=()=>selectPlayer(Number(button.dataset.player)));
+}
+function mapPoint(pos){
+  const bounds=data.map_bounds||{min_x:-120,min_y:-120,max_x:14870,max_y:14980};
+  const x=Math.min(100,Math.max(0,(pos.x-bounds.min_x)/(bounds.max_x-bounds.min_x)*100));
+  const y=Math.min(100,Math.max(0,100-(pos.y-bounds.min_y)/(bounds.max_y-bounds.min_y)*100));
+  return `left:${x}%;top:${y}%`;
+}
+function renderMap(){
+  const scene=currentState;
+  const structures=scene.structures.map(s=>{
+    const side=s.team_id===100?"Blue":"Red";
+    const name=`${side} ${s.lane.toLowerCase()} ${s.tier.toLowerCase()} ${s.kind}`;
+    const state=s.down?(s.kind==="inhibitor"?"down":"destroyed"):"standing";
+    return `<span class="structure ${s.kind} ${s.team_id===100?"blue":"red"} ${s.down?"down":""}"
+      style="${mapPoint(s.position)}" title="${escapeHtml(name)} · ${state}"
+      aria-label="${escapeHtml(name)} · ${state}"><img src="${MM}/${structureIcon(s.kind)}" alt=""></span>`;
+  }).join("");
+  const champions=data.players.map(p=>{
+    const state=scene.players[p.participant_id],death=state.life==="death_recorded";
+    const position=death?state.death_position:state.position;
+    if(!position)return "";
+    const note=death?`Death at ${clock(state.death_at)}; awaiting a later living snapshot.`
+      :`Recorded position at ${clock(state.position_at)}${state.position_age_ms>0?"; movement since then is unknown.":"."}`;
+    return `<button type="button" class="${death?"death-marker":"marker"} ${p.team_id===100?"blue":"red"} ${p.participant_id===focus?"focus":""} ${!death&&state.position_age_ms>0?"last-position":""}"
+      data-map-player="${p.participant_id}" data-life="${state.life}" style="${mapPoint(position)}"
+      title="${escapeHtml(p.champion)} · ${note}" aria-label="${escapeHtml(p.champion)} · ${note}">
+      <img src="${escapeHtml(p.icon)}" alt="">${death?'<span class="death-cross" aria-hidden="true">×</span>':""}</button>`;
+  }).join("");
+  const pin=selectedEvent?.position&&selectedEvent.ts===now
+    ?`<span class="event-pin" style="${mapPoint(selectedEvent.position)}" title="Recorded event location"></span>`:"";
+  $("#map").innerHTML=structures+champions+pin;
+  const sample=lastAt(data.observations,now);
+  $("#map-note").textContent=`Event ${clock(now)} · latest position snapshot ${sample?clock(sample.ts):"unavailable"}`;
+}
+function renderComparison(){
+  const p=player(focus);$("#focused-player").textContent=p?.champion||"Player";
+  const playerVisits=(data.decisions||[]).filter(d=>d.participant_id===focus);
+  const visit=playerVisits.filter(d=>(d.ts_end??d.ts)<=now).at(-1);
+  const icons=items=>items.length ? items.map(id=>`<img src="${escapeHtml(itemIcon(id))}"
+    alt="${escapeHtml(itemName(id))}" title="${escapeHtml(itemName(id))}">`).join("") : "—";
+  $("#held-items").innerHTML=visit?icons(visit.inventory):"—";
+  $("#actual-buy").innerHTML=visit?icons(visit.bought):"—";
+  $("#buy-time").textContent=visit
+    ? `Shop ${clock(visit.ts)}–${clock(visit.ts_end??visit.ts)} · level ${visit.level??"?"} · about ${visit.gold_est??"?"} gold on arrival.`
+    : playerVisits.length?"No completed shop visit at this time.":"This sample reviews Faker's shop visits. Select Faker to inspect his build choices.";
+  const cohort=visit?.comparison;
+  if(cohort?.status==="descriptive"&&cohort.top_items?.length){
+    const first=cohort.top_items[0];
+    const rows=cohort.top_items.map(item=>`<div class="peer-item"><img src="${escapeHtml(itemIcon(item.item_id))}"
+      alt=""><span><b>${escapeHtml(item.item_name)}</b><small>${item.visits} of ${cohort.n} nearby shop visits</small></span></div>`).join("");
+    $("#comparison-status").innerHTML=`<b>${(visit.modeled_bought||visit.bought).includes(first.item_id)?"Included in this shop":"Common affordable choice"}: ${escapeHtml(first.item_name)}</b>
+      <div class="peer-items">${rows}</div><details class="data-notes"><summary>About these ${cohort.n} shops</summary><p>Item occurrences in comparable Cassiopeia mid shops, patch 16.18. Frozen TRAIN sample, n=${cohort.n}. Prices use the estimated wallet; choices are filtered for inventory space and purchase restrictions.
+      <a href="${escapeHtml(cohort.report)}" target="_blank" rel="noopener">Method & evidence</a></p></details>`;
+  }else{
+    $("#comparison-status").textContent=cohort?.reason||"No frozen-cohort comparison is available for this decision.";
+  }
+}
+function renderEvents(){
+  const minutes=Array.from({length:Math.floor(data.duration_ms/60000)+1},(_,m)=>({
+    ts:m*60000,kind:"minute",title:"",detail:""
+  }));
+  const all=[...timelineAll(),...minutes].sort((a,b)=>a.ts-b.ts);
+  visibleEvents=filter==="all"?all:all.filter(e=>e.kind===filter);
+  $("#events").innerHTML=visibleEvents.length?visibleEvents.map((e,i)=>`<button type="button"
+    class="ev ${e.kind} ${eventKey(e)===eventKey(selectedEvent)?"active":""}" data-index="${i}" data-ts="${e.ts}" data-event-key="${escapeHtml(eventKey(e))}" aria-current="${eventKey(e)===eventKey(selectedEvent)}"><time>${clock(e.ts)}</time>
+    <span>${eventBody(e)}</span></button>`).join("")
+    :`<p class="map-note" style="padding:.75rem">No events in this category.</p>`;
+  document.querySelectorAll(".ev").forEach(b=>b.onclick=()=>{
+    const e=visibleEvents[Number(b.dataset.index)];
+    if(e.participant_id) focus=e.participant_id;
+    setTime(e.ts,e);
+  });
+  const categories=[["all","All"],["kill","Kills"],["objective","Objectives"],["base","Bases"],["shop","Shops"]];
+  $("#filters").innerHTML=categories.map(([key,label])=>`<button type="button"
+    class="${key===filter?"active":""}" data-filter="${key}" aria-pressed="${key===filter}">${label}</button>`).join("");
+  document.querySelectorAll("[data-filter]").forEach(b=>b.onclick=()=>{filter=b.dataset.filter;renderEvents();setTime(now,selectedEvent);});
+}
+function step(dir){
+  const all=visibleEvents.filter(e=>e.kind!=="minute");
+  const index=all.findIndex(e=>eventKey(e)===eventKey(selectedEvent));
+  const e=index>=0?all[index+dir]:dir<0?[...all].reverse().find(x=>x.ts<now):all.find(x=>x.ts>now);
+  if(e)setTime(e.ts,e,true);
+}
+async function load(matchId,region,participantId=0,push=true){
+  $("#review").classList.remove("ready");
+  $("#state").innerHTML='<div class="loading">Loading Riot match and timeline…</div>';
+  try{
+    const qs=new URLSearchParams({region});
+    if(participantId) qs.set("participant_id",participantId);
+    const res=await fetch(`/api/review/${encodeURIComponent(matchId)}?${qs}`);
+    const body=await res.json().catch(()=>({}));
+    if(!res.ok)throw Error(body.detail||`Review failed (${res.status}).`);
+    installReview(body);
+    $("#title").textContent=`${data.match_id} · Match review`;
+    $("#meta").textContent=`Patch ${data.patch} · ${clock(data.duration_ms)} · ${data.players.find(p=>p.participant_id===focus)?.win?"Victory":"Defeat"} for selected player`;
+    $("#map").style.backgroundImage=`url("${data.map_image}")`;
+    renderEvents();setTime(0);
+    $("#state").innerHTML="";$("#review").classList.add("ready");
+    if(push){
+      const url=new URLSearchParams({match_id:matchId,region,participant_id:String(focus)});
+      history.pushState(null,"",`/review?${url}`);
+    }
+  }catch(err){$("#state").innerHTML=`<div class="error">${escapeHtml(err.message)}</div>`;}
+}
+async function showDemo(){
+  $("#state").innerHTML='<div class="loading">Opening Faker’s ranked match…</div>';
+  try{
+    installReview(await demoReview());
+    const faker=player(focus);
+    $("#title").textContent=`Faker · ${faker.champion}`;
+    $("#meta").textContent=`${faker.name}#${faker.tag} · Ranked Solo · ${faker.win?"Victory":"Defeat"} · ${clock(data.duration_ms)} · patch ${data.patch}`;
+    $("#lookup").hidden=true;
+    $("#map").style.backgroundImage=`url("${data.map_image}")`;
+    renderEvents();
+    const initial=data.events.find(event=>event.kind==="kill")||timelineAll()[0];
+    setTime(initial?.ts||0,initial);
+    $("#state").innerHTML="";$("#review").classList.add("ready");
+  }catch(err){$("#state").innerHTML=`<div class="error">${escapeHtml(err.message)}</div>`;}
+}
+$("#lookup").addEventListener("submit",e=>{
+  e.preventDefault();load($("#match-id").value.trim(),$("#region").value);
+});
+$("#prev").onclick=()=>step(-1);$("#next").onclick=()=>step(1);
+$("#map").addEventListener("click",event=>{
+  const marker=event.target.closest("[data-map-player]");
+  if(marker)selectPlayer(Number(marker.dataset.mapPlayer));
+});
+document.addEventListener("keydown",event=>{
+  if(!data||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||event.target.closest?.("input,select,textarea,[contenteditable=true]"))return;
+  if(event.key==="ArrowLeft"||event.key==="ArrowRight"){
+    event.preventDefault();step(event.key==="ArrowLeft"?-1:1);
+  }
+});
+const params=new URLSearchParams(location.search);
+if(document.body.dataset.staticDemo==="1"||params.has("demo"))showDemo();
+else if(params.has("match_id")){
+  $("#match-id").value=params.get("match_id");
+  $("#region").value=params.get("region")||"euw";
+  load(params.get("match_id"),$("#region").value,Number(params.get("participant_id"))||0,false);
+}
+</script>
+</body>
+</html>

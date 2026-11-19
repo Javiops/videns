@@ -1,0 +1,19 @@
+{
+  "_": "Muestra de arranque del OCR de oro. Las diez celdas etiquetadas a mano leyendo la captura; a partir de aqui todo es automatico: las plantillas salen de aqui y la validacion sale de los anclajes de Match-V5 (cada 60s, los diez).",
+  "fuente": "EUW1_7986655074, replay t=900s, pasada omni, marcador en vista de ORO",
+  "captura": "sample_gold.png",
+  "rect": [537, 820, 1382, 1080],
+  "nota_rect": "scoreboard_rect() a 1920x1080; el recorte ya viene aplicado en el png",
+  "celdas": [
+    {"pid": 1,  "campeon": "Renekton", "box": [135, 49, 216, 64],  "texto": "92(6457)"},
+    {"pid": 2,  "campeon": "Shaco",    "box": [130, 93, 221, 108], "texto": "726(6126)"},
+    {"pid": 3,  "campeon": "Zed",      "box": [126, 137, 226, 152], "texto": "1117(6522)"},
+    {"pid": 4,  "campeon": "Kaisa",    "box": [130, 181, 221, 196], "texto": "620(8850)"},
+    {"pid": 5,  "campeon": "Rell",     "box": [130, 225, 221, 240], "texto": "271(4961)"},
+    {"pid": 6,  "campeon": "Riven",    "box": [643, 49, 724, 64],  "texto": "83(6258)"},
+    {"pid": 7,  "campeon": "Elise",    "box": [643, 93, 724, 108], "texto": "91(6891)"},
+    {"pid": 8,  "campeon": "Yone",     "box": [638, 137, 729, 152], "texto": "573(6123)"},
+    {"pid": 9,  "campeon": "Ziggs",    "box": [638, 181, 729, 196], "texto": "327(6202)"},
+    {"pid": 10, "campeon": "Camille",  "box": [638, 225, 729, 240], "texto": "566(5191)"}
+  ]
+}

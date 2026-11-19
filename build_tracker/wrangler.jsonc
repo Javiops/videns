@@ -1,0 +1,14 @@
+{
+  // Respaldo de la landing de videns.gg en Cloudflare Workers.
+  // El dominio propio lo sirve ahora GitHub Pages (repo Javiops/videns-site),
+  // porque el rango de IPs de Cloudflare que nos toco esta bloqueado por los
+  // ISP espanoles. Este worker se queda como URL alternativa accesible.
+  // Desplegar con:  npx wrangler deploy
+  "name": "videns",
+  "compatibility_date": "2026-09-17",
+  "assets": {
+    "directory": "./site"
+  },
+  // Mantiene viva videns.build-tracker.workers.dev como URL de respaldo.
+  "workers_dev": true
+}

@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Live Overlay</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/rows.css">
+<style>
+  :root { color-scheme: dark; --order: #4f8bff; --chaos: #ff5c5c; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font: 14px/1.4 "Segoe UI", system-ui, sans-serif;
+    background: #0b0e13; color: #e8e6e3;
+    min-height: 100vh; padding: 24px;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; }
+  h1 { font-size: 18px; font-weight: 600; letter-spacing: .02em; color: #c8aa6e; }
+  .sub { color: #7a8494; font-size: 12px; margin-top: 2px; }
+  .card { background: #131824; border: 1px solid #1f2738; border-radius: 6px; padding: 12px 14px; margin-top: 14px; }
+  .offline { text-align: center; color: #7a8494; padding: 30px 0; }
+  .dim { color: #7a8494; font-size: 12px; }
+  .t { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .t.up { color: #7ed491; }
+  .t.soon { color: #f0c75e; }
+  .order { color: var(--order); }
+  .chaos { color: var(--chaos); }
+  .gold { color: #f0c75e; font-weight: 600; }
+  /* iconos redondos (portadores de buff) */
+  .ci { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; border: 1px solid #2a3040;
+        background: #1f2738; align-items: center; justify-content: center; flex: none; vertical-align: middle; }
+  .ci img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); }
+  .ci i { font: 700 9px/1 system-ui, sans-serif; font-style: normal; color: #aeb7c7; }
+  .ci.dead { filter: grayscale(1); opacity: .45; }
+  .ci.order { border-color: var(--order); }
+  .ci.chaos { border-color: var(--chaos); }
+  .oi { width: 22px; height: 22px; vertical-align: middle; flex: none; }
+  /* objetivos */
+  .objrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .cell { display: inline-flex; align-items: center; gap: 6px; }
+  .buff { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,.14); }
+  .buff .who { display: inline-flex; gap: 3px; margin-left: auto; }
+  .buff .who .ci { width: 20px; height: 20px; }
+  /* oro: BLUE | diferencias por línea | RED, cinco filas; la fila (.prow) vive en /rows.css */
+  .gt { display: grid; grid-template-columns: 150px 56px 150px; gap: 0 6px; justify-content: space-between; }
+  .col .side { display: flex; justify-content: space-between; font-weight: 700; font-size: 12px; letter-spacing: .06em;
+               padding-bottom: 3px; border-bottom: 1px solid rgba(255,255,255,.14); margin-bottom: 3px; }
+  /* cuadro de diferencia: flecha hacia el ganador, azul / rojo / blanco si empate */
+  .mid .side { justify-content: center; }
+  .diff { display: flex; align-items: center; justify-content: center; gap: 3px; height: 34px; margin: 2px 0;
+          border: 1px solid #2a3040; border-radius: 3px; background: #0f1420;
+          font: 600 11px/1 "Segoe UI", system-ui, sans-serif; font-variant-numeric: tabular-nums; color: #e8e6e3; }
+  .diff.blue { color: var(--order); border-color: #2a4a8a; }
+  .diff.red { color: var(--chaos); border-color: #7a2a2a; }
+  .diff .arrow { font-size: 10px; }
+  .diff.total { height: auto; padding: 3px 0; margin: 0 0 3px; border-color: transparent; background: transparent; font-size: 12px; }
+  footer { margin-top: 14px; font-size: 11px; color: #55607080; text-align: center; line-height: 1.5; }
+  #closer { display: none; position: fixed; top: 2px; right: 6px; color: #7a8494; font-size: 14px; cursor: pointer;
+            z-index: 10; padding: 2px 5px; opacity: 0; transition: opacity .15s; }
+  #closer:hover { color: #e8e6e3; }
+  /* modo widget (?overlay=1): la ventana ES la tarjeta (mismo fondo, sin bordes ni márgenes) y lleva alfa
+     uniforme desde el lanzador; con Tab el alfa pasa a 255 y el fondo a sólido */
+  body.overlay { background: #0b0e13; padding: 0; min-height: 0; cursor: grab; }
+  body.overlay .wrap { max-width: none; }
+  body.overlay h1, body.overlay .sub, body.overlay footer { display: none; }
+  body.overlay .card { background: #0b0e13; border: 0; border-radius: 0; padding: 8px 10px; margin: 0; }
+  body.overlay .card + .card { margin-top: 0; border-top: 1px solid #1f2738; }
+  body.overlay .offline { padding: 4px 0; font-size: 12px; }
+  body.overlay #closer { display: block; }
+  body.overlay:hover #closer { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="closer" title="Close overlay">✕</div>
+<div class="wrap">
+  <h1>LIVE OVERLAY</h1>
+  <div class="sub">team item gold · Baron and Elder buffs · epic respawns — from the local client API only</div>
+  <div id="content"><div class="card offline">Waiting for a game…</div></div>
+  <footer>Buff durations are game constants (Baron 180 s, Elder 150 s); the client API exposes no buff state. Holders are unknown for a kill that happened before this overlay was opened. Hold Tab to make the widgets opaque. Mark each champion's head for the gold rows at <a href="/faces" style="color:#7a8494">/faces</a>.</footer>
+</div>
+<script src="/rows.js"></script>
+<script>
+const content = document.getElementById("content");
+const params = new URLSearchParams(location.search);
+const PANEL = params.get("panel") || "all";          // objectives | gold | all
+const OVERLAY = params.has("overlay");
+const CONSTANTS_NOTE = "Buff durations are game constants (Baron 180 s, Elder 150 s), not observed through the client API";
+if (OVERLAY) {
+  document.body.classList.add("overlay", "panel-" + PANEL);
+  document.getElementById("closer").addEventListener("click", () => {
+    if (window.pywebview) window.pywebview.api.close(); else window.close();
+  });
+}
+window.setOpaque = on => document.body.classList.toggle("opaque", !!on);
+
+let ov = null, ovAt = 0, answered = false, serverDown = false, inFlight = false, lastFit = 0, shownClock = 0;
+let faces = {};   // cabeza por campeón (config/faces.json), refrescada cada 10 s
+async function loadFaces() {
+  try { const r = await fetch("/api/faces"); if (r.ok) faces = await r.json(); } catch (e) {}
+}
+loadFaces();
+setInterval(loadFaces, 10000);
+
+function mmss(s) {
+  s = Math.max(0, Math.round(s));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+function kg(n) { return Number(n || 0).toLocaleString("en-US"); }
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function teamClass(teamId) { return teamId === 100 ? "order" : teamId === 200 ? "chaos" : ""; }
+function teamName(teamId) { return teamId === 100 ? "BLUE" : teamId === 200 ? "RED" : "?"; }
+// reloj de partida interpolado entre polls, monótono (una pausa o un poll tardío no lo hacen retroceder)
+function gameNow() {
+  const raw = ov.game_time_s + (ov.game_over ? 0 : (performance.now() - ovAt) / 1000);
+  shownClock = raw < shownClock - 2 ? raw : Math.max(shownClock, raw);
+  return shownClock;
+}
+function spawnCell(x, now) {
+  if (x.uncertain) return `<span class="t dim" title="a dragon kill could not be attributed: the next spawn may be Elder">?</span>`;
+  const left = x.spawns_at - now;
+  if (left <= 0) return `<span class="t up">UP</span>`;
+  return `<span class="t ${left <= 60 ? "soon" : ""}">${mmss(left)}</span>`;
+}
+function initials(label) { return esc(String(label || "?").replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase() || "?"); }
+function champIcon(p, extra = "") {
+  const label = p.champion || p.name || "?";
+  const cls = `ci ${p.dead ? "dead" : ""} ${extra}`;
+  if (!p.icon) return `<span class="${cls}" title="${esc(label)}"><i>${initials(label)}</i></span>`;
+  return `<span class="${cls}" title="${esc(label)}"><img src="/img/champion/${encodeURIComponent(p.icon)}.png" alt=""
+    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><i style="display:none">${initials(label)}</i></span>`;
+}
+function objIcon(name, title) {
+  return `<img class="oi" src="/img/objective/${name}.png" alt="${title}" title="${title}"
+    onerror="this.replaceWith(document.createTextNode('${title}'))">`;
+}
+
+function objectivesCard(now) {
+  const o = ov.objectives;
+  if (!o) return `<div class="card obj"><span class="dim">Objectives: Summoner's Rift only</span></div>`;
+  const c = o.dragon.counts;
+  const elder = o.dragon.kind === "elder";
+  const buffs = o.buffs.map(b => {
+    const left = b.ends_at - now;
+    if (left <= 0) return "";
+    let who;
+    if (b.holders === null) who = b.team_id == null
+      ? `<span class="dim" title="team unknown: the killer was not a champion">?</span>`
+      : `<span class="dim" title="holders unknown: overlay opened after the kill">?</span>`;
+    else if (!b.holders.length) who = `<span class="dim" title="no one alive holds it">—</span>`;
+    else who = b.holders.map(h => champIcon(h, teamClass(b.team_id))).join("");
+    return `<div class="buff" title="${CONSTANTS_NOTE}">
+      ${objIcon(b.kind === "elder" ? "dragon_elder" : "baron", b.kind === "elder" ? "Elder buff" : "Baron buff")}
+      <span class="${teamClass(b.team_id)}">${teamName(b.team_id)}</span>${b.stolen ? `<span class="dim">stolen</span>` : ""}
+      <span class="t ${left <= 30 ? "soon" : ""}">${mmss(left)}</span>
+      <span class="who">${who}</span>
+    </div>`;
+  }).join("");
+  return `<div class="card obj">
+    <div class="objrow">
+      <span class="cell">${objIcon("baron", "Baron")}${spawnCell(o.baron, now)}</span>
+      <span class="cell">${objIcon(elder ? "dragon_elder" : "dragon", elder ? "Elder" : "Dragon")}<span class="dim"><span class="order">${c["100"]}</span>–<span class="chaos">${c["200"]}</span>${c.unknown ? `+${c.unknown}?` : ""}</span>${spawnCell(o.dragon, now)}</span>
+    </div>${buffs}</div>`;
+}
+
+// fila de jugador: el rectángulo del splash marcado en /faces (rows.js), el mismo en las dos columnas.
+// BLUE: oro a la derecha y fundido hacia la derecha; RED: oro a la izquierda y fundido hacia la izquierda
+// Un splash que falló (404, red caída) deja ver las iniciales y se vuelve a pedir pasados ART_RETRY_MS,
+// no en cada render de 250 ms.
+const ART_RETRY_MS = 15000;
+const artFailed = {};
+window.artError = (el, iconId) => { artFailed[iconId] = Date.now() + ART_RETRY_MS; el.remove(); };
+function row(p, teamId) {
+  const label = p.champion || p.name || "?";
+  const mirror = teamId === 200;
+  const showArt = p.icon && !(artFailed[p.icon] > Date.now());
+  const cls = `prow ${mirror ? "mirror" : ""} ${showArt ? "splash" : ""} ${p.is_me ? "me" : ""} ${p.dead ? "dead" : ""}`;
+  const ini = `<div class="ini">${initials(label)}</div>`;
+  const art = showArt
+    ? `<img class="art" src="${Rows.artUrl(p.icon, p.art_v)}" alt="" style="${Rows.artStyle(faces[p.icon])}" onerror="artError(this, '${esc(p.icon)}')">`
+    : "";
+  const num = `<span class="num">${kg(p.item_gold)}${p.approx ? "≈" : ""}</span>`;
+  return `<div class="${cls}" title="${esc(label)}">${ini}${art}${num}</div>`;
+}
+
+// cuadro de diferencia entre la fila BLUE y la fila RED de la misma línea: flecha hacia el ganador
+function diffBox(blueGold, redGold, approx, extra = "") {
+  if (blueGold == null || redGold == null) return `<div class="diff ${extra}"><span class="dim">—</span></div>`;
+  const d = blueGold - redGold, mark = approx ? "≈" : "";
+  if (d === 0) return `<div class="diff ${extra}" title="even">0${mark}</div>`;
+  const cls = d > 0 ? "blue" : "red";
+  const arrow = d > 0 ? `<span class="arrow">◀</span>` : `<span class="arrow">▶</span>`;
+  const label = `${kg(Math.abs(d))}${mark}`;
+  return `<div class="diff ${cls} ${extra}" title="${d > 0 ? "BLUE" : "RED"} +${label} in items">${d > 0 ? arrow + label : label + arrow}</div>`;
+}
+
+function goldCard() {
+  const g = ov.gold;
+  const [blue, red] = g.teams;
+  const col = t => `<div class="col">
+    <div class="side ${teamClass(t.team_id)}"><span>${teamName(t.team_id)}</span><span class="t">${kg(t.item_gold)}${t.approx ? "≈" : ""}</span></div>
+    ${t.players.map(p => row(p, t.team_id)).join("")}
+  </div>`;
+  const n = Math.max(blue.players.length, red.players.length);
+  const mid = `<div class="col mid">
+    ${diffBox(blue.item_gold, red.item_gold, g.lead.approx, "total")}
+    ${Array.from({ length: n }, (_, i) => {
+      const b = blue.players[i], r = red.players[i];
+      return diffBox(b ? b.item_gold : null, r ? r.item_gold : null, (b && b.approx) || (r && r.approx));
+    }).join("")}
+  </div>`;
+  // sin línea de pie: la diferencia de equipo ya está en el cuadro central de arriba; el ≈ va en cada cifra
+  const title = g.lead.approx
+    ? (ov.catalog_version ? `≈ item missing from Data Dragon ${esc(ov.catalog_version)}: base cost used` : `≈ no Data Dragon catalog yet: base costs used`)
+    : "";
+  return `<div class="card gold" title="${title}"><div class="gt">${col(blue)}${mid}${col(red)}</div></div>`;
+}
+
+function render() {
+  if (serverDown) content.innerHTML = `<div class="card offline">Overlay server unreachable.</div>`;
+  else if (!answered) content.innerHTML = `<div class="card offline">Waiting for a game…</div>`;
+  else if (!ov || !ov.in_game) content.innerHTML = `<div class="card offline">No game detected — start a match or Practice Tool.</div>`;
+  else {
+    const now = gameNow();
+    const parts = [];
+    if (PANEL === "objectives" || PANEL === "all") parts.push(objectivesCard(now));
+    if (PANEL === "gold" || PANEL === "all") parts.push(goldCard());
+    content.innerHTML = parts.join("");
+  }
+  fit();
+}
+
+// la ventana ajusta su alto al contenido (solo en modo widget de un panel)
+function fit() {
+  if (!OVERLAY || PANEL === "all" || !window.pywebview || !window.pywebview.api) return;
+  const h = Math.ceil(content.getBoundingClientRect().bottom);
+  if (Math.abs(h - lastFit) < 3) return;
+  lastFit = h;
+  try { window.pywebview.api.fit(PANEL, h); } catch (e) {}
+}
+window.addEventListener("pywebviewready", () => {
+  lastFit = 0;
+  fit();
+  // la página avisa de que ya existe: el lanzador aplica (o reintenta) la translucidez de su ventana
+  if (OVERLAY && PANEL !== "all") {
+    const ask = () => window.pywebview.api.layered(PANEL).then(ok => { if (!ok) setTimeout(ask, 1500); }).catch(() => {});
+    ask();
+  }
+});
+
+async function tick() {
+  if (inFlight) return;                 // un poll lento no se apila con el siguiente
+  inFlight = true;
+  try {
+    const r = await fetch("/api/overlay", { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) throw new Error("overlay unavailable");
+    const next = await r.json();
+    if (ov && next.in_game && ov.in_game && next.game_time_s < ov.game_time_s && ov.game_time_s - next.game_time_s < 2) {
+      // respuesta llegada fuera de orden: no retroceder el reloj por menos de una partida nueva
+    } else {
+      ov = next;
+      ovAt = performance.now();
+    }
+    answered = true;
+    serverDown = false;
+  } catch (e) {
+    serverDown = true;
+  } finally {
+    inFlight = false;
+  }
+  render();
+}
+tick();
+setInterval(tick, 1000);
+setInterval(render, 250);
+</script>
+</body>
+</html>

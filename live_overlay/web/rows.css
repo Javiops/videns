@@ -1,0 +1,23 @@
+/* Fila de jugador del panel de oro (compartida con /faces): franja del splash desde la cabeza del campeón
+   hasta un borde del arte, fundida en negro conforme llega a la cifra. Columna BLUE: cifra a la derecha,
+   franja hacia el borde derecho. Columna RED (.mirror): todo en espejo, cifra a la izquierda y franja
+   hacia el borde izquierdo. Capas: iniciales (0) < arte (1) < degradado (2) < cifra (3). El tamaño y la
+   posición del arte los calcula rows.js por fila; ROW en rows.js debe coincidir con --rh y con la
+   anchura (150 px). */
+.prow { --rh: 34px; position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 6px;
+        padding: 0 5px 0 6px; height: var(--rh); width: 150px; margin: 2px 0; border-radius: 3px;
+        background-color: #1a2030; overflow: hidden; }
+.prow .ini { position: absolute; inset: 0; z-index: 0; display: flex; align-items: center; justify-content: center;
+             font: 700 12px/1 system-ui, sans-serif; color: #aeb7c7; letter-spacing: .05em; }
+.prow .art { position: absolute; z-index: 1; width: auto; max-width: none; display: block; pointer-events: none; }
+.prow.splash::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+                      background: linear-gradient(90deg, rgba(11,14,19,0) 0%, rgba(11,14,19,0) 40%, rgba(11,14,19,.75) 72%, #0b0e13 92%); }
+.prow.mirror { justify-content: flex-start; padding: 0 6px 0 5px; }
+.prow.mirror.splash::after { background: linear-gradient(270deg, rgba(11,14,19,0) 0%, rgba(11,14,19,0) 40%, rgba(11,14,19,.75) 72%, #0b0e13 92%); }
+.prow .num { position: relative; z-index: 3; font-variant-numeric: tabular-nums; color: #f0c75e; font-size: 12.5px; font-weight: 600;
+             text-shadow: 0 1px 2px #000; }
+.prow .ci { position: relative; z-index: 3; margin-right: auto; }
+.prow.mirror .ci { margin-right: 0; margin-left: auto; }
+.prow.me { box-shadow: inset 2px 0 0 #c8aa6e; }
+.prow.mirror.me { box-shadow: inset -2px 0 0 #c8aa6e; }
+.prow.dead { filter: grayscale(1); opacity: .55; }

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Videns · Orb</title>
+<link rel="preload" href="fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+  @font-face{font-family:"Inter";font-style:normal;font-weight:400 900;font-display:optional;
+    src:url("fonts/inter-var-latin.woff2") format("woff2")}
+  :root{--bg:#06070a;--panel:#11141a;--line:rgba(255,255,255,.1);--ink:#f2f4f8;
+        --muted:#939cae;--faint:#626b7d;--gold:#e8c14a;--gold-2:#c9a227;
+        --font:"Inter",ui-sans-serif,system-ui,sans-serif;--mono:ui-monospace,Menlo,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--font);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:72rem;margin:0 auto;padding:3.5rem 2rem 6rem}
+  h1{margin:0;font-size:1.6rem;font-weight:800;letter-spacing:-.035em}
+  h1 span{color:var(--gold)}
+  .intro{margin:.6rem 0 2.5rem;color:var(--muted);max-width:46rem}
+
+  .opt{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;margin-bottom:1.25rem}
+  .opt header{display:flex;align-items:baseline;gap:.8rem;padding:.95rem 1.3rem;
+    border-bottom:1px solid var(--line);background:rgba(0,0,0,.25)}
+  .opt header b{font-size:.9375rem;font-weight:700}
+  .opt header span{font-size:.8125rem;color:var(--muted)}
+  .opt header i{margin-left:auto;font-style:normal;font:600 .625rem/1 var(--mono);
+    letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+
+  .row{display:flex;align-items:center;gap:2.75rem;flex-wrap:wrap;padding:2rem 1.3rem}
+  .sizes{display:flex;align-items:flex-end;gap:1.9rem;color:var(--gold)}
+  .sizes figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:.6rem}
+  .sizes figcaption{font:600 .5625rem/1 var(--mono);letter-spacing:.12em;color:var(--faint)}
+
+  .lock{display:flex;align-items:center;gap:.6rem;color:var(--gold);
+    padding-left:2rem;border-left:1px solid var(--line)}
+  .lock .word{font-weight:800;letter-spacing:-.04em;font-size:1.5rem;color:var(--ink)}
+  .lock .word i{font-style:normal;color:var(--gold)}
+
+  .onlight{background:#eceff4;border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;gap:.6rem;
+    color:#16181c;margin-left:auto}
+  .onlight .word{color:#14161a;font-weight:800;letter-spacing:-.04em;font-size:1.125rem}
+  .onlight .word i{color:var(--gold-2);font-style:normal}
+
+  .note{margin:0;padding:.75rem 1.3rem .9rem;border-top:1px solid var(--line);
+    font:500 .6875rem/1.6 var(--mono);color:var(--faint);letter-spacing:.03em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Orb<span>.</span></h1>
+  <p class="intro">
+    The seer's instrument rather than the optician's. Four builds of the same idea —
+    a sphere on a stand — differing in weight and in what the glass holds. No motion:
+    every one is a static shape that has to work at 16px and in one colour.
+  </p>
+
+  <!-- ============ R1 · ORB ============ -->
+  <section class="opt">
+    <header><b>R1 · Orb</b><span>Outlined sphere, single glint, low cradle</span><i>Recommended</i></header>
+    <div class="row">
+      <div class="sizes">
+        <figure><svg width="16" height="16" viewBox="0 0 32 32" aria-label="Videns">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.9"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><figcaption>16</figcaption></figure>
+        <figure><svg width="28" height="28" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M10.6 14.6A6.4 6.4 0 0 1 14.8 8.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><figcaption>28</figcaption></figure>
+        <figure><svg width="84" height="84" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.2"/>
+          <path d="M10.6 14.6A6.4 6.4 0 0 1 14.8 8.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><figcaption>84</figcaption></figure>
+      </div>
+      <div class="lock">
+        <svg width="30" height="30" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.3"/>
+          <path d="M10.6 14.6A6.4 6.4 0 0 1 14.8 8.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><span class="word">VIDENS<i>.</i></span>
+      </div>
+      <div class="onlight">
+        <svg width="24" height="24" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M10.6 14.6A6.4 6.4 0 0 1 14.8 8.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><span class="word">VIDENS<i>.</i></span>
+      </div>
+    </div>
+    <p class="note">THE GLINT IS WHAT MAKES IT GLASS AND NOT A CIRCLE · DROPPED AT 16PX WHERE IT WOULD MUDDY</p>
+  </section>
+
+  <!-- ============ R2 · SOLID ============ -->
+  <section class="opt">
+    <header><b>R2 · Solid</b><span>Filled sphere, glint knocked out of it</span></header>
+    <div class="row">
+      <div class="sizes">
+        <figure><svg width="16" height="16" viewBox="0 0 32 32" aria-label="Videns">
+          <path fill="currentColor" fill-rule="evenodd" d="M16 3.8a9.2 9.2 0 1 1 0 18.4 9.2 9.2 0 0 1 0-18.4Zm-4.2 4.9a1.35 1.35 0 0 0-2 1.75 5.2 5.2 0 0 1 3.55-1.6 1.35 1.35 0 0 0-1.55-.15Z"/>
+          <path fill="currentColor" d="M11.4 27.8 13 22.9h6l1.6 4.9Z"/>
+        </svg><figcaption>16</figcaption></figure>
+        <figure><svg width="28" height="28" viewBox="0 0 32 32">
+          <path fill="currentColor" fill-rule="evenodd" d="M16 3.8a9.2 9.2 0 1 1 0 18.4 9.2 9.2 0 0 1 0-18.4Zm-5.4 5.9a1.5 1.5 0 0 0 .9 2.7 4.6 4.6 0 0 1 3.1-3.05 1.5 1.5 0 0 0-1.4-2.35 7.4 7.4 0 0 0-2.6 2.7Z"/>
+          <path fill="currentColor" d="M11.4 27.8 13 22.9h6l1.6 4.9Z"/>
+        </svg><figcaption>28</figcaption></figure>
+        <figure><svg width="84" height="84" viewBox="0 0 32 32">
+          <path fill="currentColor" fill-rule="evenodd" d="M16 3.8a9.2 9.2 0 1 1 0 18.4 9.2 9.2 0 0 1 0-18.4Zm-5.4 5.9a1.5 1.5 0 0 0 .9 2.7 4.6 4.6 0 0 1 3.1-3.05 1.5 1.5 0 0 0-1.4-2.35 7.4 7.4 0 0 0-2.6 2.7Z"/>
+          <path fill="currentColor" d="M11.4 27.8 13 22.9h6l1.6 4.9Z"/>
+        </svg><figcaption>84</figcaption></figure>
+      </div>
+      <div class="lock">
+        <svg width="30" height="30" viewBox="0 0 32 32">
+          <path fill="currentColor" fill-rule="evenodd" d="M16 3.8a9.2 9.2 0 1 1 0 18.4 9.2 9.2 0 0 1 0-18.4Zm-5.4 5.9a1.5 1.5 0 0 0 .9 2.7 4.6 4.6 0 0 1 3.1-3.05 1.5 1.5 0 0 0-1.4-2.35 7.4 7.4 0 0 0-2.6 2.7Z"/>
+          <path fill="currentColor" d="M11.4 27.8 13 22.9h6l1.6 4.9Z"/>
+        </svg><span class="word">VIDENS<i>.</i></span>
+      </div>
+      <div class="onlight">
+        <svg width="24" height="24" viewBox="0 0 32 32">
+          <path fill="currentColor" fill-rule="evenodd" d="M16 3.8a9.2 9.2 0 1 1 0 18.4 9.2 9.2 0 0 1 0-18.4Zm-5.4 5.9a1.5 1.5 0 0 0 .9 2.7 4.6 4.6 0 0 1 3.1-3.05 1.5 1.5 0 0 0-1.4-2.35 7.4 7.4 0 0 0-2.6 2.7Z"/>
+          <path fill="currentColor" d="M11.4 27.8 13 22.9h6l1.6 4.9Z"/>
+        </svg><span class="word">VIDENS<i>.</i></span>
+      </div>
+    </div>
+    <p class="note">HEAVIEST SILHOUETTE · BEST FAVICON · THE GLINT IS A TRUE HOLE, SO IT WORKS ON ANY GROUND</p>
+  </section>
+
+  <!-- ============ R3 · ORACLE ============ -->
+  <section class="opt">
+    <header><b>R3 · Oracle</b><span>A spark held inside the glass</span></header>
+    <div class="row">
+      <div class="sizes">
+        <figure><svg width="16" height="16" viewBox="0 0 32 32" aria-label="Videns">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.6"/>
+          <path d="M16 8.6c.5 2.6 1.3 3.4 3.9 3.9-2.6.5-3.4 1.3-3.9 3.9-.5-2.6-1.3-3.4-3.9-3.9 2.6-.5 3.4-1.3 3.9-3.9Z" fill="currentColor"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><figcaption>16</figcaption></figure>
+        <figure><svg width="28" height="28" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.2"/>
+          <path d="M16 7.9c.62 3.2 1.58 4.16 4.78 4.78-3.2.62-4.16 1.58-4.78 4.78-.62-3.2-1.58-4.16-4.78-4.78 3.2-.62 4.16-1.58 4.78-4.78Z" fill="currentColor"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><figcaption>28</figcaption></figure>
+        <figure><svg width="84" height="84" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M16 7.9c.62 3.2 1.58 4.16 4.78 4.78-3.2.62-4.16 1.58-4.78 4.78-.62-3.2-1.58-4.16-4.78-4.78 3.2-.62 4.16-1.58 4.78-4.78Z" fill="currentColor"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><figcaption>84</figcaption></figure>
+      </div>
+      <div class="lock">
+        <svg width="30" height="30" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.1"/>
+          <path d="M16 7.9c.62 3.2 1.58 4.16 4.78 4.78-3.2.62-4.16 1.58-4.78 4.78-.62-3.2-1.58-4.16-4.78-4.78 3.2-.62 4.16-1.58 4.78-4.78Z" fill="currentColor"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><span class="word">VIDENS<i>.</i></span>
+      </div>
+      <div class="onlight">
+        <svg width="24" height="24" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.2"/>
+          <path d="M16 7.9c.62 3.2 1.58 4.16 4.78 4.78-3.2.62-4.16 1.58-4.78 4.78-.62-3.2-1.58-4.16-4.78-4.78 3.2-.62 4.16-1.58 4.78-4.78Z" fill="currentColor"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><span class="word">VIDENS<i>.</i></span>
+      </div>
+    </div>
+    <p class="note">READS AS PROPHECY · THE FOUR-POINT SPARK KEEPS IT FROM LOOKING LIKE A PLANET</p>
+  </section>
+
+  <!-- ============ R4 · MONOGRAM ============ -->
+  <section class="opt">
+    <header><b>R4 · Monogram</b><span>The V suspended in the glass</span></header>
+    <div class="row">
+      <div class="sizes">
+        <figure><svg width="16" height="16" viewBox="0 0 32 32" aria-label="Videns">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.6"/>
+          <path d="M11.9 9.4 16 17.6l4.1-8.2" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><figcaption>16</figcaption></figure>
+        <figure><svg width="28" height="28" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.2"/>
+          <path d="M11.9 9.4 16 17.6l4.1-8.2" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><figcaption>28</figcaption></figure>
+        <figure><svg width="84" height="84" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M11.9 9.4 16 17.6l4.1-8.2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><figcaption>84</figcaption></figure>
+      </div>
+      <div class="lock">
+        <svg width="30" height="30" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.1"/>
+          <path d="M11.9 9.4 16 17.6l4.1-8.2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><span class="word">VIDENS<i>.</i></span>
+      </div>
+      <div class="onlight">
+        <svg width="24" height="24" viewBox="0 0 32 32">
+          <circle cx="16" cy="13" r="9.2" fill="none" stroke="currentColor" stroke-width="2.2"/>
+          <path d="M11.9 9.4 16 17.6l4.1-8.2" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11.4 27.8 13 22.9h6l1.6 4.9Z" fill="currentColor"/>
+        </svg><span class="word">VIDENS<i>.</i></span>
+      </div>
+    </div>
+    <p class="note">ONLY ONE THAT CARRIES THE INITIAL · SAFEST IF THE MARK EVER TRAVELS WITHOUT THE WORDMARK</p>
+  </section>
+
+</div>
+</body>
+</html>

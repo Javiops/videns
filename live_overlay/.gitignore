@@ -1,0 +1,7 @@
+.venv/
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# caché de Data Dragon y capturas propias: nunca se commitean (política de los proyectos hermanos)
+data/

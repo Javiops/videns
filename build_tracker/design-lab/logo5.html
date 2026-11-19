@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Videns · Engraved orb</title>
+<link rel="preload" href="fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+  @font-face{font-family:"Inter";font-style:normal;font-weight:400 900;font-display:optional;
+    src:url("fonts/inter-var-latin.woff2") format("woff2")}
+  :root{--bg:#06070a;--panel:#11141a;--line:rgba(255,255,255,.1);--ink:#f2f4f8;
+        --muted:#939cae;--faint:#626b7d;--gold:#e8c14a;--gold-2:#c9a227;
+        --font:"Inter",ui-sans-serif,system-ui,sans-serif;--mono:ui-monospace,Menlo,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--font);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:72rem;margin:0 auto;padding:3.5rem 2rem 6rem}
+  h1{margin:0;font-size:1.6rem;font-weight:800;letter-spacing:-.035em}
+  h1 span{color:var(--gold)}
+  .intro{margin:.6rem 0 2.5rem;color:var(--muted);max-width:48rem}
+
+  .opt{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;margin-bottom:1.25rem}
+  .opt header{display:flex;align-items:baseline;gap:.8rem;padding:.95rem 1.3rem;
+    border-bottom:1px solid var(--line);background:rgba(0,0,0,.25)}
+  .opt header b{font-size:.9375rem;font-weight:700}
+  .opt header span{font-size:.8125rem;color:var(--muted)}
+  .opt header i{margin-left:auto;font-style:normal;font:600 .625rem/1 var(--mono);
+    letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .row{display:flex;align-items:center;gap:2.5rem;flex-wrap:wrap;padding:2rem 1.3rem;color:var(--gold)}
+  .sizes{display:flex;align-items:flex-end;gap:2rem}
+  .sizes figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:.6rem}
+  .sizes figcaption{font:600 .5625rem/1 var(--mono);letter-spacing:.12em;color:var(--faint);text-align:center}
+  .lock{display:flex;align-items:center;gap:.7rem;padding-left:2rem;border-left:1px solid var(--line)}
+  .lock .word{font-weight:800;letter-spacing:-.04em;font-size:1.6rem;color:var(--ink)}
+  .lock .word i{font-style:normal;color:var(--gold)}
+  .onlight{background:#eceff4;border-radius:10px;padding:.8rem 1.05rem;display:flex;align-items:center;gap:.65rem;
+    color:#16181c;margin-left:auto}
+  .onlight .word{color:#14161a;font-weight:800;letter-spacing:-.04em;font-size:1.2rem}
+  .onlight .word i{color:var(--gold-2);font-style:normal}
+  .note{margin:0;padding:.75rem 1.3rem .9rem;border-top:1px solid var(--line);
+    font:500 .6875rem/1.6 var(--mono);color:var(--faint);letter-spacing:.03em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Engraved orb<span>.</span></h1>
+  <p class="intro">
+    Detailed line-work rather than a pictogram — an ornate pedestal, mist turning inside
+    the glass, a cut highlight. Each one ships with a <b>reduced cut</b> for 16px, because
+    this much line-work fills in at favicon size; that pairing is how a detailed mark
+    survives in the wild.
+  </p>
+
+  <!-- ============ S1 · SEER ============ -->
+  <section class="opt">
+    <header><b>S1 · Seer</b><span>Mist turning in the glass, clawed pedestal</span><i>Recommended</i></header>
+    <div class="row">
+      <div class="sizes">
+        <figure>
+          <svg width="132" height="132" viewBox="0 0 64 64" aria-label="Videns">
+            <defs><clipPath id="ballS1"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+            <!-- mist inside -->
+            <g clip-path="url(#ballS1)" fill="none" stroke="currentColor" stroke-linecap="round">
+              <path d="M13 30C19 22 26 33 33 26 39 20 45 27 51 22" stroke-width="1.7" opacity=".62"/>
+              <path d="M14 36.5C21 31 26 40 34 34.5 40 30.5 45 35 49 31" stroke-width="1.5" opacity=".42"/>
+              <path d="M17 20.5C23 15.5 29 21 35.5 17.5" stroke-width="1.4" opacity=".3"/>
+              <path d="M16 41.5C22 38 28 43 35 40" stroke-width="1.3" opacity=".22"/>
+            </g>
+            <!-- glass -->
+            <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="2.6"/>
+            <circle cx="32" cy="26" r="14.6" fill="none" stroke="currentColor" stroke-width=".9" opacity=".3"/>
+            <!-- cut highlight -->
+            <path d="M21.6 21.2A11.2 11.2 0 0 1 28.4 14.4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="24.6" cy="17.4" r="1.15" fill="currentColor" opacity=".8"/>
+            <!-- pedestal: cradle, collar, stem, flared foot -->
+            <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M20.4 41.8C22.4 46.4 27 48 32 48s9.6-1.6 11.6-6.2" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".45"/>
+            <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+            <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M17.6 61.4h28.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            <!-- sparks -->
+            <path d="M51 7.4q.8 2.6 3.4 3.4-2.6.8-3.4 3.4-.8-2.6-3.4-3.4 2.6-.8 3.4-3.4Z" fill="currentColor" opacity=".85"/>
+            <path d="M11.4 14.6q.6 2 2.6 2.6-2 .6-2.6 2.6-.6-2-2.6-2.6 2-.6 2.6-2.6Z" fill="currentColor" opacity=".6"/>
+            <path d="M54.2 29q.5 1.6 2.1 2.1-1.6.5-2.1 2.1-.5-1.6-2.1-2.1 1.6-.5 2.1-2.1Z" fill="currentColor" opacity=".45"/>
+          </svg>
+          <figcaption>132 · full</figcaption>
+        </figure>
+        <figure>
+          <svg width="40" height="40" viewBox="0 0 64 64">
+            <defs><clipPath id="ballS1b"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+            <g clip-path="url(#ballS1b)" fill="none" stroke="currentColor" stroke-linecap="round">
+              <path d="M13 30C19 22 26 33 33 26 39 20 45 27 51 22" stroke-width="2.2" opacity=".6"/>
+              <path d="M14 36.5C21 31 26 40 34 34.5 40 30.5 45 35 49 31" stroke-width="2" opacity=".4"/>
+            </g>
+            <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="3.2"/>
+            <path d="M21.6 21.2A11.2 11.2 0 0 1 28.4 14.4" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+            <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+            <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="currentColor"/>
+            <path d="M51 7.4q.8 2.6 3.4 3.4-2.6.8-3.4 3.4-.8-2.6-3.4-3.4 2.6-.8 3.4-3.4Z" fill="currentColor"/>
+          </svg>
+          <figcaption>40 · full</figcaption>
+        </figure>
+        <figure>
+          <svg width="16" height="16" viewBox="0 0 64 64">
+            <circle cx="32" cy="26" r="18" fill="currentColor"/>
+            <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+            <path d="M20.6 61.4c0-5.4 4.4-7 11.4-7s11.4 1.6 11.4 7z" fill="currentColor"/>
+          </svg>
+          <figcaption>16 · reduced</figcaption>
+        </figure>
+      </div>
+      <div class="lock">
+        <svg width="42" height="42" viewBox="0 0 64 64">
+          <defs><clipPath id="ballS1c"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+          <g clip-path="url(#ballS1c)" fill="none" stroke="currentColor" stroke-linecap="round">
+            <path d="M13 30C19 22 26 33 33 26 39 20 45 27 51 22" stroke-width="2" opacity=".6"/>
+            <path d="M14 36.5C21 31 26 40 34 34.5 40 30.5 45 35 49 31" stroke-width="1.8" opacity=".4"/>
+          </g>
+          <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M21.6 21.2A11.2 11.2 0 0 1 28.4 14.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+          <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="currentColor"/>
+        </svg>
+        <span class="word">VIDENS<i>.</i></span>
+      </div>
+      <div class="onlight">
+        <svg width="32" height="32" viewBox="0 0 64 64">
+          <defs><clipPath id="ballS1d"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+          <g clip-path="url(#ballS1d)" fill="none" stroke="currentColor" stroke-linecap="round">
+            <path d="M13 30C19 22 26 33 33 26 39 20 45 27 51 22" stroke-width="2" opacity=".55"/>
+          </g>
+          <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M21.6 21.2A11.2 11.2 0 0 1 28.4 14.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+          <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="currentColor"/>
+        </svg>
+        <span class="word">VIDENS<i>.</i></span>
+      </div>
+    </div>
+    <p class="note">ORNATE BASE IS WHAT MAKES IT A CRYSTAL BALL AND NOT A CIRCLE · MIST GIVES THE GLASS DEPTH</p>
+  </section>
+
+  <!-- ============ S2 · FACET ============ -->
+  <section class="opt">
+    <header><b>S2 · Facet</b><span>Cut crystal — the sphere as a faceted stone</span></header>
+    <div class="row">
+      <div class="sizes">
+        <figure>
+          <svg width="132" height="132" viewBox="0 0 64 64" aria-label="Videns">
+            <defs><clipPath id="ballS2"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+            <g clip-path="url(#ballS2)">
+              <path d="M32 8 46.6 18.6 41 35.8H23L17.4 18.6Z" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".75"/>
+              <path d="M32 8v-2M46.6 18.6 52 15M41 35.8l7 8M23 35.8l-7 8M17.4 18.6 12 15" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".4"/>
+              <path d="M32 8 23 35.8M32 8l9 27.8M17.4 18.6 41 35.8M46.6 18.6 23 35.8M17.4 18.6h29.2" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".33"/>
+              <path d="M32 8 46.6 18.6 32 22Z" fill="currentColor" opacity=".55"/>
+            </g>
+            <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="2.6"/>
+            <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M20.4 41.8C22.4 46.4 27 48 32 48s9.6-1.6 11.6-6.2" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".45"/>
+            <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+            <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M17.6 61.4h28.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M51 7.4q.8 2.6 3.4 3.4-2.6.8-3.4 3.4-.8-2.6-3.4-3.4 2.6-.8 3.4-3.4Z" fill="currentColor" opacity=".85"/>
+          </svg>
+          <figcaption>132 · full</figcaption>
+        </figure>
+        <figure>
+          <svg width="40" height="40" viewBox="0 0 64 64">
+            <defs><clipPath id="ballS2b"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+            <g clip-path="url(#ballS2b)">
+              <path d="M32 8 46.6 18.6 41 35.8H23L17.4 18.6Z" fill="none" stroke="currentColor" stroke-width="2.2" opacity=".8"/>
+              <path d="M32 8 46.6 18.6 32 22Z" fill="currentColor" opacity=".6"/>
+            </g>
+            <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="3.2"/>
+            <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+            <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="currentColor"/>
+          </svg>
+          <figcaption>40 · full</figcaption>
+        </figure>
+        <figure>
+          <svg width="16" height="16" viewBox="0 0 64 64">
+            <circle cx="32" cy="26" r="18" fill="currentColor"/>
+            <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+            <path d="M20.6 61.4c0-5.4 4.4-7 11.4-7s11.4 1.6 11.4 7z" fill="currentColor"/>
+          </svg>
+          <figcaption>16 · reduced</figcaption>
+        </figure>
+      </div>
+      <div class="lock">
+        <svg width="42" height="42" viewBox="0 0 64 64">
+          <defs><clipPath id="ballS2c"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+          <g clip-path="url(#ballS2c)">
+            <path d="M32 8 46.6 18.6 41 35.8H23L17.4 18.6Z" fill="none" stroke="currentColor" stroke-width="1.9" opacity=".75"/>
+            <path d="M32 8 46.6 18.6 32 22Z" fill="currentColor" opacity=".55"/>
+          </g>
+          <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+          <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="currentColor"/>
+        </svg>
+        <span class="word">VIDENS<i>.</i></span>
+      </div>
+      <div class="onlight">
+        <svg width="32" height="32" viewBox="0 0 64 64">
+          <defs><clipPath id="ballS2d"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+          <g clip-path="url(#ballS2d)">
+            <path d="M32 8 46.6 18.6 41 35.8H23L17.4 18.6Z" fill="none" stroke="currentColor" stroke-width="1.9" opacity=".75"/>
+            <path d="M32 8 46.6 18.6 32 22Z" fill="currentColor" opacity=".55"/>
+          </g>
+          <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+          <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="currentColor"/>
+        </svg>
+        <span class="word">VIDENS<i>.</i></span>
+      </div>
+    </div>
+    <p class="note">HARDER, LESS MYSTICAL · THE CUT STONE READS AS PRECISION RATHER THAN PROPHECY</p>
+  </section>
+
+  <!-- ============ S3 · RIFT ============ -->
+  <section class="opt">
+    <header><b>S3 · Rift</b><span>The map itself held in the glass</span></header>
+    <div class="row">
+      <div class="sizes">
+        <figure>
+          <svg width="132" height="132" viewBox="0 0 64 64" aria-label="Videns">
+            <defs><clipPath id="ballS3"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+            <g clip-path="url(#ballS3)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M32 11.5 46.5 26 32 40.5 17.5 26Z" stroke-width="1.6" opacity=".7"/>
+              <path d="M21.6 26 32 36.4 42.4 26" stroke-width="2.1"/>
+              <path d="M18.6 15.4 45.4 36.6" stroke-width="1.2" opacity=".35"/>
+              <path d="M22 37.4 42 14.6" stroke-width="1.2" opacity=".35"/>
+              <circle cx="32" cy="17.6" r="1.9" fill="currentColor" stroke="none"/>
+            </g>
+            <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="2.6"/>
+            <path d="M21.6 21.2A11.2 11.2 0 0 1 28.4 14.4" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" opacity=".75"/>
+            <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M20.4 41.8C22.4 46.4 27 48 32 48s9.6-1.6 11.6-6.2" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".45"/>
+            <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+            <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M17.6 61.4h28.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+          </svg>
+          <figcaption>132 · full</figcaption>
+        </figure>
+        <figure>
+          <svg width="40" height="40" viewBox="0 0 64 64">
+            <defs><clipPath id="ballS3b"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+            <g clip-path="url(#ballS3b)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M32 11.5 46.5 26 32 40.5 17.5 26Z" stroke-width="2.2" opacity=".7"/>
+              <path d="M21.6 26 32 36.4 42.4 26" stroke-width="2.8"/>
+            </g>
+            <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="3.2"/>
+            <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+            <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="currentColor"/>
+          </svg>
+          <figcaption>40 · full</figcaption>
+        </figure>
+        <figure>
+          <svg width="16" height="16" viewBox="0 0 64 64">
+            <circle cx="32" cy="26" r="18" fill="currentColor"/>
+            <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+            <path d="M20.6 61.4c0-5.4 4.4-7 11.4-7s11.4 1.6 11.4 7z" fill="currentColor"/>
+          </svg>
+          <figcaption>16 · reduced</figcaption>
+        </figure>
+      </div>
+      <div class="lock">
+        <svg width="42" height="42" viewBox="0 0 64 64">
+          <defs><clipPath id="ballS3c"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+          <g clip-path="url(#ballS3c)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M32 11.5 46.5 26 32 40.5 17.5 26Z" stroke-width="2" opacity=".7"/>
+            <path d="M21.6 26 32 36.4 42.4 26" stroke-width="2.5"/>
+          </g>
+          <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+          <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="currentColor"/>
+        </svg>
+        <span class="word">VIDENS<i>.</i></span>
+      </div>
+      <div class="onlight">
+        <svg width="32" height="32" viewBox="0 0 64 64">
+          <defs><clipPath id="ballS3d"><circle cx="32" cy="26" r="18"/></clipPath></defs>
+          <g clip-path="url(#ballS3d)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M32 11.5 46.5 26 32 40.5 17.5 26Z" stroke-width="2" opacity=".7"/>
+            <path d="M21.6 26 32 36.4 42.4 26" stroke-width="2.5"/>
+          </g>
+          <circle cx="32" cy="26" r="18" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M16.2 38.2C17.8 47 25 49.8 32 49.8s14.2-2.8 15.8-11.6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M27.8 50.2h8.4l-1 4.6h-6.4z" fill="currentColor"/>
+          <path d="M20.6 61.2c0-4.6 4.4-6 11.4-6s11.4 1.4 11.4 6z" fill="currentColor"/>
+        </svg>
+        <span class="word">VIDENS<i>.</i></span>
+      </div>
+    </div>
+    <p class="note">THE V INSIDE IS ALSO THE RIVER · ONLY ONE THAT SAYS LEAGUE WITHOUT TOUCHING RIOT ART</p>
+  </section>
+
+</div>
+</body>
+</html>

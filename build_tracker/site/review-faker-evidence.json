@@ -1,0 +1,623 @@
+{
+  "schema": 1,
+  "match_id": "KR_8386011226",
+  "focus_participant_id": 3,
+  "metric": "visits containing an item in a nearest state-matched cohort",
+  "split": "train",
+  "train_cohort_rows": 1403,
+  "generation": "16.18-reconstructible-development-v3",
+  "generation_fingerprint": "e4ea64319e0566bdfdb775175c9d0fdf71f26b93d07ed4672c42c0d62a0ba1e0",
+  "generation_purpose": "patch_development_1618",
+  "patch": "16.18",
+  "source": "Riot Match-V5 match and timeline; frozen development TRAIN visits",
+  "filters": "same champion (Cassiopeia), role (MIDDLE), patch 16.18; time/level/gold-estimate bands shown per decision; 80 nearest maximum",
+  "selection_features": [
+    "pre-decision timestamp",
+    "level",
+    "prequential-v3 estimated gold",
+    "held inventory"
+  ],
+  "display_filter": "Recipe cost, duplicate/boot restrictions and free inventory slots; skipped consumables reserve their physical slots.",
+  "excluded_splits": [
+    "validation",
+    "test",
+    "post_cutoff"
+  ],
+  "limitations": [
+    "Development/probe corpus, not a promoted serving policy.",
+    "Historical behavior does not establish a correct or optimal purchase.",
+    "The target wallet is estimated from pre-decision observations, not exact.",
+    "Cohort visits are not independent players; a player may contribute multiple shops."
+  ],
+  "decisions": [
+    {
+      "ts": 1958,
+      "observed_bought": [
+        1056,
+        2003,
+        2003
+      ],
+      "modeled_bought": [
+        1056
+      ],
+      "gold_est": 500,
+      "level": 1,
+      "comparison": {
+        "status": "descriptive",
+        "n": 80,
+        "candidate_n": 174,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 1056,
+            "item_name": "Doran's Ring",
+            "visits": 77,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 3070,
+            "item_name": "Tear of the Goddess",
+            "visits": 3,
+            "estimated_cost": 400
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 166717,
+      "observed_bought": [
+        2031,
+        1001,
+        2055
+      ],
+      "modeled_bought": [
+        1001,
+        2055
+      ],
+      "gold_est": 540,
+      "level": 2,
+      "comparison": {
+        "status": "descriptive",
+        "n": 80,
+        "candidate_n": 230,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 3070,
+            "item_name": "Tear of the Goddess",
+            "visits": 35,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 1001,
+            "item_name": "Boots",
+            "visits": 25,
+            "estimated_cost": 300
+          },
+          {
+            "item_id": 1028,
+            "item_name": "Ruby Crystal",
+            "visits": 20,
+            "estimated_cost": 400
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 381126,
+      "observed_bought": [
+        3009,
+        1082
+      ],
+      "modeled_bought": [
+        3009,
+        1082
+      ],
+      "gold_est": 974,
+      "level": 6,
+      "comparison": {
+        "status": "descriptive",
+        "n": 80,
+        "candidate_n": 163,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 1028,
+            "item_name": "Ruby Crystal",
+            "visits": 17,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 1026,
+            "item_name": "Blasting Wand",
+            "visits": 16,
+            "estimated_cost": 850
+          },
+          {
+            "item_id": 3009,
+            "item_name": "Boots of Swiftness",
+            "visits": 9,
+            "estimated_cost": 700
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 434424,
+      "observed_bought": [
+        1028,
+        2055
+      ],
+      "modeled_bought": [
+        1028,
+        2055
+      ],
+      "gold_est": 581,
+      "level": 7,
+      "comparison": {
+        "status": "descriptive",
+        "n": 80,
+        "candidate_n": 160,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 1028,
+            "item_name": "Ruby Crystal",
+            "visits": 21,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 1027,
+            "item_name": "Sapphire Crystal",
+            "visits": 4,
+            "estimated_cost": 300
+          },
+          {
+            "item_id": 1052,
+            "item_name": "Amplifying Tome",
+            "visits": 3,
+            "estimated_cost": 400
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 553038,
+      "observed_bought": [
+        3803
+      ],
+      "modeled_bought": [
+        3803
+      ],
+      "gold_est": 925,
+      "level": 8,
+      "comparison": {
+        "status": "descriptive",
+        "n": 80,
+        "candidate_n": 169,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 1026,
+            "item_name": "Blasting Wand",
+            "visits": 24,
+            "estimated_cost": 850
+          },
+          {
+            "item_id": 3803,
+            "item_name": "Catalyst of Aeons",
+            "visits": 22,
+            "estimated_cost": 900
+          },
+          {
+            "item_id": 1028,
+            "item_name": "Ruby Crystal",
+            "visits": 6,
+            "estimated_cost": 400
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 697163,
+      "observed_bought": [
+        1026
+      ],
+      "modeled_bought": [
+        1026
+      ],
+      "gold_est": 821,
+      "level": 9,
+      "comparison": {
+        "status": "descriptive",
+        "n": 80,
+        "candidate_n": 171,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 1052,
+            "item_name": "Amplifying Tome",
+            "visits": 11,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 1028,
+            "item_name": "Ruby Crystal",
+            "visits": 4,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 1033,
+            "item_name": "Null-Magic Mantle",
+            "visits": 2,
+            "estimated_cost": 400
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 823938,
+      "observed_bought": [
+        6657,
+        2055
+      ],
+      "modeled_bought": [
+        6657,
+        2055
+      ],
+      "gold_est": 609,
+      "level": 10,
+      "comparison": {
+        "status": "descriptive",
+        "n": 80,
+        "candidate_n": 156,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 1052,
+            "item_name": "Amplifying Tome",
+            "visits": 24,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 6657,
+            "item_name": "Rod of Ages",
+            "visits": 17,
+            "estimated_cost": 450
+          },
+          {
+            "item_id": 1028,
+            "item_name": "Ruby Crystal",
+            "visits": 9,
+            "estimated_cost": 400
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 925589,
+      "observed_bought": [
+        1052,
+        2055
+      ],
+      "modeled_bought": [
+        1052,
+        2055
+      ],
+      "gold_est": 618,
+      "level": 11,
+      "comparison": {
+        "status": "descriptive",
+        "n": 80,
+        "candidate_n": 134,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 1052,
+            "item_name": "Amplifying Tome",
+            "visits": 23,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 1028,
+            "item_name": "Ruby Crystal",
+            "visits": 8,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 1082,
+            "item_name": "Dark Seal",
+            "visits": 2,
+            "estimated_cost": 350
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 1028734,
+      "observed_bought": [
+        1026
+      ],
+      "modeled_bought": [
+        1026
+      ],
+      "gold_est": 997,
+      "level": 12,
+      "comparison": {
+        "status": "descriptive",
+        "n": 80,
+        "candidate_n": 135,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 1052,
+            "item_name": "Amplifying Tome",
+            "visits": 10,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 1026,
+            "item_name": "Blasting Wand",
+            "visits": 9,
+            "estimated_cost": 850
+          },
+          {
+            "item_id": 3145,
+            "item_name": "Hextech Alternator",
+            "visits": 9,
+            "estimated_cost": 700
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 1201737,
+      "observed_bought": [
+        3116,
+        2055
+      ],
+      "modeled_bought": [
+        3116,
+        2055
+      ],
+      "gold_est": 1511,
+      "level": 13,
+      "comparison": {
+        "status": "descriptive",
+        "n": 60,
+        "candidate_n": 60,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 3116,
+            "item_name": "Rylai's Crystal Scepter",
+            "visits": 15,
+            "estimated_cost": 1350
+          },
+          {
+            "item_id": 2420,
+            "item_name": "Seeker's Armguard",
+            "visits": 4,
+            "estimated_cost": 1200
+          },
+          {
+            "item_id": 3147,
+            "item_name": "Haunting Guise",
+            "visits": 4,
+            "estimated_cost": 900
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 1278793,
+      "observed_bought": [
+        3108
+      ],
+      "modeled_bought": [
+        3108
+      ],
+      "gold_est": 905,
+      "level": 14,
+      "comparison": {
+        "status": "descriptive",
+        "n": 80,
+        "candidate_n": 100,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 1052,
+            "item_name": "Amplifying Tome",
+            "visits": 16,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 1026,
+            "item_name": "Blasting Wand",
+            "visits": 11,
+            "estimated_cost": 850
+          },
+          {
+            "item_id": 1011,
+            "item_name": "Giant's Belt",
+            "visits": 8,
+            "estimated_cost": 900
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 1376786,
+      "observed_bought": [],
+      "modeled_bought": [],
+      "gold_est": 818,
+      "level": 14,
+      "comparison": {
+        "status": "unavailable",
+        "candidate_n": 87,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "reason": "No observed cohort item fits the estimated budget."
+      }
+    },
+    {
+      "ts": 1392692,
+      "observed_bought": [
+        3108
+      ],
+      "modeled_bought": [
+        3108
+      ],
+      "gold_est": 849,
+      "level": 14,
+      "comparison": {
+        "status": "descriptive",
+        "n": 80,
+        "candidate_n": 80,
+        "band": {
+          "time_ms": 180000,
+          "level": 2,
+          "gold_est": 300
+        },
+        "metric": "visits containing item",
+        "split": "train",
+        "report": "review-faker-evidence.json",
+        "top_items": [
+          {
+            "item_id": 1052,
+            "item_name": "Amplifying Tome",
+            "visits": 14,
+            "estimated_cost": 400
+          },
+          {
+            "item_id": 1029,
+            "item_name": "Cloth Armor",
+            "visits": 2,
+            "estimated_cost": 300
+          },
+          {
+            "item_id": 3916,
+            "item_name": "Oblivion Orb",
+            "visits": 2,
+            "estimated_cost": 800
+          }
+        ],
+        "limitations": "Estimated gold; nearest observed purchases, not a validated policy or optimal build."
+      }
+    },
+    {
+      "ts": 1603331,
+      "observed_bought": [
+        3137,
+        2055
+      ],
+      "modeled_bought": [
+        3137,
+        2055
+      ],
+      "gold_est": 1730,
+      "level": 17,
+      "comparison": {
+        "status": "unavailable",
+        "candidate_n": 67,
+        "band": {
+          "time_ms": 300000,
+          "level": 3,
+          "gold_est": 500
+        },
+        "reason": "No observed cohort item fits the estimated budget."
+      }
+    }
+  ]
+}

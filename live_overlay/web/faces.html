@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Splash marks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/rows.css">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font: 14px/1.45 "Segoe UI", system-ui, sans-serif; background: #0b0e13; color: #e8e6e3; padding: 18px 24px; }
+  h1 { font-size: 18px; font-weight: 600; color: #c8aa6e; letter-spacing: .02em; }
+  .sub { color: #7a8494; font-size: 12px; margin: 2px 0 12px; }
+  .layout { display: grid; grid-template-columns: 250px 1fr; gap: 14px; align-items: start; }
+  .card { background: #131824; border: 1px solid #1f2738; border-radius: 6px; padding: 12px 14px; }
+  label { display: block; font-size: 12px; color: #aeb7c7; }
+  input[type=text] { font: inherit; background: #0b0e13; color: #e8e6e3; border: 1px solid #2a3040; border-radius: 4px; padding: 6px 8px; width: 100%; }
+  input[type=range] { width: 100%; }
+  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .val { font-variant-numeric: tabular-nums; color: #f0c75e; }
+  button { font: inherit; border: 1px solid #465066; background: transparent; color: #e8e6e3; border-radius: 5px; padding: 6px 12px; cursor: pointer; }
+  button.primary { background: #c8aa6e; border-color: #c8aa6e; color: #16120a; font-weight: 700; }
+  .hint { color: #7a8494; font-size: 12px; margin-top: 6px; }
+  code { background: #0b0e13; padding: 1px 5px; border-radius: 3px; }
+  .status { font-size: 12px; color: #7a8494; margin-top: 8px; min-height: 1.4em; }
+  .status.ok { color: #7ed491; }
+  .status.err { color: #e07a7a; }
+  .blue { color: #4f8bff; font-weight: 700; }
+  .red { color: #ff5c5c; font-weight: 700; }
+  /* lista alfabética de campeones */
+  #list { list-style: none; margin-top: 8px; max-height: calc(100vh - 210px); overflow-y: auto; border-top: 1px solid #1f2738; }
+  #list li { display: flex; align-items: center; gap: 8px; padding: 4px 6px; cursor: pointer; border-bottom: 1px solid #1f273880; font-size: 13px; }
+  #list li:hover { background: #1a2030; }
+  #list li.sel { background: #26304a; color: #fff; }
+  #list li img { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #2a3040; flex: none; }
+  #list li .done { margin-left: auto; color: #7ed491; font-size: 12px; }
+  #list li.ingame .name::after { content: " · in game"; color: #c8aa6e; font-size: 11px; }
+  .progress { font-size: 12px; color: #7a8494; margin-top: 6px; }
+  /* splash a escala 0.6; el rectángulo se arrastra y se redimensiona con la rueda o el deslizador */
+  .art { position: relative; width: 729px; height: 430px; background: #1a2030 center / 100% 100% no-repeat; border: 1px solid #2a3040;
+         user-select: none; overflow: hidden; }
+  .art .msg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #7a8494; font-size: 13px; pointer-events: none; }
+  .band { position: absolute; border: 2px solid #f0c75e; box-shadow: 0 0 0 9999px rgba(11,14,19,.55); cursor: move; box-sizing: border-box; }
+  .band::after { content: ""; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: #f0c75e; }
+  .big { zoom: 3; }
+  kbd { font: 11px/1 ui-monospace, monospace; background: #0b0e13; border: 1px solid #2a3040; border-radius: 3px; padding: 1px 5px; color: #aeb7c7; }
+</style>
+</head>
+<body>
+<h1>SPLASH MARKS</h1>
+<div class="sub">drag the rectangle over the champion on the splash (mouse wheel or the slider resizes it, arrow keys nudge it): that rectangle is what the gold row shows, the same for both teams · saved to <code>config/faces.json</code> · the overlay picks changes up within 10 s · <kbd>PgUp</kbd> <kbd>PgDn</kbd> previous / next champion, <kbd>Enter</kbd> save</div>
+
+<div class="layout">
+  <div class="card">
+    <label>Champions (A → Z) <input id="filter" type="text" placeholder="filter…" spellcheck="false"></label>
+    <div class="progress" id="progress">loading champion list…</div>
+    <ul id="list"></ul>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div><b id="title">—</b> <span class="hint" id="cid"></span></div>
+        <div class="row">
+          <button id="prev">← previous</button>
+          <button id="next">next →</button>
+          <label style="display:inline-flex;align-items:center;gap:6px;margin:0"><input id="onlyTodo" type="checkbox"> skip champions already marked</label>
+        </div>
+      </div>
+      <div class="row" style="align-items:flex-start;margin-top:12px">
+        <div>
+          <div id="art" class="art"><div id="msg" class="msg">pick a champion on the left</div><div id="band" class="band" hidden></div></div>
+          <label style="margin:8px 0 2px">width <span class="val" id="wv"></span> of the splash — wheel over the splash also resizes</label>
+          <input id="w" type="range" min="0.12" max="1" step="0.005">
+          <div class="hint">rectangle <span class="val" id="rv">—</span> (art pixels) · centre <span class="val" id="cv">—</span></div>
+        </div>
+        <div style="min-width:460px">
+          <label style="margin:0 0 6px"><span class="blue">BLUE</span> row at 3× — gold on the right</label>
+          <div class="big"><div id="prev3" class="prow splash"><span class="num">12,345</span></div></div>
+          <label style="margin:12px 0 6px"><span class="red">RED</span> row at 3× — gold on the left</label>
+          <div class="big"><div id="prev3l" class="prow mirror splash"><span class="num">12,345</span></div></div>
+          <label style="margin:12px 0 6px">Real size</label>
+          <div class="row"><div id="prev1" class="prow splash"><span class="num">12,345</span></div><div id="prev1l" class="prow mirror splash"><span class="num">12,345</span></div></div>
+          <div class="row" style="margin-top:16px">
+            <button id="save" class="primary">Save (Enter)</button>
+            <button id="reset">Remove (use default rectangle)</button>
+          </div>
+          <div class="hint">row size ${ROW}: the rectangle keeps the row's proportion; if a size feels off, the row size lives in <code>web/rows.js</code> and <code>web/rows.css</code></div>
+          <div class="status" id="status"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/rows.js"></script>
+<script>
+const K = 729 / Rows.SPLASH.w;   // escala del splash mostrado
+const $ = id => document.getElementById(id);
+let faces = {}, champions = [], ingame = new Set(), current = null, mark = { ...Rows.DEFAULT_RECT };
+
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function status(msg, err) { $("status").textContent = msg; $("status").className = "status " + (err ? "err" : "ok"); }
+function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+document.querySelector(".hint code").parentElement.innerHTML = document.querySelector(".hint code").parentElement.innerHTML.replace("${ROW}", `${Rows.ROW.w}×${Rows.ROW.h} px`);
+
+// --- lista ---------------------------------------------------------------------
+function visibleChampions() {
+  const q = $("filter").value.trim().toLowerCase();
+  return champions.filter(c => (!q || c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q))
+                            && (!$("onlyTodo").checked || !faces[c.id] || c.id === current));
+}
+function renderList() {
+  const vis = visibleChampions();
+  $("list").innerHTML = vis.map(c => `<li data-id="${esc(c.id)}" class="${c.id === current ? "sel" : ""} ${ingame.has(c.id) ? "ingame" : ""}">
+    <img src="/img/champion/${encodeURIComponent(c.id)}.png" alt="" loading="lazy"><span class="name">${esc(c.name)}</span>${faces[c.id] ? `<span class="done">✓</span>` : ""}</li>`).join("");
+  for (const li of $("list").querySelectorAll("li")) li.addEventListener("click", () => select(li.dataset.id));
+  const done = champions.filter(c => faces[c.id]).length;
+  $("progress").textContent = `${done} of ${champions.length} marked · ${vis.length} shown`;
+  const sel = $("list").querySelector("li.sel");
+  if (sel) sel.scrollIntoView({ block: "nearest" });
+}
+function step(delta) {
+  const vis = visibleChampions();
+  if (!vis.length) return;
+  const i = vis.findIndex(c => c.id === current);
+  const next = vis[clamp(i < 0 ? 0 : i + delta, 0, vis.length - 1)];
+  if (next) select(next.id);
+}
+
+// --- rectángulo y vistas previas ------------------------------------------------
+function artV(id) { const c = champions.find(x => x.id === id); return c ? c.art_v : 0; }
+function draw() {
+  const r = Rows.rect(mark);
+  $("band").hidden = !current;
+  Object.assign($("band").style, { left: r.left * K + "px", top: r.top * K + "px", width: r.width * K + "px", height: r.height * K + "px" });
+  $("w").value = mark.w; $("wv").textContent = `${Math.round(mark.w * 100)} %`;
+  const preview = (el, on) => {
+    el.innerHTML = (current ? `<img class="art" src="${Rows.artUrl(current, artV(current))}" alt="" style="${Rows.artStyle(mark)}">` : "") + `<span class="num">12,345</span>`;
+    el.classList.toggle("splash", !!current);
+  };
+  for (const el of [$("prev3"), $("prev1"), $("prev3l"), $("prev1l")]) preview(el);
+  $("rv").textContent = current ? `left ${Math.round(r.left)} · top ${Math.round(r.top)} · ${Math.round(r.width)} × ${Math.round(r.height)}` : "—";
+  $("cv").textContent = current ? `${Math.round(mark.x * Rows.SPLASH.w)}, ${Math.round(mark.y * Rows.SPLASH.h)} (x ${mark.x.toFixed(3)}, y ${mark.y.toFixed(3)}, w ${mark.w.toFixed(3)})` : "—";
+}
+function loadArt(id) {
+  const art = $("art"), msg = $("msg");
+  art.style.backgroundImage = "none";
+  msg.textContent = "loading splash…"; msg.style.display = "flex";
+  const url = Rows.artUrl(id, artV(id));
+  const probe = new Image();
+  probe.onload = () => { if (current !== id) return; art.style.backgroundImage = `url('${url}')`; msg.style.display = "none"; };
+  probe.onerror = () => { if (current !== id) return; msg.textContent = `splash for ${id} not available (offline? the server could not fetch it from Data Dragon)`; msg.style.display = "flex"; };
+  probe.src = url;
+}
+function setWidth(w) { mark.w = clamp(w, Rows.MIN_W, Rows.MAX_W); draw(); }
+// arrastrar: mueve el centro; rueda: cambia la anchura; flechas: empujan un píxel de arte
+(() => {
+  let drag = null;
+  $("band").addEventListener("mousedown", e => { drag = { mx: e.clientX, my: e.clientY, x: mark.x, y: mark.y }; e.preventDefault(); });
+  window.addEventListener("mousemove", e => {
+    if (!drag) return;
+    mark.x = clamp(drag.x + (e.clientX - drag.mx) / K / Rows.SPLASH.w, 0, 1);
+    mark.y = clamp(drag.y + (e.clientY - drag.my) / K / Rows.SPLASH.h, 0, 1);
+    draw();
+  });
+  window.addEventListener("mouseup", () => { drag = null; });
+  $("art").addEventListener("click", e => {          // un clic fuera del rectángulo lo centra ahí
+    if (!current || e.target === $("band")) return;
+    const r = $("art").getBoundingClientRect();
+    mark.x = clamp((e.clientX - r.left) / r.width, 0, 1); mark.y = clamp((e.clientY - r.top) / r.height, 0, 1);
+    draw();
+  });
+  $("art").addEventListener("wheel", e => { if (!current) return; e.preventDefault(); setWidth(mark.w * (e.deltaY < 0 ? 1.04 : 1 / 1.04)); }, { passive: false });
+})();
+$("w").addEventListener("input", () => setWidth(+$("w").value));
+
+function select(id) {
+  const c = champions.find(x => x.id === id);
+  if (!c) { status(`Unknown champion id ${id}`, true); return; }
+  current = id;
+  mark = Rows.mark(faces[id]);
+  $("title").textContent = c.name; $("cid").textContent = `(${c.id})`;
+  history.replaceState(null, "", `?champ=${encodeURIComponent(id)}`);
+  loadArt(id);
+  renderList();
+  draw();
+  status(faces[id] ? (faces[id].w == null ? "Old head mark converted to a rectangle: adjust and save" : "Saved rectangle loaded") : "No mark yet: showing the default rectangle — drag it over the champion");
+}
+
+// --- datos ---------------------------------------------------------------------------
+async function refreshFaces() { const r = await fetch("/api/faces"); faces = r.ok ? await r.json() : {}; }
+async function refreshChampions() {
+  const r = await fetch("/api/champions");
+  if (!r.ok) { $("progress").textContent = "champion list unavailable yet (Data Dragon catalog still loading) — retrying…"; setTimeout(refreshChampions, 3000); return; }
+  champions = (await r.json()).champions;
+  renderList();
+}
+async function refreshGame() {
+  try {
+    const r = await fetch("/api/overlay"); const d = await r.json();
+    ingame = new Set(d.in_game ? d.gold.teams.flatMap(t => t.players).map(p => p.icon).filter(Boolean) : []);
+    renderList();
+  } catch (e) {}
+}
+
+// --- acciones ---------------------------------------------------------------------
+async function save() {
+  if (!current) { status("Pick a champion first", true); return; }
+  const body = { x: +mark.x.toFixed(4), y: +mark.y.toFixed(4), w: +mark.w.toFixed(4) };
+  const r = await fetch(`/api/faces/${encodeURIComponent(current)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!r.ok) { status(`Save failed (${r.status})`, true); return; }
+  faces = await r.json(); renderList();
+  status(`Saved ${current}: centre (${body.x}, ${body.y}), width ${Math.round(body.w * 100)} % — the overlay updates within 10 s`);
+}
+$("save").addEventListener("click", save);
+$("reset").addEventListener("click", async () => {
+  if (!current) return;
+  const r = await fetch(`/api/faces/${encodeURIComponent(current)}`, { method: "DELETE" });
+  if (!r.ok) { status(`Remove failed (${r.status})`, true); return; }
+  faces = await r.json(); mark = { ...Rows.DEFAULT_RECT }; renderList(); draw(); status(`Mark removed for ${current}`);
+});
+$("prev").addEventListener("click", () => step(-1));
+$("next").addEventListener("click", () => step(1));
+$("filter").addEventListener("input", renderList);
+$("onlyTodo").addEventListener("change", renderList);
+document.addEventListener("keydown", e => {
+  if (e.target === $("filter")) return;
+  const nudge = (dx, dy) => { mark.x = clamp(mark.x + dx / Rows.SPLASH.w, 0, 1); mark.y = clamp(mark.y + dy / Rows.SPLASH.h, 0, 1); draw(); };
+  if (e.key === "PageDown") { e.preventDefault(); step(1); }
+  else if (e.key === "PageUp") { e.preventDefault(); step(-1); }
+  else if (e.key === "Enter") { e.preventDefault(); save(); }
+  else if (e.key === "ArrowLeft") { e.preventDefault(); nudge(-(e.shiftKey ? 10 : 1), 0); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); nudge(e.shiftKey ? 10 : 1, 0); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); nudge(0, -(e.shiftKey ? 10 : 1)); }
+  else if (e.key === "ArrowDown") { e.preventDefault(); nudge(0, e.shiftKey ? 10 : 1); }
+});
+
+(async () => {
+  await refreshFaces();
+  await refreshChampions();
+  await refreshGame();
+  setInterval(refreshGame, 5000);
+  const wanted = new URLSearchParams(location.search).get("champ");
+  if (wanted && champions.some(c => c.id === wanted)) select(wanted);
+  else if (champions.length) select((champions.find(c => ingame.has(c.id)) || champions[0]).id);
+  draw();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+ "source": "own game 2026-10-04 (data/captures/20261004_201707): champ select session champselect_1791138055023, screenshot shot_1791138068934_select (your turn, 11 s, Thresh highlighted); enemy roles from the game's positions",
+ "me": {
+  "side": 1,
+  "role": 4
+ },
+ "hover": 412,
+ "picks": [
+  [
+   63,
+   31,
+   7,
+   221,
+   350
+  ],
+  [
+   157,
+   64,
+   134,
+   804,
+   0
+  ]
+ ],
+ "bans": [
+  [
+   166,
+   78,
+   62,
+   53,
+   51
+  ],
+  [
+   24,
+   145,
+   38,
+   233,
+   55
+  ]
+ ]
+}

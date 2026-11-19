@@ -1,0 +1,249 @@
+<title>Macro de Evelynn</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..800&family=Instrument+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f3ef;
+    --surface: #fbfaf7;
+    --ink: #22282a;
+    --ink-soft: #5a6367;
+    --line: #d9d7cf;
+    --accent: #b03d80;
+    --farm: #4e7f58;
+    --gank: #b34f2c;
+    --invade: #7247b8;
+    --rio: #3c7796;
+    --base: #8a8f8f;
+    --gold: #96781f;
+    --death: #b03434;
+    --chip-ink: #ffffff;
+    --mark-bg: #edece6;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14191b;
+      --surface: #1b2225;
+      --ink: #e8e6df;
+      --ink-soft: #9aa4a6;
+      --line: #2c3538;
+      --accent: #e06ab4;
+      --farm: #6fbf80;
+      --gank: #e07a4f;
+      --invade: #a37fe8;
+      --rio: #62a9cc;
+      --base: #7d8788;
+      --gold: #d3b100;
+      --death: #e06060;
+      --chip-ink: #14191b;
+      --mark-bg: #232c2f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14191b;
+    --surface: #1b2225;
+    --ink: #e8e6df;
+    --ink-soft: #9aa4a6;
+    --line: #2c3538;
+    --accent: #e06ab4;
+    --farm: #6fbf80;
+    --gank: #e07a4f;
+    --invade: #a37fe8;
+    --rio: #62a9cc;
+    --base: #7d8788;
+    --gold: #d3b100;
+    --death: #e06060;
+    --chip-ink: #14191b;
+    --mark-bg: #232c2f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Instrument Sans", system-ui, sans-serif;
+    margin: 0;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 40px 20px 72px; }
+  header h1 {
+    font-family: "Archivo", sans-serif;
+    font-weight: 800;
+    font-stretch: 80%;
+    font-size: clamp(2rem, 5vw, 2.9rem);
+    letter-spacing: 0.01em;
+    margin: 0 0 4px;
+    text-wrap: balance;
+  }
+  header h1 .accent { color: var(--accent); }
+  .sub {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    margin: 0 0 20px;
+  }
+  .sub code { font-family: "Spline Sans Mono", monospace; font-size: 0.85rem; }
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 36px; }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 14px;
+    min-width: 96px;
+  }
+  .stat .v {
+    font-family: "Spline Sans Mono", monospace;
+    font-weight: 600;
+    font-size: 1.25rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .k {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--ink-soft);
+  }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 20px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--ink-soft); }
+  .dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .tl { border-left: 2px solid var(--line); margin-left: 118px; padding: 6px 0; }
+  .row { display: flex; align-items: flex-start; gap: 14px; position: relative; padding: 5px 0; }
+  .row .time {
+    font-family: "Spline Sans Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    width: 104px;
+    text-align: right;
+    position: absolute;
+    left: -120px;
+    top: 9px;
+    white-space: nowrap;
+  }
+  .node {
+    width: 12px; height: 12px; border-radius: 3px;
+    margin-left: -7px; margin-top: 9px; flex: none;
+  }
+  .card { flex: 1; padding: 2px 0 6px; }
+  .act {
+    font-family: "Archivo", sans-serif;
+    font-weight: 700;
+    font-stretch: 85%;
+    font-size: 1.02rem;
+    letter-spacing: 0.01em;
+  }
+  .dur {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    margin-left: 8px;
+  }
+  .marks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+  .mark {
+    background: var(--mark-bg);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.78rem;
+    display: inline-flex;
+    gap: 6px;
+    align-items: baseline;
+  }
+  .mark .mt { font-family: "Spline Sans Mono", monospace; font-size: 0.72rem; color: var(--ink-soft); }
+  .mark.kill { box-shadow: inset 3px 0 0 var(--accent); }
+  .mark.death { box-shadow: inset 3px 0 0 var(--death); }
+  .mark.obj { box-shadow: inset 3px 0 0 var(--gold); }
+  .mark.other { box-shadow: inset 3px 0 0 var(--base); }
+  .phase {
+    margin: 18px 0 18px -7px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .phase .pline { flex: 1; border-top: 1px dashed var(--line); }
+  .phase .ptxt {
+    font-family: "Archivo", sans-serif;
+    font-weight: 700;
+    font-stretch: 85%;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  footer {
+    margin-top: 44px;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  footer code { font-family: "Spline Sans Mono", monospace; font-size: 0.74rem; }
+  @media (max-width: 560px) {
+    .tl { margin-left: 64px; }
+    .row .time { width: 56px; left: -66px; font-size: 0.7rem; }
+  }
+</style>
+<div class="wrap">
+  <header>
+    <h1>Macro de <span class="accent">Evelynn</span></h1>
+    <p class="sub">Jungla · equipo azul · <code>EUW1-7983109023</code> · parche 16.18 · 26:16 · derrota</p>
+  </header>
+  <div class="stats">
+    <div class="stat"><div class="v">6/4/3</div><div class="k">KDA</div></div>
+    <div class="stat"><div class="v">177</div><div class="k">CS</div></div>
+    <div class="stat"><div class="v">0–4</div><div class="k">dragones</div></div>
+    <div class="stat"><div class="v" id="n-ganks">—</div><div class="k">ganks</div></div>
+    <div class="stat"><div class="v" id="n-invades">—</div><div class="k">invades</div></div>
+  </div>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--farm)"></span>farmea jungla</span>
+    <span><span class="dot" style="background:var(--gank)"></span>gank</span>
+    <span><span class="dot" style="background:var(--invade)"></span>invade</span>
+    <span><span class="dot" style="background:var(--rio)"></span>río / foso</span>
+    <span><span class="dot" style="background:var(--gold)"></span>objetivo</span>
+    <span><span class="dot" style="background:var(--base)"></span>base</span>
+  </div>
+  <div class="tl" id="tl"></div>
+  <footer>
+    Fuente: Eventos, objetivos y posiciones exactas de <strong>Match-V5</strong> (EUW1_7983109023); trayectoria densa del minimapa de la replay, anclada a las posiciones de cada kill y a los frames de 60s. Cada acción se sitúa donde ocurrió. Regiones derivadas de los píxeles del mapa: carriles como polilíneas que se ensanchan hacia su tramo de río, bases como cuarto de círculo completo (r=0.37), fosos de Barón y Dragón propios, y los doce campamentos garantizados en jungla. farmea = muere un rombo del cuadrante o sube el CS de jungla; si no, cruza. Huecos = muerta o sin detección.
+    Generado el 2026-09-18 · <code>mv5_timeline.json</code> + <code>traj_v7.jsonl</code> + <code>region_labels.npy</code>
+  </footer>
+</div>
+<script>
+  const DATA = {"first_tower": 779.726, "segments": [{"t0": 0.0, "t1": 0.0, "action": "en base", "detail": "", "marks": []}, {"t0": 46.7, "t1": 113.1, "action": "farmea jungla propia · cuadrante rojo", "detail": "", "marks": []}, {"t0": 121.8, "t1": 171.0, "action": "farmea jungla propia · cuadrante azul", "detail": "", "marks": []}, {"t0": 180.02, "t1": 186.925, "action": "GANK MID", "detail": "sobre Lux (MID)", "marks": [{"t": 186.925, "kind": "kill", "text": "KILL Lux (MID)"}]}, {"t0": 194.1, "t1": 205.6, "action": "río inferior", "detail": "", "marks": []}, {"t0": 208.6, "t1": 260.2, "action": "farmea jungla propia · cuadrante rojo", "detail": "", "marks": []}, {"t0": 263.1, "t1": 268.9, "action": "backea", "detail": "", "marks": []}, {"t0": 277.4, "t1": 283.6, "action": "en base", "detail": "", "marks": []}, {"t0": 289.7, "t1": 316.4, "action": "farmea jungla propia · cuadrante azul", "detail": "", "marks": []}, {"t0": 319.3, "t1": 378.0, "action": "GANK TOP", "detail": "sobre Cho'Gath (TOP), Vi (JG)", "marks": []}, {"t0": 341.358, "t1": 341.358, "action": "OBJETIVO (RIVAL)", "detail": "Dragón de tierra — foso de Dragón", "marks": []}, {"t0": 380.8, "t1": 386.9, "action": "backea", "detail": "", "marks": []}, {"t0": 392.5, "t1": 401.1, "action": "en base", "detail": "", "marks": []}, {"t0": 407.0, "t1": 450.0, "action": "farmea jungla propia · cuadrante rojo", "detail": "", "marks": []}, {"t0": 458.5, "t1": 508.1, "action": "farmea jungla propia · cuadrante azul", "detail": "", "marks": []}, {"t0": 499.093, "t1": 499.093, "action": "OBJETIVO (RIVAL)", "detail": "Larvas x2 — foso de Barón", "marks": []}, {"t0": 530.18, "t1": 530.18, "action": "OBJETIVO (equipo)", "detail": "Larvas x1 · lo asegura ella — foso de Barón", "marks": []}, {"t0": 540.176, "t1": 547.257, "action": "GANK TOP", "detail": "sobre Cho'Gath (TOP)", "marks": [{"t": 547.257, "kind": "assist", "text": "asiste kill de Nasus (TOP) a Cho'Gath (TOP)"}]}, {"t0": 548.8, "t1": 572.4, "action": "río superior", "detail": "", "marks": []}, {"t0": 575.4, "t1": 581.4, "action": "backea", "detail": "", "marks": []}, {"t0": 584.1, "t1": 590.2, "action": "en base", "detail": "", "marks": []}, {"t0": 600.19, "t1": 624.6, "action": "farmea jungla propia · cuadrante rojo", "detail": "", "marks": []}, {"t0": 636.2, "t1": 645.2, "action": "INVADE jungla enemiga · cuadrante azul", "detail": "", "marks": []}, {"t0": 651.174, "t1": 653.8, "action": "río inferior", "detail": "", "marks": [{"t": 651.174, "kind": "kill", "text": "KILL Lux (MID)"}]}, {"t0": 656.7, "t1": 665.4, "action": "pelea en foso de Dragón", "detail": "", "marks": []}, {"t0": 685.7, "t1": 691.937, "action": "GANK BOT", "detail": "sobre Blitzcrank (SUP), Jinx (ADC)", "marks": [{"t": 691.937, "kind": "kill", "text": "KILL Jinx (ADC)"}]}, {"t0": 731.672, "t1": 731.672, "action": "OBJETIVO (RIVAL)", "detail": "Dragón de fuego — foso de Dragón", "marks": [{"t": 736.315, "kind": "kill", "text": "KILL Vi (JG)"}]}, {"t0": 736.315, "t1": 746.8, "action": "pelea en foso de Dragón", "detail": "", "marks": []}, {"t0": 749.7, "t1": 788.1, "action": "farmea jungla propia · cuadrante rojo", "detail": "", "marks": []}, {"t0": 779.726, "t1": 779.726, "action": "OBJETIVO (RIVAL)", "detail": "Torre BOT — BOT", "marks": []}, {"t0": 796.9, "t1": 823.8, "action": "farmea jungla propia · cuadrante azul", "detail": "", "marks": []}, {"t0": 846.9, "t1": 863.9, "action": "GANK TOP", "detail": "sobre Cho'Gath (TOP)", "marks": [{"t": 857.715, "kind": "kill", "text": "KILL Cho'Gath (TOP)"}]}, {"t0": 875.8, "t1": 878.6, "action": "en base", "detail": "", "marks": []}, {"t0": 881.5, "t1": 890.2, "action": "cruza jungla propia · cuadrante rojo", "detail": "", "marks": []}, {"t0": 896.4, "t1": 906.169, "action": "GANK BOT", "detail": "sobre Lux (MID)", "marks": [{"t": 906.169, "kind": "kill", "text": "KILL Lux (MID)"}]}, {"t0": 924.46, "t1": 924.46, "action": "OBJETIVO (RIVAL)", "detail": "Heraldo — foso de Barón", "marks": []}, {"t0": 931.5, "t1": 946.1, "action": "pisa BOT (sin rival visto)", "detail": "", "marks": []}, {"t0": 938.77, "t1": 938.77, "action": "OBJETIVO (equipo)", "detail": "Torre BOT · lo asegura ella — BOT", "marks": []}, {"t0": 949.1, "t1": 955.1, "action": "backea", "detail": "", "marks": []}, {"t0": 960.26, "t1": 966.9, "action": "en base", "detail": "", "marks": []}, {"t0": 969.8, "t1": 978.6, "action": "cruza jungla propia · cuadrante azul", "detail": "", "marks": []}, {"t0": 988.489, "t1": 988.489, "action": "GANK TOP → INVADE jungla enemiga · cuadrante rojo", "detail": "", "marks": [{"t": 988.489, "kind": "assist", "text": "asiste kill de Nasus (TOP) a Cho'Gath (TOP)"}]}, {"t0": 1013.086, "t1": 1013.086, "action": "OBJETIVO (equipo)", "detail": "Torre TOP — TOP", "marks": []}, {"t0": 1032.205, "t1": 1032.205, "action": "OBJETIVO (equipo)", "detail": "Torre MID — MID", "marks": []}, {"t0": 1044.644, "t1": 1044.644, "action": "OBJETIVO (RIVAL)", "detail": "Dragón quimtec — foso de Dragón", "marks": []}, {"t0": 1061.2, "t1": 1081.4, "action": "GANK MID", "detail": "sobre Blitzcrank (SUP), Jinx (ADC), Lux (MID), Vi (JG)", "marks": [{"t": 1070.133, "kind": "assist", "text": "asiste kill de Zed (MID) a Lux (MID)"}]}, {"t0": 1084.4, "t1": 1093.2, "action": "farmea jungla propia · cuadrante rojo", "detail": "", "marks": []}, {"t0": 1102.151, "t1": 1102.151, "action": "pelea en MID (lado propio)", "detail": "sobre Jinx (ADC), Lux (MID), Vi (JG)", "marks": [{"t": 1102.151, "kind": "death", "text": "MUERE ante Vi (JG)"}]}, {"t0": 1143.7, "t1": 1146.6, "action": "en base", "detail": "", "marks": []}, {"t0": 1148.151, "t1": 1148.151, "action": "OBJETIVO (RIVAL)", "detail": "Torre MID — MID", "marks": []}, {"t0": 1162.841, "t1": 1162.841, "action": "pelea en MID (lado propio)", "detail": "sobre Lux (MID), Vi (JG)", "marks": [{"t": 1162.841, "kind": "death", "text": "MUERE ante Vi (JG)"}]}, {"t0": 1206.4, "t1": 1209.2, "action": "en base", "detail": "", "marks": []}, {"t0": 1207.725, "t1": 1207.725, "action": "OBJETIVO (RIVAL)", "detail": "Torre TOP — TOP", "marks": []}, {"t0": 1212.0, "t1": 1265.8, "action": "farmea jungla propia · cuadrante azul", "detail": "", "marks": []}, {"t0": 1292.5, "t1": 1295.6, "action": "en base", "detail": "", "marks": []}, {"t0": 1298.7, "t1": 1307.8, "action": "farmea jungla propia · cuadrante rojo", "detail": "", "marks": []}, {"t0": 1310.7, "t1": 1322.6, "action": "GANK BOT", "detail": "sobre Vi (JG)", "marks": []}, {"t0": 1343.8, "t1": 1343.8, "action": "en base", "detail": "", "marks": []}, {"t0": 1353.821, "t1": 1353.821, "action": "pelea en foso de Dragón", "detail": "", "marks": [{"t": 1353.821, "kind": "death", "text": "MUERE ante Vi (JG)"}]}, {"t0": 1360.2, "t1": 1360.2, "action": "OBJETIVO (RIVAL)", "detail": "Dragón quimtec — foso de Dragón", "marks": []}, {"t0": 1403.7, "t1": 1403.7, "action": "en base", "detail": "", "marks": []}, {"t0": 1406.6, "t1": 1418.7, "action": "pelea en MID (lado propio)", "detail": "sobre Blitzcrank (SUP), Lux (MID), Vi (JG)", "marks": []}, {"t0": 1421.7, "t1": 1421.7, "action": "en base", "detail": "", "marks": []}, {"t0": 1423.352, "t1": 1423.352, "action": "OBJETIVO (RIVAL)", "detail": "Barón — foso de Barón", "marks": []}, {"t0": 1427.6, "t1": 1442.6, "action": "pelea en MID (lado propio)", "detail": "sobre Blitzcrank (SUP), Cho'Gath (TOP), Lux (MID), Vi (JG)", "marks": []}, {"t0": 1457.3, "t1": 1466.2, "action": "farmea jungla propia · cuadrante rojo", "detail": "", "marks": []}, {"t0": 1495.575, "t1": 1495.575, "action": "OBJETIVO (RIVAL)", "detail": "Torre MID — MID", "marks": []}, {"t0": 1505.2, "t1": 1511.5, "action": "backea", "detail": "", "marks": []}, {"t0": 1514.3, "t1": 1517.3, "action": "en base", "detail": "", "marks": []}, {"t0": 1532.6, "t1": 1570.537, "action": "en base", "detail": "", "marks": [{"t": 1558.883, "kind": "death", "text": "MUERE ante Lux (MID)"}]}, {"t0": 1532.833, "t1": 1532.833, "action": "OBJETIVO (RIVAL)", "detail": "Torre MID — en base", "marks": []}, {"t0": 1536.34, "t1": 1536.34, "action": "OBJETIVO (RIVAL)", "detail": "Inhibidor MID — en base", "marks": []}, {"t0": 1540.982, "t1": 1540.982, "action": "OBJETIVO (RIVAL)", "detail": "Torre TOP — TOP", "marks": []}, {"t0": 1557.48, "t1": 1557.48, "action": "OBJETIVO (RIVAL)", "detail": "Torre MID — en base", "marks": []}, {"t0": 1559.384, "t1": 1559.384, "action": "OBJETIVO (RIVAL)", "detail": "Torre MID — en base", "marks": []}], "kda": "6/4/3", "cs": 177, "win": false, "drag_rival": 4, "drag_team": 0};
+  const color = a =>
+    a.startsWith("GANK") ? "gank" :
+    a.startsWith("pelea") ? "gank" :
+    a.startsWith("OBJETIVO") ? "gold" :
+    a.startsWith("INVADE") ? "invade" :
+    a.startsWith("farmea") ? "farm" :
+    a.startsWith("río") ? "rio" :
+    a === "OBJETIVO" ? "gold" :
+    a.startsWith("pisa") ? "rio" : "base";
+  const mmss = t => `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+  const tl = document.getElementById("tl");
+  let shownPhase = false, ganks = 0, invades = 0;
+  for (const s of DATA.segments) {
+    if (!shownPhase && DATA.first_tower && s.t0 >= DATA.first_tower) {
+      tl.insertAdjacentHTML("beforeend",
+        `<div class="phase"><span class="ptxt">${mmss(DATA.first_tower)} · cae la primera torre — fin de fase de líneas</span><span class="pline"></span></div>`);
+      shownPhase = true;
+    }
+    if (s.action.startsWith("GANK")) ganks++;
+    if (s.action.startsWith("INVADE")) invades++;
+    const cls = { kill: "kill", death: "death", assist: "other" };
+    const dur = Math.round(s.t1 - s.t0);
+    const c = color(s.action);
+    tl.insertAdjacentHTML("beforeend", `
+      <div class="row">
+        <span class="time">${s.t1 - s.t0 < 3 ? mmss(s.t0) : mmss(s.t0) + "–" + mmss(s.t1)}</span>
+        <span class="node" style="background:var(--${c})"></span>
+        <div class="card">
+          <span class="act" style="color:var(--${c})">${s.action}${s.action === "OBJETIVO" ? " · " + s.detail : ""}</span>
+          ${dur >= 3 ? `<span class="dur">${dur}s</span>` : ""}
+          ${s.detail && s.action !== "OBJETIVO" ? `<span class="dur">${s.detail}</span>` : ""}
+          ${s.marks.length ? `<div class="marks">${s.marks.map(m =>
+            `<span class="mark ${cls[m.kind] || "other"}"><span class="mt">${mmss(m.t)}</span>${m.text}</span>`).join("")}</div>` : ""}
+        </div>
+      </div>`);
+  }
+  document.getElementById("n-ganks").textContent = ganks;
+  document.getElementById("n-invades").textContent = invades;
+</script>

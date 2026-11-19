@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Videns · Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0b0d; --ink:#e9ebef; --dim:#8d94a2; --faint:#565d6b;
+    --rule:rgba(255,255,255,.07); --rule-2:rgba(255,255,255,.15);
+    --gold:#d4aa2e; --gold-b:#f0c64a;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:"Inter",ui-sans-serif,system-ui,sans-serif;
+    /* the middle ground: a sheet, but a wide one */
+    --sheet:84rem;
+    --pad:clamp(.9rem,2.6vw,2.5rem);
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.65 var(--sans);
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  img{max-width:100%;display:block}
+
+  .sheet{position:relative;width:100%;max-width:var(--sheet);margin:0 auto;padding-inline:var(--pad)}
+
+  /* Hairline column grid — bounded to the sheet, so the page still reads as a document. */
+  .grid-overlay{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);
+    width:min(var(--sheet),100vw);pointer-events:none;z-index:0;
+    background:repeating-linear-gradient(90deg,transparent,transparent calc(8.3333% - 1px),var(--rule) calc(8.3333% - 1px),var(--rule) 8.3333%);
+    opacity:0;animation:gridIn 1.4s var(--ease) .15s forwards}
+  @keyframes gridIn{to{opacity:1}}
+  @media(max-width:60rem){.grid-overlay{
+    background:repeating-linear-gradient(90deg,transparent,transparent calc(25% - 1px),var(--rule) calc(25% - 1px),var(--rule) 25%)}}
+  @media(max-width:36rem){.grid-overlay{display:none}}
+  body>*:not(.grid-overlay){position:relative;z-index:1}
+
+  /* ---------- masthead ---------- */
+  .mast{border-bottom:1px solid var(--rule-2);position:sticky;top:0;z-index:30;
+    background:rgba(10,11,13,.88);backdrop-filter:blur(12px)}
+  .mast .sheet{display:flex;align-items:center;gap:1.5rem;height:56px}
+  .mark{font:800 1.0625rem/1 var(--mono);letter-spacing:-.04em}
+  .mark i{color:var(--gold);font-style:normal}
+  .meta{margin-left:auto;display:flex;gap:clamp(1rem,2.2vw,2.25rem);font:500 .6875rem/1 var(--mono);
+    letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+  .meta b{color:var(--gold);font-weight:500}
+  @media(max-width:52rem){.meta span:nth-child(n+3){display:none}}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;min-height:calc(92svh - 56px);display:flex;flex-direction:column;
+    padding-bottom:1.5rem}
+  .fileline{display:flex;gap:1rem;align-items:baseline;padding-top:clamp(1.5rem,3.6vw,2.5rem);
+    font:500 .6875rem/1 var(--mono);letter-spacing:.14em;color:var(--faint);text-transform:uppercase}
+  .fileline s{flex:1;height:1px;background:var(--rule-2);text-decoration:none;
+    transform:scaleX(0);transform-origin:left;animation:drawRule 1.2s var(--ease) .35s forwards}
+  @keyframes drawRule{to{transform:none}}
+
+  .hero-mid{flex:1;display:flex;flex-direction:column;justify-content:center;
+    padding-block:clamp(2rem,5vw,3.5rem)}
+
+  h1{margin:0;font:800 clamp(1.1rem,8vw,6.9rem)/1 var(--mono);letter-spacing:-.065em;white-space:nowrap}
+  h1 em{font-style:normal;color:var(--gold)}
+  /* the slogan arrives a word at a time, wiped from the left */
+  h1 .w{display:inline-block;clip-path:inset(0 100% 0 0);opacity:0;
+    animation:wordIn .85s var(--ease) forwards}
+  h1 .w:nth-child(1){animation-delay:.25s}
+  h1 .w:nth-child(2){animation-delay:.37s}
+  h1 .w:nth-child(3){animation-delay:.49s}
+  @keyframes wordIn{to{clip-path:inset(0 0 0 0);opacity:1}}
+
+  .sub{margin:clamp(1.15rem,2.2vw,1.75rem) 0 0;font-size:clamp(1rem,1.8vw,1.375rem);
+    color:var(--dim);max-width:48ch}
+  .actions{display:flex;flex-wrap:wrap;align-items:center;gap:1.25rem;margin:clamp(1.6rem,3vw,2.5rem) 0 0}
+  .dl{display:inline-flex;align-items:center;gap:.7rem;cursor:pointer;border:1px solid var(--gold);
+    background:var(--gold);color:#17120a;padding:.95rem 1.8rem;border-radius:2px;
+    font:700 .875rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;
+    transition:background .22s var(--ease),color .22s var(--ease),box-shadow .22s var(--ease),transform .22s var(--ease)}
+  .dl:hover{background:transparent;color:var(--gold);transform:translateY(-2px);
+    box-shadow:0 8px 26px -10px rgba(212,170,46,.55)}
+  .dl svg{width:16px;height:16px}
+  .actions small{font:500 .6875rem/1.5 var(--mono);color:var(--faint);letter-spacing:.1em}
+
+  /* video plate, framed in the sheet, with crop marks */
+  .plate{position:relative;margin-top:clamp(1.75rem,3.4vw,2.5rem);aspect-ratio:21/9;
+    border:1px solid var(--rule-2);overflow:hidden;background:
+      radial-gradient(ellipse 60% 70% at 25% 40%,rgba(212,170,46,.12),transparent 65%),
+      radial-gradient(ellipse 70% 80% at 85% 70%,rgba(40,60,110,.24),transparent 70%),
+      linear-gradient(180deg,#0e1014,#08090b);
+    clip-path:inset(0 100% 0 0);animation:plateIn 1.1s var(--ease) .75s forwards}
+  @keyframes plateIn{to{clip-path:inset(0 0 0 0)}}
+  .plate video{width:100%;height:100%;object-fit:cover}
+  .plate::after{content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 3px)}
+  .crop{position:absolute;width:11px;height:11px;border:1px solid var(--gold);opacity:.7}
+  .crop.tl{top:8px;left:8px;border-right:0;border-bottom:0}
+  .crop.tr{top:8px;right:8px;border-left:0;border-bottom:0}
+  .crop.bl{bottom:8px;left:8px;border-right:0;border-top:0}
+  .crop.br{bottom:8px;right:8px;border-left:0;border-top:0}
+  .plate .lbl{position:absolute;left:1rem;bottom:.85rem;font:500 .625rem/1 var(--mono);
+    letter-spacing:.22em;color:var(--faint);text-transform:uppercase}
+
+  /* HUD strip closing the hero */
+  .hud{border-top:1px solid var(--rule-2);display:flex;flex-wrap:wrap;margin-top:clamp(1.5rem,3vw,2.25rem);
+    font:500 .6875rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  .hud div{flex:1;min-width:8rem;padding:.95rem 0 0;border-right:1px solid var(--rule);
+    display:flex;flex-direction:column;gap:.45rem}
+  .hud div:last-child{border-right:0;align-items:flex-end;text-align:right}
+  .hud b{font-weight:800;font-size:.9375rem;letter-spacing:-.02em;color:var(--ink);
+    font-variant-numeric:tabular-nums;display:inline-block}
+  .hud b.g{color:var(--gold)}
+  @media(max-width:52rem){.hud div:nth-child(n+4){display:none}}
+
+  /* ---------- sections ---------- */
+  section{padding-block:clamp(3.5rem,7vw,6rem);border-top:1px solid var(--rule-2)}
+  .shead{display:flex;align-items:baseline;gap:1.25rem;margin:0 0 clamp(2rem,4vw,3rem)}
+  .shead .no{font:700 .75rem/1 var(--mono);color:var(--gold);letter-spacing:.1em}
+  .shead h2{margin:0;font:600 clamp(1.3rem,2.7vw,1.95rem)/1.15 var(--sans);letter-spacing:-.03em;white-space:nowrap}
+  .shead s{flex:1;height:1px;background:var(--rule-2);text-decoration:none;
+    transform:scaleX(0);transform-origin:left;transition:transform 1.1s var(--ease) .15s}
+  .in .shead s{transform:none}
+  .shead .of{font:500 .625rem/1 var(--mono);color:var(--faint);letter-spacing:.14em;white-space:nowrap}
+
+  .bed{display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(1.5rem,3vw,3rem)}
+  .c-left,.c-right{grid-column:1/-1}
+  @media(min-width:58rem){.c-left{grid-column:1/7}.c-right{grid-column:7/13}}
+  .c-left>h3,.c-right>h3{margin:0 0 .4rem;font:700 .8125rem/1 var(--mono);letter-spacing:.12em;
+    text-transform:uppercase;color:var(--gold)}
+  .c-left>p,.c-right>p{margin:0 0 1.75rem;color:var(--dim);font-size:.9375rem;max-width:48ch}
+
+  .fields{list-style:none;margin:0;padding:0;font:500 .8125rem/1 var(--mono)}
+  .fields li{display:flex;align-items:baseline;gap:.6rem;padding:.7rem 0;border-bottom:1px dotted var(--rule-2);
+    transition:color .2s var(--ease)}
+  .fields li:last-child{border-bottom:0}
+  .fields li:hover .v{color:var(--gold-b)}
+  .fields .k{color:var(--faint);letter-spacing:.08em;text-transform:uppercase;font-size:.6875rem;white-space:nowrap}
+  .fields .d{flex:1;border-bottom:1px dotted var(--rule);transform:translateY(-3px)}
+  .fields .v{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;transition:color .2s var(--ease)}
+  .fields .v.g{color:var(--gold)}
+
+  .items{display:flex;gap:.45rem;margin:1.5rem 0}
+  .items img{width:38px;height:38px;border:1px solid var(--rule-2);border-radius:2px;
+    transition:transform .25s var(--ease),border-color .25s var(--ease)}
+  .items img:hover{transform:translateY(-3px);border-color:var(--gold)}
+  .verdict{border-left:2px solid var(--gold);padding:.85rem 0 .85rem 1.15rem;margin-top:1.5rem;
+    display:flex;gap:.9rem;align-items:center}
+  .verdict img{width:42px;height:42px;border-radius:2px;flex:none}
+  .verdict b{display:block;font:700 .9375rem/1.3 var(--mono)}
+  .verdict span{display:block;font-size:.8125rem;color:var(--dim);margin-top:.15rem}
+  .verdict span i{font-style:normal;color:var(--gold)}
+
+  .log{list-style:none;margin:0;padding:0;font:500 .8125rem/1 var(--mono)}
+  .log li{display:grid;grid-template-columns:3.4rem 1.1rem 1fr;align-items:center;gap:.7rem;
+    padding:.8rem 0;border-bottom:1px dotted var(--rule-2)}
+  .log li:last-child{border-bottom:0}
+  .log time{color:var(--faint);font-variant-numeric:tabular-nums}
+  .log .m{color:var(--rule-2);transition:color .25s var(--ease)}
+  .log b{font-weight:500;letter-spacing:.07em;text-transform:uppercase;font-size:.8125rem;color:var(--dim);
+    transition:color .25s var(--ease),transform .25s var(--ease)}
+  .log li:hover b{color:var(--ink);transform:translateX(3px)}
+  .log li.k .m{color:var(--gold)}
+  .log li.k b{color:var(--gold-b)}
+
+  .rank{list-style:none;margin:0;padding:0}
+  .rank li{position:relative;display:flex;align-items:center;gap:1rem;padding:.8rem .7rem;
+    border-bottom:1px dotted var(--rule-2)}
+  .rank li:last-child{border-bottom:0}
+  /* bars grow from zero when the section scrolls in */
+  .rank .fill{position:absolute;inset:0 auto 0 0;background:rgba(212,170,46,.09);
+    width:0;transition:width 1.1s var(--ease)}
+  .in .rank .fill{width:var(--w)}
+  .rank li:nth-child(2) .fill{transition-delay:.08s}
+  .rank li:nth-child(3) .fill{transition-delay:.16s}
+  .rank li:nth-child(4) .fill{transition-delay:.24s}
+  .rank li:nth-child(5) .fill{transition-delay:.32s}
+  .rank li>*{position:relative}
+  .rank .n{font:700 .625rem/1 var(--mono);color:var(--faint);width:1.3rem}
+  .rank img{width:36px;height:36px;border:1px solid var(--rule-2);border-radius:2px;
+    transition:border-color .25s var(--ease)}
+  .rank li:hover img{border-color:var(--gold)}
+  .rank .nm{flex:1;font-size:.9375rem}
+  .rank .pc{font:700 .875rem/1 var(--mono);color:var(--gold);font-variant-numeric:tabular-nums}
+
+  /* ---------- figures ---------- */
+  .figs{display:grid;border-top:1px solid var(--rule-2);border-bottom:1px solid var(--rule-2)}
+  @media(min-width:44rem){.figs{grid-template-columns:1fr 1fr}}
+  @media(min-width:68rem){.figs{grid-template-columns:repeat(4,1fr)}}
+  .figs .f{padding:clamp(1.5rem,3vw,2.25rem) clamp(1rem,2vw,1.75rem) clamp(1.5rem,3vw,2.25rem) 0;
+    border-right:1px solid var(--rule)}
+  .figs .f:last-child{border-right:0}
+  .figs .f b{display:block;font:800 clamp(1.8rem,4vw,3rem)/1 var(--mono);letter-spacing:-.055em;
+    color:var(--gold);font-variant-numeric:tabular-nums}
+  .figs .f span{display:block;margin-top:.7rem;color:var(--dim);font-size:.875rem;max-width:22ch}
+  .figs .f em{display:block;margin-top:.5rem;font:500 .625rem/1 var(--mono);color:var(--faint);
+    letter-spacing:.14em;text-transform:uppercase;font-style:normal}
+  .note{margin:1.75rem 0 0;font:500 .6875rem/1.8 var(--mono);color:var(--faint);letter-spacing:.05em}
+
+  .stamp{border:1px solid var(--rule-2);padding:1.75rem 2rem;max-width:58rem;position:relative}
+  .stamp::before{content:"STATUS";position:absolute;top:-.5rem;left:1.5rem;background:var(--bg);
+    padding:0 .55rem;font:700 .625rem/1 var(--mono);letter-spacing:.22em;color:var(--gold)}
+  .stamp p{margin:0;color:var(--dim);font-size:1rem;max-width:60ch}
+
+  footer{border-top:1px solid var(--rule-2)}
+  footer .sheet{padding-block:2rem 3rem;display:flex;flex-wrap:wrap;gap:1rem 2rem;
+    justify-content:space-between;align-items:baseline}
+  footer p{margin:0;font:500 .6875rem/1.8 var(--mono);color:var(--faint);max-width:52rem;letter-spacing:.04em}
+
+  /* ---------- scroll reveal ---------- */
+  [data-reveal]{opacity:0;transform:translateY(16px);
+    transition:opacity .75s var(--ease),transform .75s var(--ease)}
+  [data-reveal].in{opacity:1;transform:none}
+  [data-reveal].in [data-stagger]{opacity:1;transform:none}
+  [data-stagger]{opacity:0;transform:translateX(-12px);
+    transition:opacity .55s var(--ease),transform .55s var(--ease)}
+
+  @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    [data-reveal],[data-stagger],h1 .w{opacity:1!important;transform:none!important;clip-path:none!important}
+    .grid-overlay{opacity:1}
+    .rank .fill{width:var(--w)}
+    .shead s{transform:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-overlay" aria-hidden="true"></div>
+
+<div class="mast"><div class="sheet">
+  <span class="mark">VIDENS<i>.</i></span>
+  <div class="meta">
+    <span>PATCH <b>16.18</b></span>
+    <span>KR · EUW</span>
+    <span>STATUS <b>DEV</b></span>
+  </div>
+</div></div>
+
+<header class="hero sheet">
+  <p class="fileline"><span>FILE 001 — POST-GAME COACH</span><s></s><span>2026</span></p>
+
+  <div class="hero-mid">
+    <h1><span class="w">League</span> <span class="w">without</span> <em class="w">Limits</em></h1>
+    <p class="sub">Become the summoner you were supposed to</p>
+    <div class="actions">
+      <button class="dl">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10 4.6v6.9H3V5.5Zm8-1 10-1.3v8.2H11V4.5ZM3 12.6h7v6.9l-7-.9v-6ZM11 12.6h10v8.2l-10-1.3v-6.9Z"/></svg>
+        Download for Windows
+      </button>
+      <small>FREE · BETA COMING SOON</small>
+    </div>
+
+    <!--
+      VIDEO — drop the file in and uncomment inside .plate:
+        <video src="hero.mp4" poster="hero.jpg" autoplay muted loop playsinline></video>
+      Scanlines sit on top, so footage keeps the monitor feel.
+    -->
+    <div class="plate">
+      <i class="crop tl"></i><i class="crop tr"></i><i class="crop bl"></i><i class="crop br"></i>
+      <span class="lbl">Fig. 1 — Demo</span>
+    </div>
+  </div>
+
+  <div class="hud">
+    <div><span>Decisions rebuilt</span><b class="g" data-count="2995568">0</b></div>
+    <div><span>Games</span><b data-count="30738">0</b></div>
+    <div><span>Players</span><b data-count="17563">0</b></div>
+    <div><span>Regions</span><b>KR · EUW</b></div>
+    <div><span>Scroll</span><b>↓</b></div>
+  </div>
+</header>
+
+<section class="sheet" data-reveal>
+  <div class="shead"><span class="no">§ 01</span><h2>In the shop</h2><s></s><span class="of">N = 5,546</span></div>
+  <div class="bed">
+    <div class="c-left">
+      <h3>What the panel shows</h3>
+      <p>At a shop stop, the share of high-elo players who completed each item from a comparable state. A frequency, not a recommendation.</p>
+      <ul class="fields">
+        <li data-stagger style="transition-delay:.05s"><span class="k">Match</span><span class="d"></span><span class="v">KR_8376630711</span></li>
+        <li data-stagger style="transition-delay:.11s"><span class="k">Champion</span><span class="d"></span><span class="v">Vladimir · Mid</span></li>
+        <li data-stagger style="transition-delay:.17s"><span class="k">Clock</span><span class="d"></span><span class="v">14:16</span></li>
+        <li data-stagger style="transition-delay:.23s"><span class="k">Gold</span><span class="d"></span><span class="v g">2,213</span></li>
+        <li data-stagger style="transition-delay:.29s"><span class="k">Level / CS</span><span class="d"></span><span class="v">11 · 111</span></li>
+        <li data-stagger style="transition-delay:.35s"><span class="k">KDA</span><span class="d"></span><span class="v">4 / 3 / 8</span></li>
+      </ul>
+      <div class="items">
+        <img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/1056.png" alt="Doran's Ring" title="Doran's Ring">
+        <img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/1082.png" alt="Dark Seal" title="Dark Seal">
+        <img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/4629.png" alt="Cosmic Drive" title="Cosmic Drive">
+        <img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/3363.png" alt="Farsight" title="Farsight Alteration">
+      </div>
+      <div class="verdict">
+        <img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/3041.png" alt="Mejai's Soulstealer">
+        <span><b>MEJAI'S SOULSTEALER</b><span>Paid <i>1,150</i> of 1,500 — already held the Dark Seal.</span></span>
+      </div>
+    </div>
+    <div class="c-right">
+      <h3>Bought from here</h3>
+      <p>Mid lane · patch 16.18 · 1,700–2,700 gold · Dark Seal held.</p>
+      <ol class="rank">
+        <li><span class="fill" style="--w:78%"></span><span class="n">01</span><img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/3100.png" alt=""><span class="nm">Lich Bane</span><span class="pc">12.0%</span></li>
+        <li><span class="fill" style="--w:60%"></span><span class="n">02</span><img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/4645.png" alt=""><span class="nm">Shadowflame</span><span class="pc">9.3%</span></li>
+        <li><span class="fill" style="--w:58%"></span><span class="n">03</span><img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/3175.png" alt=""><span class="nm">Spellslinger's Shoes</span><span class="pc">8.9%</span></li>
+        <li><span class="fill" style="--w:56%"></span><span class="n">04</span><img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/3152.png" alt=""><span class="nm">Hextech Rocketbelt</span><span class="pc">8.7%</span></li>
+        <li><span class="fill" style="--w:54%"></span><span class="n">05</span><img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/item/3041.png" alt=""><span class="nm">Mejai's Soulstealer</span><span class="pc">8.3%</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="sheet" data-reveal>
+  <div class="shead"><span class="no">§ 02</span><h2>On the map</h2><s></s><span class="of">25-TOKEN VOCABULARY</span></div>
+  <div class="bed">
+    <div class="c-left">
+      <h3>Decision log</h3>
+      <p>Your match turned into the moves you actually made. Transit is not a decision; a gank in your own half is not a gank.</p>
+      <ul class="fields">
+        <li data-stagger style="transition-delay:.05s"><span class="k">Match</span><span class="d"></span><span class="v">EUW1_7983109023</span></li>
+        <li data-stagger style="transition-delay:.11s"><span class="k">Champion</span><span class="d"></span><span class="v">Evelynn · Jungle</span></li>
+        <li data-stagger style="transition-delay:.17s"><span class="k">Regions</span><span class="d"></span><span class="v">13</span></li>
+        <li data-stagger style="transition-delay:.23s"><span class="k">Source</span><span class="d"></span><span class="v">Match-V5 + replay</span></li>
+      </ul>
+    </div>
+    <div class="c-right">
+      <ol class="log">
+        <li data-stagger style="transition-delay:.06s"><time>3:28</time><span class="m">—</span><b>Farm · red quadrant</b></li>
+        <li data-stagger style="transition-delay:.14s"><time>4:02</time><span class="m">—</span><b>Farm · blue quadrant</b></li>
+        <li data-stagger style="transition-delay:.22s"><time>4:23</time><span class="m">—</span><b>Reset</b></li>
+        <li class="k" data-stagger style="transition-delay:.30s"><time>5:04</time><span class="m">▸</span><b>Dragon</b></li>
+        <li class="k" data-stagger style="transition-delay:.38s"><time>5:19</time><span class="m">▸</span><b>Gank top</b></li>
+        <li data-stagger style="transition-delay:.46s"><time>5:52</time><span class="m">—</span><b>Invade · blue side</b></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="sheet" data-reveal>
+  <div class="shead"><span class="no">§ 03</span><h2>The corpus</h2><s></s><span class="of">18 SEP 2026</span></div>
+  <div class="figs">
+    <div class="f"><b data-count="2995568">0</b><span>Shop decisions rebuilt</span><em>Build</em></div>
+    <div class="f"><b data-count="30738">0</b><span>Complete ten-player games</span><em>Build</em></div>
+    <div class="f"><b data-count="249979">0</b><span>Player-game perspectives</span><em>Build</em></div>
+    <div class="f"><b data-count="17563">0</b><span>Ladder players</span><em>KR · EUW</em></div>
+  </div>
+  <p class="note">PATCHES 16.17–16.18 · RANKED SOLO ONLY · THE MACRO SIDE IS AN EARLIER PROTOTYPE.</p>
+</section>
+
+<section class="sheet" data-reveal>
+  <div class="stamp">
+    <p>The corpus stands and the reconstruction works. The measurement doesn't yet — and nothing gets published here until it does.</p>
+  </div>
+</section>
+
+<footer><div class="sheet">
+  <span class="mark">VIDENS<i>.</i></span>
+  <p>INDEPENDENT PROJECT · NOT ENDORSED BY OR AFFILIATED WITH RIOT GAMES · LEAGUE OF LEGENDS IS A TRADEMARK OF RIOT GAMES, INC.</p>
+</div></footer>
+
+<script>
+(() => {
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fmt = new Intl.NumberFormat('en-US');
+
+  // Odometer for the tabular figures. The slot is sized to the final string
+  // first, so counting up never reflows the row.
+  function countUp(el) {
+    const target = +el.dataset.count;
+    const final = fmt.format(target);
+    el.style.minWidth = final.length + 'ch';
+    if (still) { el.textContent = final; return; }
+    const dur = 1500, t0 = performance.now();
+    (function tick(t) {
+      const p = Math.min((t - t0) / dur, 1);
+      el.textContent = fmt.format(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) requestAnimationFrame(tick); else el.textContent = final;
+    })(performance.now());
+  }
+
+  const counted = new WeakSet();
+  function runCounts(root) {
+    root.querySelectorAll('[data-count]').forEach(el => {
+      if (!counted.has(el)) { counted.add(el); countUp(el); }
+    });
+  }
+
+  if (still) {
+    document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in'));
+    runCounts(document);
+    return;
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      e.target.classList.add('in');
+      runCounts(e.target);
+      io.unobserve(e.target);
+    }
+  }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+
+  document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+
+  // Odometers run per figure, when that figure is actually on screen — the hero
+  // HUD sits below the fold on short viewports and would otherwise count unseen.
+  const numIo = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting || counted.has(e.target)) continue;
+      counted.add(e.target);
+      countUp(e.target);
+      numIo.unobserve(e.target);
+    }
+  }, { threshold: 0.9 });
+  document.querySelectorAll('[data-count]').forEach(el => numIo.observe(el));
+})();
+</script>
+</body>
+</html>

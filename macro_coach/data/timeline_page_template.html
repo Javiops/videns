@@ -1,0 +1,248 @@
+<title>Macro de Evelynn</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..800&family=Instrument+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f3ef;
+    --surface: #fbfaf7;
+    --ink: #22282a;
+    --ink-soft: #5a6367;
+    --line: #d9d7cf;
+    --accent: #b03d80;
+    --farm: #4e7f58;
+    --gank: #b34f2c;
+    --invade: #7247b8;
+    --rio: #3c7796;
+    --base: #8a8f8f;
+    --gold: #96781f;
+    --death: #b03434;
+    --chip-ink: #ffffff;
+    --mark-bg: #edece6;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14191b;
+      --surface: #1b2225;
+      --ink: #e8e6df;
+      --ink-soft: #9aa4a6;
+      --line: #2c3538;
+      --accent: #e06ab4;
+      --farm: #6fbf80;
+      --gank: #e07a4f;
+      --invade: #a37fe8;
+      --rio: #62a9cc;
+      --base: #7d8788;
+      --gold: #d3b100;
+      --death: #e06060;
+      --chip-ink: #14191b;
+      --mark-bg: #232c2f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14191b;
+    --surface: #1b2225;
+    --ink: #e8e6df;
+    --ink-soft: #9aa4a6;
+    --line: #2c3538;
+    --accent: #e06ab4;
+    --farm: #6fbf80;
+    --gank: #e07a4f;
+    --invade: #a37fe8;
+    --rio: #62a9cc;
+    --base: #7d8788;
+    --gold: #d3b100;
+    --death: #e06060;
+    --chip-ink: #14191b;
+    --mark-bg: #232c2f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Instrument Sans", system-ui, sans-serif;
+    margin: 0;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 40px 20px 72px; }
+  header h1 {
+    font-family: "Archivo", sans-serif;
+    font-weight: 800;
+    font-stretch: 80%;
+    font-size: clamp(2rem, 5vw, 2.9rem);
+    letter-spacing: 0.01em;
+    margin: 0 0 4px;
+    text-wrap: balance;
+  }
+  header h1 .accent { color: var(--accent); }
+  .sub {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    margin: 0 0 20px;
+  }
+  .sub code { font-family: "Spline Sans Mono", monospace; font-size: 0.85rem; }
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 36px; }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 14px;
+    min-width: 96px;
+  }
+  .stat .v {
+    font-family: "Spline Sans Mono", monospace;
+    font-weight: 600;
+    font-size: 1.25rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .k {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--ink-soft);
+  }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 20px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--ink-soft); }
+  .dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .tl { border-left: 2px solid var(--line); margin-left: 118px; padding: 6px 0; }
+  .row { display: flex; align-items: flex-start; gap: 14px; position: relative; padding: 5px 0; }
+  .row .time {
+    font-family: "Spline Sans Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    width: 104px;
+    text-align: right;
+    position: absolute;
+    left: -120px;
+    top: 9px;
+    white-space: nowrap;
+  }
+  .node {
+    width: 12px; height: 12px; border-radius: 3px;
+    margin-left: -7px; margin-top: 9px; flex: none;
+  }
+  .card { flex: 1; padding: 2px 0 6px; }
+  .act {
+    font-family: "Archivo", sans-serif;
+    font-weight: 700;
+    font-stretch: 85%;
+    font-size: 1.02rem;
+    letter-spacing: 0.01em;
+  }
+  .dur {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    margin-left: 8px;
+  }
+  .marks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+  .mark {
+    background: var(--mark-bg);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.78rem;
+    display: inline-flex;
+    gap: 6px;
+    align-items: baseline;
+  }
+  .mark .mt { font-family: "Spline Sans Mono", monospace; font-size: 0.72rem; color: var(--ink-soft); }
+  .mark.kill { box-shadow: inset 3px 0 0 var(--accent); }
+  .mark.death { box-shadow: inset 3px 0 0 var(--death); }
+  .mark.obj { box-shadow: inset 3px 0 0 var(--gold); }
+  .mark.other { box-shadow: inset 3px 0 0 var(--base); }
+  .phase {
+    margin: 18px 0 18px -7px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .phase .pline { flex: 1; border-top: 1px dashed var(--line); }
+  .phase .ptxt {
+    font-family: "Archivo", sans-serif;
+    font-weight: 700;
+    font-stretch: 85%;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  footer {
+    margin-top: 44px;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  footer code { font-family: "Spline Sans Mono", monospace; font-size: 0.74rem; }
+  @media (max-width: 560px) {
+    .tl { margin-left: 64px; }
+    .row .time { width: 56px; left: -66px; font-size: 0.7rem; }
+  }
+</style>
+<div class="wrap">
+  <header>
+    <h1>Macro de <span class="accent">Evelynn</span></h1>
+    <p class="sub">Jungla · equipo azul · <code>EUW1-7983109023</code> · parche 16.18 · 26:16 · derrota</p>
+  </header>
+  <div class="stats">
+    <div class="stat"><div class="v">6/4/3</div><div class="k">KDA</div></div>
+    <div class="stat"><div class="v">1</div><div class="k">dragón</div></div>
+    <div class="stat"><div class="v">1</div><div class="k">torre</div></div>
+    <div class="stat"><div class="v" id="n-ganks">—</div><div class="k">ganks</div></div>
+    <div class="stat"><div class="v" id="n-invades">—</div><div class="k">invades</div></div>
+  </div>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--farm)"></span>farmea jungla</span>
+    <span><span class="dot" style="background:var(--gank)"></span>gank</span>
+    <span><span class="dot" style="background:var(--invade)"></span>invade</span>
+    <span><span class="dot" style="background:var(--rio)"></span>río</span>
+    <span><span class="dot" style="background:var(--base)"></span>base</span>
+  </div>
+  <div class="tl" id="tl"></div>
+  <footer>
+    Fuente: trayectoria del minimapa (pasada única a 8x, 554 frames, cobertura de Evelynn 89%,
+    detección por anillos de equipo + retratos renderizados) cruzada con eventos del Live Client API
+    de la replay. Segmentos &lt;8s sin evento anclado descartados; huecos = muerta o tránsito.
+    Generado el 2026-09-18 · <code>traj_v5.jsonl</code> + <code>eventdata_full.json</code>
+  </footer>
+</div>
+<script>
+  const DATA = __DATA__;
+  const color = a =>
+    a.startsWith("GANK") ? "gank" :
+    a.startsWith("INVADE") ? "invade" :
+    a.startsWith("farmea") ? "farm" :
+    a.startsWith("río") ? "rio" :
+    a === "OBJETIVO" ? "gold" :
+    a.startsWith("pisa") ? "rio" : "base";
+  const mmss = t => `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+  const tl = document.getElementById("tl");
+  let shownPhase = false, ganks = 0, invades = 0;
+  for (const s of DATA.segments) {
+    if (!shownPhase && DATA.first_tower && s.t0 >= DATA.first_tower) {
+      tl.insertAdjacentHTML("beforeend",
+        `<div class="phase"><span class="ptxt">${mmss(DATA.first_tower)} · cae la primera torre — fin de fase de líneas</span><span class="pline"></span></div>`);
+      shownPhase = true;
+    }
+    if (s.action.startsWith("GANK")) ganks++;
+    if (s.action.startsWith("INVADE")) invades++;
+    const cls = { kill: "kill", death: "death", assist: "other" };
+    const dur = Math.round(s.t1 - s.t0);
+    const c = color(s.action);
+    tl.insertAdjacentHTML("beforeend", `
+      <div class="row">
+        <span class="time">${s.t1 - s.t0 < 3 ? mmss(s.t0) : mmss(s.t0) + "–" + mmss(s.t1)}</span>
+        <span class="node" style="background:var(--${c})"></span>
+        <div class="card">
+          <span class="act" style="color:var(--${c})">${s.action}${s.action === "OBJETIVO" ? " · " + s.detail : ""}</span>
+          ${dur >= 3 ? `<span class="dur">${dur}s</span>` : ""}
+          ${s.detail && s.action !== "OBJETIVO" ? `<span class="dur">${s.detail}</span>` : ""}
+          ${s.marks.length ? `<div class="marks">${s.marks.map(m =>
+            `<span class="mark ${cls[m.kind] || "other"}"><span class="mt">${mmss(m.t)}</span>${m.text}</span>`).join("")}</div>` : ""}
+        </div>
+      </div>`);
+  }
+  document.getElementById("n-ganks").textContent = ganks;
+  document.getElementById("n-invades").textContent = invades;
+</script>

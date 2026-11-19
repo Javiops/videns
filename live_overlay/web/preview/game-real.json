@@ -1,0 +1,161 @@
+{
+ "source": "own game 2026-10-04 (20261004_201707), live snapshot live_1791139136114_01019.json replayed through app/tracker.py; screenshot shot_1791139136516_game; CS target: drafting tool /api/meta for Thresh UTILITY at 12 and 24 min, interpolated",
+ "match": "own",
+ "patch": "",
+ "game_time_s": 1019.1514282226562,
+ "hud_gold": 559,
+ "objectives": {
+  "baron": {
+   "state": "spawning",
+   "spawns_at": 1200.0
+  },
+  "dragon": {
+   "kind": "dragon",
+   "state": "up",
+   "spawns_at": 971.3463134765625,
+   "uncertain": false,
+   "counts": {
+    "100": 0,
+    "200": 1,
+    "unknown": 0
+   }
+  },
+  "buffs": [],
+  "towers_destroyed": {
+   "100": 0,
+   "200": 4
+  }
+ },
+ "gold": {
+  "teams": [
+   {
+    "team_id": 100,
+    "side": "ORDER",
+    "item_gold": 21350,
+    "approx": false,
+    "players": [
+     {
+      "champion": "Brand",
+      "icon": "Brand",
+      "position": "TOP",
+      "level": 10,
+      "dead": false,
+      "item_gold": 3200,
+      "approx": false,
+      "is_me": false
+     },
+     {
+      "champion": "Cho'Gath",
+      "icon": "Chogath",
+      "position": "JUNGLE",
+      "level": 10,
+      "dead": false,
+      "item_gold": 5900,
+      "approx": false,
+      "is_me": false
+     },
+     {
+      "champion": "LeBlanc",
+      "icon": "Leblanc",
+      "position": "MIDDLE",
+      "level": 10,
+      "dead": true,
+      "item_gold": 4200,
+      "approx": false,
+      "is_me": false
+     },
+     {
+      "champion": "Zeri",
+      "icon": "Zeri",
+      "position": "BOTTOM",
+      "level": 9,
+      "dead": true,
+      "item_gold": 4850,
+      "approx": false,
+      "is_me": false
+     },
+     {
+      "champion": "Yuumi",
+      "icon": "Yuumi",
+      "position": "UTILITY",
+      "level": 8,
+      "dead": false,
+      "item_gold": 3200,
+      "approx": false,
+      "is_me": false
+     }
+    ]
+   },
+   {
+    "team_id": 200,
+    "side": "CHAOS",
+    "item_gold": 31750,
+    "approx": false,
+    "players": [
+     {
+      "champion": "Yasuo",
+      "icon": "Yasuo",
+      "position": "TOP",
+      "level": 14,
+      "dead": false,
+      "item_gold": 8350,
+      "approx": false,
+      "is_me": false
+     },
+     {
+      "champion": "Lee Sin",
+      "icon": "LeeSin",
+      "position": "JUNGLE",
+      "level": 12,
+      "dead": false,
+      "item_gold": 5550,
+      "approx": false,
+      "is_me": false
+     },
+     {
+      "champion": "Syndra",
+      "icon": "Syndra",
+      "position": "MIDDLE",
+      "level": 13,
+      "dead": false,
+      "item_gold": 6850,
+      "approx": false,
+      "is_me": false
+     },
+     {
+      "champion": "Yunara",
+      "icon": "Yunara",
+      "position": "BOTTOM",
+      "level": 9,
+      "dead": false,
+      "item_gold": 6050,
+      "approx": false,
+      "is_me": false
+     },
+     {
+      "champion": "Thresh",
+      "icon": "Thresh",
+      "position": "UTILITY",
+      "level": 8,
+      "dead": false,
+      "item_gold": 4950,
+      "approx": false,
+      "is_me": true
+     }
+    ]
+   }
+  ],
+  "lead": {
+   "team_id": 200,
+   "amount": 10400,
+   "approx": false
+  }
+ },
+ "cs": {
+  "champion": "Thresh",
+  "icon": "Thresh",
+  "role": "SUPPORT",
+  "now": 20,
+  "expected": 21.4
+ }
+}

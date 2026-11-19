@@ -1,0 +1,28 @@
+.env
+.venv/
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# corpus y derivados: nunca se commitean (política build_tracker)
+data/pass*/
+data/*.webm
+data/corpus/
+data/cache/
+data/ml/
+data/reports/
+data/feedback/
+data/queue.jsonl
+data/raw/
+data/*.log
+
+# plantillas de digitos: derivadas de data/ocr/ en 1s (scripts/learn_digits.py)
+data/ocr_digits.npz
+data/preflight/
+
+# oro por compra: derivado de gold.jsonl + timeline
+data/corpus/*/buys.jsonl
+data/corpus/*/buys_report.json
+
+# logs de captura/proceso/tanda
+data/logs/

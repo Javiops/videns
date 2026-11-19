@@ -1,0 +1,32 @@
+{
+  "_doc": [
+    "Semillas de pros para collect_pro_games.py (editable a mano).",
+    "riot_ids: cuentas exactas GameName#TAG que se resuelven directamente",
+    "  (añade aquí los smurfs conocidos: es lo mas fiable).",
+    "names: nombres de pro que se buscan como TOKEN EXACTO (case-insensitive)",
+    "  dentro de los gameName de las 300 cuentas challenger EUW; 'KC Yike'",
+    "  matchea 'yike', 'Prismatic' NO matchea 'isma'. Junglas LEC + Agurin;",
+    "  las temporadas cambian rosters: revisar al empezar cada recogida."
+  ],
+  "riot_ids": [
+    "Agurin#EUW"
+  ],
+  "names": [
+    "Agurin",
+    "SkewMond",
+    "Razork",
+    "Elyoya",
+    "Yike",
+    "Sheo",
+    "Isma",
+    "Closer",
+    "Lyncas",
+    "Boukada",
+    "Umti",
+    "Malrang",
+    "Jankos",
+    "Selfmade",
+    "Daglas",
+    "Shlatan"
+  ]
+}

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informe 2026-09-20 — videns.gg</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page:      #f9f9f7;
+    --surface:   #fcfcfb;
+    --ink:       #0b0b0b;
+    --ink-2:     #52514e;
+    --muted:     #898781;
+    --grid:      #e1e0d9;
+    --baseline:  #c3c2b7;
+    --border:    rgba(11,11,11,0.10);
+    --s1:        #2a78d6;   /* serie: omnisciente */
+    --s2:        #eb6834;   /* serie: POV limpio */
+    --good-text: #006300;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --page:      #0d0d0d;
+      --surface:   #1a1a19;
+      --ink:       #ffffff;
+      --ink-2:     #c3c2b7;
+      --muted:     #898781;
+      --grid:      #2c2c2a;
+      --baseline:  #383835;
+      --border:    rgba(255,255,255,0.10);
+      --s1:        #3987e5;
+      --s2:        #d95926;
+      --good-text: #0ca30c;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--page); color: var(--ink);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 32px 16px 64px;
+  }
+  main { max-width: 860px; margin: 0 auto; display: grid; gap: 28px; }
+  header h1 { font-size: 26px; letter-spacing: -0.01em; }
+  header p  { color: var(--ink-2); margin-top: 4px; }
+  section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px 24px;
+  }
+  h2 { font-size: 17px; margin-bottom: 4px; }
+  .sub { color: var(--ink-2); font-size: 13.5px; margin-bottom: 16px; }
+  /* ---- tiles ---- */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .tile {
+    border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+    display: grid; gap: 2px; align-content: start;
+  }
+  .tile .k { font-size: 12.5px; color: var(--ink-2); }
+  .tile .v { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; }
+  .tile .d { font-size: 12.5px; color: var(--muted); }
+  .tile .v.good { color: var(--good-text); }
+  /* ---- tabla ---- */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--ink-2); font-weight: 600; font-size: 12.5px; }
+  tr:last-child td { border-bottom: none; }
+  .chip { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 7px; vertical-align: baseline; }
+  /* ---- barras ---- */
+  .chart { display: grid; gap: 14px; margin-top: 8px; }
+  .metric { display: grid; gap: 4px; }
+  .metric .mname { font-size: 13px; color: var(--ink-2); }
+  .row { display: grid; grid-template-columns: 92px 1fr 64px; align-items: center; gap: 10px; }
+  .row .who { font-size: 12.5px; color: var(--muted); text-align: right; }
+  .track { position: relative; height: 14px; background: transparent; border-left: 2px solid var(--baseline); }
+  .bar {
+    height: 14px; border-radius: 0 4px 4px 0; min-width: 2px;
+    outline: 2px solid var(--surface);
+  }
+  .bar.s1 { background: var(--s1); }
+  .bar.s2 { background: var(--s2); }
+  .row .val { font-size: 13px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .legend { display: flex; gap: 18px; margin-top: 14px; font-size: 12.5px; color: var(--ink-2); }
+  .legend span { display: inline-flex; align-items: center; }
+  /* ---- listas ---- */
+  ul { padding-left: 20px; display: grid; gap: 8px; }
+  li::marker { color: var(--muted); }
+  .foot { color: var(--muted); font-size: 12px; }
+  code { font-size: 12.5px; background: color-mix(in oklab, var(--ink) 6%, transparent); padding: 1px 5px; border-radius: 4px; }
+  .tooltip {
+    position: fixed; pointer-events: none; z-index: 10; display: none;
+    background: var(--surface); color: var(--ink); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Informe del día — 20 de septiembre de 2026</h1>
+    <p>macro_coach · build_tracker · experimento POV Gold V1</p>
+  </header>
+
+  <section>
+    <h2>Titular: jugar limpio ha salido gratis</h2>
+    <p class="sub">Se retiraron del modelo de compras las dos features de oro omnisciente
+    (el <code>totalGold</code> de los diez jugadores, que ningún jugador ve) y se sustituyeron por la
+    estimación observable: ítems visibles de cada equipo ± cartera propia. Coste medido: cero.</p>
+    <div class="tiles">
+      <div class="tile"><span class="k">Coste del POV</span><span class="v good">−0.0005</span><span class="d">dentro del ruido (CI ±0.002)</span></div>
+      <div class="tile"><span class="k">first_action_exact (POV)</span><span class="v">0.3806</span><span class="d">CI [0.378 – 0.383] · n = 191.916</span></div>
+      <div class="tile"><span class="k">Margen sobre baseline</span><span class="v">+0.151</span><span class="d">emparejado, CI [0.149 – 0.153]</span></div>
+      <div class="tile"><span class="k">Opciones impagables</span><span class="v good">0</span><span class="d">en ambos modelos</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Omnisciente vs POV, misma generación y receta</h2>
+    <p class="sub">Evaluación de política mostrada, 1.601 partidas de validación, bootstrap emparejado de 400.
+    Un solo mando cambiado entre ambos.</p>
+    <div class="chart" id="chart">
+      <div class="metric">
+        <div class="mname">first_action_exact — 1ª propuesta = compra exacta</div>
+        <div class="row"><span class="who">omnisciente</span><div class="track"><div class="bar s1" data-v="0.3811" data-ci="informe fase D"></div></div><span class="val">0.381</span></div>
+        <div class="row"><span class="who">POV limpio</span><div class="track"><div class="bar s2" data-v="0.3806" data-ci="CI [0.3784, 0.3828]"></div></div><span class="val">0.381</span></div>
+      </div>
+      <div class="metric">
+        <div class="mname">any_of_three_exact — la compra está en el top-3</div>
+        <div class="row"><span class="who">omnisciente</span><div class="track"><div class="bar s1" data-v="0.4630" data-ci="informe fase D"></div></div><span class="val">0.463</span></div>
+        <div class="row"><span class="who">POV limpio</span><div class="track"><div class="bar s2" data-v="0.4612" data-ci="CI [0.4590, 0.4637]"></div></div><span class="val">0.461</span></div>
+      </div>
+      <div class="metric">
+        <div class="mname">action_family_match — acierta el tipo de compra</div>
+        <div class="row"><span class="who">omnisciente</span><div class="track"><div class="bar s1" data-v="0.6342" data-ci="informe fase D"></div></div><span class="val">0.634</span></div>
+        <div class="row"><span class="who">POV limpio</span><div class="track"><div class="bar s2" data-v="0.6338" data-ci="CI [0.6313, 0.6362]"></div></div><span class="val">0.634</span></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="chip" style="background:var(--s1)"></i>Candidato fase D (oro omnisciente)</span>
+      <span><i class="chip" style="background:var(--s2)"></i>Candidato POV (16.18-pov-gold-v1)</span>
+    </div>
+    <p class="sub" style="margin-top:12px">Las tres comprobaciones pre-registradas pasaron: margen ≥ +0.10;
+    dentro de la banda 0.36–0.39; y no por encima del omnisciente (0.1507 &lt; 0.1512 — sin disparo de auditoría).
+    Salvaguardas: save 0.222 vs 0.223 · wards 0.757 vs 0.762 · no-buy 0.525 vs 0.522.</p>
+  </section>
+
+  <section>
+    <h2>El instrumento de oro de macro_coach, cerrado</h2>
+    <p class="sub">Los cinco findings de la revisión quedaron arreglados y verificados; por el camino,
+    el control de coste universal (vía el total del marcador) cazó y cerró el bug de los elixires.</p>
+    <div class="tiles">
+      <div class="tile"><span class="k">Compras con oro exacto</span><span class="v">77,9%</span><span class="d">7.834 de 10.054 · resto acotado (mediana 50–80)</span></div>
+      <div class="tile"><span class="k">Control de coste</span><span class="v">n = 2.266</span><span class="d">mediana 0 · 96,8% ≤ 5 oro</span></div>
+      <div class="tile"><span class="k">Anclas Match-V5</span><span class="v">err ≤ 10</span><span class="d">resolución que nunca las vio</span></div>
+      <div class="tile"><span class="k">Fugas de omnisciencia</span><span class="v good">0</span><span class="d">posición, futuro y oro (f3)</span></div>
+    </div>
+    <ul style="margin-top:14px">
+      <li><strong>Features f3:</strong> fuera el oro de la capa de verdad; dentro <code>gold_diff_obs = ítems propios − ítems rivales + cartera propia</code>. Dataset regenerado (2.781/654/624) y <code>check_leakage</code> vigilando también el oro.</li>
+      <li><strong>Certificado de muerte exacto</strong> en compras (muerte al ms + respawn cubriendo ambos extremos) — las exactas bajaron honestamente a 77,9%.</li>
+      <li><strong>Puente a build_tracker</strong> por artefacto versionado: 7.557 carteras exactas + 2.220 intervalos indexados por visita; las 40 partidas ingeridas con las diez perspectivas.</li>
+      <li><strong>Lecturas dirigidas</strong> (salta-pausa-foto): prototipo validado (acotadas 119→82, anclas err 2,8) y descartado escalar por coste; queda como herramienta.</li>
+      <li><strong>La UI de revisión</strong> ahora rechaza modelos de otra versión de features en vez de rellenar huecos con −1 en silencio.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Decisiones que quedan en tu tejado</h2>
+    <ul>
+      <li><strong>Promocionar el candidato POV</strong> al modelo servido (informe completo listo; paso manual del protocolo). Sin coste: rinde igual y no hace trampa.</li>
+      <li><strong>Camino al 60% en builds:</strong> objetivo realista = <code>any_of_three ≥ 0.60</code> vía oro por cuantiles (+3–6 pts de techo medido) + escala de datos. El 0.60 en primera compra exacta probablemente esté sobre el techo humano — el estudio del techo (gratis, esta semana) lo dirá. El 0.63 recordado era métrica de log de entrenamiento, la familia de números de la retractación histórica.</li>
+      <li><strong>Macro ≥ 0.80:</strong> pre-entrenar en timelines (gratis) → fine-tune → adaptadores por jugador + panel de challengers adjudicando conjuntos válidos. Primer paso: techo de imitación + curva de aprendizaje con el corpus actual.</li>
+      <li><strong>Granja de captura</strong> (PC2 + dummy plug): solo-oro ≈ 400–500 partidas/día — haría el oro medido corpus-completo parche a parche; 3 pasadas para doble uso con macro_coach. La ventana del parche 16.18 se cierra en días.</li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="foot">Procedencia: informe de evaluación
+    <code>data/experiments/16.18-pov-gold-v1/policy_eval_val_candidate_vs_conditional_policy.json</code> ·
+    plan de run <code>b79d56cb…</code> · generación <code>16.18-reconstructible-development-v3</code> (fingerprint <code>e4ea6431…</code>) ·
+    export macro <code>buys_export_v1.jsonl</code> (sha <code>b6aad145…</code>) ·
+    ledger del día en <code>build_tracker/docs/history.md</code> y <code>macro_coach/docs/history.md</code> (nº 23–26).
+    Nada promocionado; test sellado.</p>
+  </section>
+</main>
+<div class="tooltip" id="tt"></div>
+<script>
+  // escala común 0–0.70 para las tres métricas (una sola escala, un solo eje)
+  const MAX = 0.70;
+  document.querySelectorAll('.bar').forEach(b => {
+    b.style.width = (100 * parseFloat(b.dataset.v) / MAX) + '%';
+  });
+  const tt = document.getElementById('tt');
+  document.querySelectorAll('.row').forEach(r => {
+    const bar = r.querySelector('.bar');
+    r.addEventListener('mousemove', e => {
+      tt.style.display = 'block';
+      tt.textContent = r.querySelector('.who').textContent + ': '
+        + parseFloat(bar.dataset.v).toFixed(4) + '  (' + bar.dataset.ci + ')';
+      tt.style.left = Math.min(e.clientX + 14, innerWidth - 240) + 'px';
+      tt.style.top = (e.clientY + 14) + 'px';
+    });
+    r.addEventListener('mouseleave', () => tt.style.display = 'none');
+  });
+</script>
+</body>
+</html>

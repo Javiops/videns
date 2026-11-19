@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informe 2026-09-21 — videns.gg</title>
+<style>
+  :root { color-scheme: light;
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e;
+    --muted:#898781; --grid:#e1e0d9; --base:#c3c2b7; --border:rgba(11,11,11,.10);
+    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --good:#006300; }
+  @media (prefers-color-scheme: dark) { :root { color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink2:#c3c2b7;
+    --muted:#898781; --grid:#2c2c2a; --base:#383835; --border:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --good:#0ca30c; } }
+  *{box-sizing:border-box;margin:0}
+  body{background:var(--page);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;padding:32px 16px 64px}
+  main{max-width:880px;margin:0 auto;display:grid;gap:26px}
+  h1{font-size:25px} header p{color:var(--ink2);margin-top:4px}
+  section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 24px}
+  h2{font-size:17px;margin-bottom:4px} .sub{color:var(--ink2);font-size:13.5px;margin-bottom:14px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
+  .tile{border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:grid;gap:2px}
+  .tile .k{font-size:12.5px;color:var(--ink2)} .tile .v{font-size:26px;font-weight:650}
+  .tile .d{font-size:12.5px;color:var(--muted)} .v.good{color:var(--good)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:right;padding:7px 9px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left} th{color:var(--ink2);font-weight:600;font-size:12.5px}
+  tr:last-child td{border-bottom:none}
+  .chip{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+  .legend{display:flex;gap:16px;margin-top:10px;font-size:12.5px;color:var(--ink2);flex-wrap:wrap}
+  ul{padding-left:20px;display:grid;gap:7px} li::marker{color:var(--muted)}
+  .foot{color:var(--muted);font-size:12px}
+  code{font-size:12.5px;background:color-mix(in oklab,var(--ink) 6%,transparent);padding:1px 5px;border-radius:4px}
+  svg text{fill:var(--muted);font:11px system-ui} svg .lbl{fill:var(--ink);font:12px system-ui}
+  .wrap{overflow-x:auto}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Informe de progreso — 20/21 de septiembre de 2026</h1>
+    <p>build_tracker · programa whole-basket · bucle de revisión externa (5 rondas) · plan del oro</p>
+  </header>
+
+  <section>
+    <h2>Resumen ejecutivo</h2>
+    <p class="sub">Dos días, cinco experimentos pre-registrados, cero promociones. Cada cifra lleva métrica, split, n y ruta de informe en los repos.</p>
+    <div class="tiles">
+      <div class="tile"><span class="k">Coste de jugar limpio (POV)</span><span class="v good">0.000</span><span class="d">−0.0005, dentro del ruido · exp 16.18-pov-gold-v1</span></div>
+      <div class="tile"><span class="k">Mejor candidato de cestas (B-f) vs actual</span><span class="v">+4.15</span><span class="d">first_action, CI [3.84, 4.51] · listón +5 NO alcanzado</span></div>
+      <div class="tile"><span class="k">Top-3 exacto (B-f)</span><span class="v">0.582</span><span class="d">vs 0.451 del actual (+12.6 pareado B-s)</span></div>
+      <div class="tile"><span class="k">Compras bloqueadas por cartera</span><span class="v">25.5%</span><span class="d">a presupuesto estimado · la palanca del oro</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Trayectoria del programa (todas las cifras: probe interno, 58.781 decisiones / 500 partidas)</h2>
+    <div class="wrap"><table>
+      <tr><th>Fase</th><th>Resultado principal</th><th>CI 95 (pareado por partida)</th><th>Estado</th></tr>
+      <tr><td>POV (ayer): quitar oro omnisciente</td><td>0.3806 vs 0.3811</td><td>margen +0.1507 vs +0.1512</td><td>cerrado — gratis</td></tr>
+      <tr><td>A/B: cestas completas vs ítems sueltos (B-s)</td><td>+3.43 sobre A</td><td>[3.13, 3.74]</td><td>cerrado</td></tr>
+      <tr><td>Contraste de pérdida (B-f, CE completa)</td><td>+0.72 sobre B-s → <b>+4.15 sobre A</b></td><td>[0.48, 1.02] / [3.84, 4.51]</td><td>cerrado</td></tr>
+      <tr><td>Diagnósticos de tamaño (11 estratos + oráculo)</td><td>sin desajuste medio de cardinalidad</td><td>gaps B-f ±0.013</td><td>cerrado — cardinalidad aparcada</td></tr>
+      <tr><td>Extensión 8 épocas (fase con reinicio)</td><td colspan="2" id="ext-cell"><b>ambas ramas EMPEORAN vs padres</b> (B-f-ext −0.27 [−0.44,−0.11]) con FIT mejorando — esta receta de reinicio queda descartada (no demuestra convergencia global); B-f_ep16 queda como mejor candidato observado</td><td>cerrado</td></tr>
+      <tr><td>Features económicas (reranker residual, brazos gemelos)</td><td><b>+0.20 sobre control gemelo</b> (réplica seed 17: +0.21) · +0.16 sobre B-f_ep16 · multi +1.10 / single −0.34 · costes: SAVE −0.96, wards −1.13</td><td>[0.08, 0.33] / [0.03, 0.27]</td><td>cerrado — positivo, pequeño; neto +92 vs padre (auditado)</td></tr>
+      <tr><td>Fine-tune gemelo con dominio fijo (backbone descongelado)</td><td><b>+0.33 sobre control gemelo</b> · +0.20 sobre B-f_ep16 · <b>control solo: −0.13 vs padre</b> · multi +1.21 / single −0.21 / wards −0.92</td><td>[0.18, 0.46] / [0.05, 0.33] / [−0.24, −0.03]</td><td>cerrado — la economía también gana descongelado</td></tr>
+      <tr><td>Vocabulario sin wards (métrica ward-free para todos)</td><td>vs econ_ft <b>+0.23 no resuelto</b> · vs padre (misma receta) <b>+0.41</b> · top-3 <b>+1.72</b> · single +0.82 / multi −1.48 / SAVE +2.87</td><td>[−0.03, +0.46] / [+0.15, +0.64] / [+1.53, +1.93]</td><td>cerrado — efecto de vocabulario real; complementario a economía</td></tr>
+      <tr><td>Decoder agrupado (marginalizar wards, econ_ft congelado)</td><td><b>EMPATA con el ward-free entrenado</b> (1ª −0.09 · top-3 +0.01) · el +1.7 de top-3 era artefacto del decoder (+1.74 solo por agrupar) · conserva multi econ +1.15</td><td>[−0.32, +0.17] / [−0.18, +0.19]</td><td>cerrado — solución barata encontrada (2 min, sin reentrenar)</td></tr>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Curvas de generalización (probe, no pérdida de train)</h2>
+    <p class="sub">first_action_exact por checkpoint. Todo seguía subiendo al tope de 16 épocas — motivó la extensión — que EMPEORÓ vs ep16: esa receta de reinicio queda descartada; ep16 es el mejor punto observado (no convergencia global demostrada).</p>
+    <div class="wrap"><svg viewBox="0 0 560 210" width="100%" style="max-width:560px">
+      <line x1="50" y1="170" x2="530" y2="170" stroke="var(--base)" stroke-width="2"/>
+      <line x1="50" y1="20" x2="50" y2="170" stroke="var(--base)" stroke-width="2"/>
+      <text x="42" y="174" text-anchor="end">.36</text><text x="42" y="112" text-anchor="end">.38</text><text x="42" y="50" text-anchor="end">.40</text>
+      <text x="140" y="188">ep4</text><text x="290" y="188">ep8</text><text x="490" y="188">ep16</text>
+      <line x1="50" y1="108" x2="530" y2="108" stroke="var(--grid)"/><line x1="50" y1="46" x2="530" y2="46" stroke="var(--grid)"/>
+      <!-- escala: y = 170 - (v-0.36)*3100 ; x: ep4=145, ep8=295, ep16=495 -->
+      <polyline points="145,152 295,101 495,64" fill="none" stroke="var(--s2)" stroke-width="2"/>
+      <polyline points="145,137 295,71 495,42" fill="none" stroke="var(--s3)" stroke-width="2"/>
+      <circle cx="495" cy="64" r="4" fill="var(--s2)"/><circle cx="495" cy="42" r="4" fill="var(--s3)"/>
+      <text class="lbl" x="505" y="68">B-s .397</text><text class="lbl" x="505" y="40">B-f .404</text>
+      <line x1="50" y1="147" x2="530" y2="147" stroke="var(--s1)" stroke-dasharray="4 4" stroke-width="2"/>
+      <text class="lbl" x="55" y="142">A (actual) .363</text>
+    </svg></div>
+    <div class="legend"><span><i class="chip" style="background:var(--s1)"></i>A — formulación actual (referencia)</span><span><i class="chip" style="background:var(--s2)"></i>B-s — pérdida muestreada</span><span><i class="chip" style="background:var(--s3)"></i>B-f — CE catálogo completo</span></div>
+  </section>
+
+  <section>
+    <h2>El hallazgo del día: calibración vs selección</h2>
+    <p class="sub">Masas de probabilidad por tamaño de cesta (compras del probe) frente a la frecuencia real. B-f aprende la distribución casi exacta; su argmax concentra en talla 1 por teoría de la decisión, no por defecto — veredicto rebajado tras revisión: «sin gran desajuste medio en los grupos examinados; no establece irreducibilidad».</p>
+    <div class="wrap"><table>
+      <tr><th></th><th>talla 1</th><th>talla 2</th><th>talla 3</th><th>ECE multi</th><th>estratos con gap significativo</th></tr>
+      <tr><td>Frecuencia real</td><td>0.597</td><td>0.294</td><td>0.080</td><td>—</td><td>—</td></tr>
+      <tr><td><i class="chip" style="background:var(--s3)"></i>B-f (masas)</td><td>0.599</td><td>0.294</td><td>0.080</td><td>0.026</td><td>2 de 11 (±0.01)</td></tr>
+      <tr><td><i class="chip" style="background:var(--s2)"></i>B-s (masas)</td><td>0.514</td><td>0.354</td><td>0.105</td><td>0.088</td><td>11 de 11 (−0.08…−0.09)</td></tr>
+      <tr><td>B-f argmax elige</td><td>0.697</td><td>0.228</td><td>0.058</td><td colspan="2" style="text-align:left;color:var(--ink2)">concentración en la moda — comportamiento, no error</td></tr>
+    </table></div>
+    <p class="sub" style="margin-top:10px">Oráculo (información privilegiada): revelar el tamaño real daría ~+12 pts en viables a ambos modelos. Matices aceptados de la revisión: bins altos sobre-confiados (0.85→0.79 obs), estratos marginales no intersecciones.</p>
+  </section>
+
+  <section>
+    <h2>Dónde vive el error de B-f (57.734 compras del probe)</h2>
+    <div class="wrap"><table>
+      <tr><th>Mecanismo</th><th>n</th><th>%</th><th>Palanca</th></tr>
+      <tr><td>Acierto exacto 1ª</td><td>23.166</td><td>40.1%</td><td>—</td></tr>
+      <tr><td>Ranking (elige mal entre legales)</td><td>18.161</td><td>31.5%</td><td>features económicas por candidato (siguiente contraste)</td></tr>
+      <tr><td><b>Bloqueado por presupuesto estimado</b></td><td>14.701</td><td><b>25.5%</b></td><td><b>capturar oro real (plan abajo)</b></td></tr>
+      <tr><td>Bloqueo estructural (slots/recetas)</td><td>507</td><td>0.9%</td><td>—</td></tr>
+      <tr><td>Fuera de catálogo / shortlist</td><td>1.199</td><td>2.1%</td><td>agotada — la apuesta del catálogo se cumplió</td></tr>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>El bucle de revisión externa (5 rondas en 24 h)</h2>
+    <ul>
+      <li><b>R1</b>: 5 discrepancias del revisor, 5 confirmadas contra artefactos (arquitectura d64 real, decode, checkpoint sin optimizador…). Correcciones publicadas sin borrar el original.</li>
+      <li><b>R2</b>: denominador de viabilidad corregido (41.938) e <b>inversión multi-ítem</b> descubierta: B-s +2.20 sobre A en multi, B-f −0.78 — reproducida desde nuestros propios contadores.</li>
+      <li><b>R3</b>: su corrección de inferencia (identidad de cardinalidad ≠ intervención; calibración agregada ≠ por contexto) → diagnósticos por estratos.</li>
+      <li><b>R4</b>: sus precisiones metodológicas (estratos observables, oráculo etiquetado privilegiado, pre/post filtro) implementadas literalmente.</li>
+      <li><b>R5</b>: veredicto rebajado a su redacción; plan acordado: contraste económico → decoder diverso como variante de producto → cardinalidad aparcada.</li>
+    </ul>
+    <p class="sub" style="margin-top:8px">El sesgo de tamaño que «vimos» en 50 ejemplos curados (sobrellenado) resultó ser el contrario en población (sub-llenado) — el argumento definitivo para estadística poblacional sobre anécdota.</p>
+  </section>
+
+  <section>
+    <h2>Siguiente frente: arreglar el oro (plan aprobado, pendiente de cliente abierto)</h2>
+    <p class="sub">El 25,5% del error está en el presupuesto estimado (frames de 60 s). Captura solo-oro (una pasada TRUTH-SEEKER, ~2 min/partida de noche + procesado de mañana) sobre el parche vivo:</p>
+    <div class="wrap"><table>
+      <tr><th>Lote (EUW, parche 16.18, 09-10→09-21)</th><th>Partidas</th><th>Coste</th><th>Desbloquea</th></tr>
+      <tr><td>Probe v3</td><td>208</td><td>1 noche (~7 h)</td><td>evaluación con cartera medida — cuantifica el 25,5% honestamente</td></tr>
+      <tr><td>Fit v3</td><td>989</td><td>3-4 noches / 2 días PC2</td><td>entrenar con presupuesto medido en ~49% de filas</td></tr>
+      <tr><td>Resto del parche</td><td>5.448</td><td>granja dedicada ~12 días</td><td>la próxima generación entera con oro real</td></tr>
+    </table></div>
+    <p class="sub" style="margin-top:10px">Instrumento ya validado en macro_coach: 77,9% carteras exactas + resto en intervalo, control de coste n=2.266 con mediana 0, cruce a build_tracker operativo por <code>match|ts|champion</code>. Descargas desacopladas de la captura (tarde/PC usable vs noche/intocable).</p>
+  </section>
+
+  <section>
+    <p class="foot">Procedencia: experimentos <code>16.18-pov-gold-v1</code> · <code>16.18-whole-basket-v1/v2</code> · <code>v3-prework</code> · <code>ext1</code> · <code>basket-residual-econ-v1</code> · dossiers v1-v3 con correcciones en <code>build_tracker/docs/</code> · auditoría independiente del revisor en <code>data/reports/phase2_external_review_20260921/</code> · cadena de commits c6e2ec7→…→138c159 · filas por decisión persistidas y recomputables · test sellado · nada promocionado.</p>
+  </section>
+</main>
+</body>
+</html>
