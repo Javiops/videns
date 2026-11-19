@@ -1,5 +1,10 @@
 # videns.gg
 
+> [!WARNING]
+> **Proyecto descontinuado.** En los parches nuevos Riot ya no deja descargar las replays de partidas de pros, que eran la base de videns. Sin ellas el proyecto no puede seguir funcionando, así que se queda aquí como archivo. El código se puede consultar, pero no se mantiene.
+>
+> *Discontinued: Riot no longer allows downloading pro players' replays on recent patches, which videns depended on. Kept as an archive; not maintained.*
+
 Herramientas y proyectos de investigación de League of Legends detrás de videns.gg. Cada carpeta es un proyecto independiente con su propio README, `requirements.txt` y venv.
 
 | Carpeta | Qué es |
